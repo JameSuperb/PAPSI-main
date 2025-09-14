@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+
+<!--
+ // WEBSITE: https://themefisher.com
+ // TWITTER: https://twitter.com/themefisher
+ // FACEBOOK: https://www.facebook.com/themefisher
+ // GITHUB: https://github.com/themefisher/
+-->
+
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+	================================================== -->
+  <meta charset="utf-8">
+  <title>PAPSI - Webinar</title>
+
+  <!-- Mobile Specific Metas
+	================================================== -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Construction Html5 Template">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="author" content="Themefisher">
+  <meta name="generator" content="Themefisher Educenter HTML Template v1.0">
+
+  <!-- ** Plugins Needed for the Project ** -->
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+  <!-- slick slider -->
+  <link rel="stylesheet" href="plugins/slick/slick.css">
+  <!-- themefy-icon -->
+  <link rel="stylesheet" href="plugins/themify-icons/themify-icons.css">
+  <!-- animation css -->
+  <link rel="stylesheet" href="plugins/animate/animate.css">
+  <!-- aos -->
+  <link rel="stylesheet" href="plugins/aos/aos.css">
+  <!-- venobox popup -->
+  <link rel="stylesheet" href="plugins/venobox/venobox.css">
+
+  <!-- Main Stylesheet -->
+  <link href="css/style.css" rel="stylesheet">
+
+  <!--Favicon-->
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+  <link rel="icon" href="images/favicon.png" type="image/x-icon">
+
+</head>
+
+<body>
+  <!-- preloader start -->
+  <div class="preloader">
+    <img src="images/preloader.gif" alt="preloader">
+  </div>
+  <!-- preloader end -->
+
+<!-- header -->
+<header class="fixed-top header">
+  <!-- top header -->
+  <div class="top-header py-2 bg-white">
+    <div class="container">
+      <div class="row no-gutters align-items-center"> <!-- Add align-items-center class -->
+        <div class="col-lg-7 text-center text-lg-left">
+          <strong>PHILIPPINE ASSOCIATION OF PHYSICS AND SCIENCE INSTRUCTORS</strong>
+        </div>
+    
+        <div class="col-lg-5 text-center text-lg-right">
+          <ul class="list-inline">
+            <li class="list-inline-item ti-search"></li>
+            <a class="text-uppercase text-color p-sm-2 py-2 px-0 d-inline-block" href="searchmember.html">Search by Member</a>
+            <li class="list-inline-item ti-search"></li>
+            <a class="text-uppercase text-color p-sm-2 py-2 px-0 d-inline-block" href="searchtraining.html">Search by Training</a>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+    <!-- navbar -->
+    <div class="navigation w-100">
+      <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark p-0">
+          <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo"></a>
+          <button class="navbar-toggler rounded-0" type="button" data-toggle="collapse" data-target="#navigation"
+            aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+  
+          <div class="collapse navbar-collapse" id="navigation">
+            <ul class="navbar-nav ml-auto text-center">
+              <li class="nav-item active">
+                <a class="nav-link" href="index.html">Home</a>
+              </li>
+              <li class="nav-item @@about">
+                <a class="nav-link" href="about.html">About</a>
+              </li>
+              <li class="nav-item @@about">
+                <a class="nav-link" href="membership.html">Membership</a>
+              </li>
+              <li class="nav-item @@courses">
+                <a class="nav-link" href="certificate.html">Certificate</a>
+              </li>
+              <li class="nav-item @@events">
+                <a class="nav-link" href="verification.html">Verification</a>
+              </li>
+              <li class="nav-item dropdown view">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Services
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  
+                  <li><a class="dropdown-item" href="seminar.html">Seminar</a></li>
+                  <li><a class="dropdown-item" href="webinar.html">Webinar</a></li>
+                  <li><a class="dropdown-item" href="conference.html">Conference</a></li>
+                  <li><a class="dropdown-item" href="training.html">Training Bundles</a></li>
+                </ul>
+              </li>
+  
+              <li class="nav-item @@contact">
+                <a class="nav-link" href="contact.html">CONTACT</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <!-- /header -->
+<!-- Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0 border-0 p-4">
+            <div class="modal-header border-0">
+                <h3>Register</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="login">
+                    <form action="#" class="row">
+                        <div class="col-12">
+                            <input type="text" class="form-control mb-3" id="signupPhone" name="signupPhone" placeholder="Phone">
+                        </div>
+                        <div class="col-12">
+                            <input type="text" class="form-control mb-3" id="signupName" name="signupName" placeholder="Name">
+                        </div>
+                        <div class="col-12">
+                            <input type="email" class="form-control mb-3" id="signupEmail" name="signupEmail" placeholder="Email">
+                        </div>
+                        <div class="col-12">
+                            <input type="password" class="form-control mb-3" id="signupPassword" name="signupPassword" placeholder="Password">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">SIGN UP</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0 border-0 p-4">
+            <div class="modal-header border-0">
+                <h3>Login</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#" class="row">
+                    <div class="col-12">
+                        <input type="text" class="form-control mb-3" id="loginPhone" name="loginPhone" placeholder="Phone">
+                    </div>
+                    <div class="col-12">
+                        <input type="text" class="form-control mb-3" id="loginName" name="loginName" placeholder="Name">
+                    </div>
+                    <div class="col-12">
+                        <input type="password" class="form-control mb-3" id="loginPassword" name="loginPassword" placeholder="Password">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">LOGIN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- page title -->
+<section class="page-title-section overlay" data-background="images/backgrounds/page-title.jpg">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <ul class="list-inline custom-breadcrumb mb-2">
+          <li class="list-inline-item"><a class="h2 text-primary font-secondary" href="index.html">PAPSI</a></li>
+          <li class="list-inline-item text-white h3 font-secondary nasted">Webinar</li>
+        </ul>
+        <p class="text-lighten mb-0">PAPSI proudly presents a treasure trove of knowledge with over 100 webinars since 2020.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /page title -->
+
+<!-- research -->
+<section class="section">
+  <div class="container">
+    <!-- Title -->
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="section-title">Latest Webinar</h3>
+      </div>
+    </div>
+    
+    <div class="row">
+      <!-- research item -->
+      <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-sm-6 mx-auto mb-4">
+                <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                    <img class="card-img-top rounded-0" src="images/webinar/webinar1.png" alt="research thumb" onclick="openFullscreen(this)">
+                    <div class="card-body text-center">
+                        <h4 class="card-title">​IMRADC Demystified: Effective Science Investigatory Project (SIP) Composition leveraging Software and AI tools</h4>
+                        <p class="card-text2">Dr. Russel Soltura & Dr. James Salveo Olarve</p>
+                        <a href="https://forms.gle/CHtqLxQUGa2RHugY9" class="btn btn-primary btn-sm">Register Now!</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col-lg-4 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar4.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title">Embedding Technological Pedagogical Content Knowledge in Teaching Science for an Improved Learning Outcome</h4>
+                      <p class="card-text2">Dr. Michael Lubiano</p>
+                      <a href="https://forms.gle/xKiZyH1NaEMRnvAu9" class="btn btn-primary btn-sm">Register Now!</a>
+                  </div>
+              </div>
+            </div>
+        </div>
+
+</div>
+</section>
+
+<section class="training">
+  <div class="container">
+
+        
+    <!-- Title -->
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="section-title">Previous Webinar</h3>
+      </div>
+    </div>
+    
+    <div class="row">
+      <!-- previous webinar -->
+      <div class="container">
+        <div class="row">
+
+            <!-- Card 1 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+                <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                    <img class="card-img-top rounded-0" src="images/webinar/webinar2.png" alt="research thumb" onclick="openFullscreen(this)">
+                    <div class="card-body text-center">
+                        <h4 class="card-title2">Creating E-Learning Modules with Offline Feature: Path to Easy and Accessible Education</h4>
+                        <p class="card-text2">Dr. James Salveo Olarve</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar3.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Statistics: Non-Parametric Tests of Correlation</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            
+
+            <!-- Card 4 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar5.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Physics Lab: Essential Scientific Skills through Physics Experimentation</h4>
+                      <p class="card-text2">Dr. James Salveo Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar6.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">From Inquiry to Instruction (I2I): Promoting Inquiry-Based Learning in Classroom Instruction</h4>
+                      <p class="card-text2">Dr. Michael Lubiano</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar7.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Easy-to-follow Steps in Crafting Classroom-Based Action Research</h4>
+                      <p class="card-text2">Dr. Michael Leonard Lubiano</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar8.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">AI Unleashed: Shaping Education's Future with ChatGPT and Beyond</h4>
+                      <p class="card-text2">Mr. John Lorence Villamin</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar9.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Special Relativity Demystified: Inertial Frames and Time Effects Unveiled</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 9 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar10.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Periodic Table and the Electronic Structure of Atom</h4>
+                      <p class="card-text2">Dr. David Penaloza Jr</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 10 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar11.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Design Thinking in DRRR: Safety, Empathy and Innovation</h4>
+                      <p class="card-text2">Mr. Francoise Noel Amaya</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 11 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar12.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">PAPSI 3-Day Webinar Series: Assessment and Evaluation Methods of Students' Learning</h4>
+                      <p class="card-text2">Dr. Russel Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 12 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar13.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Elevating Your Research Writing through the use of Software and AI</h4>
+                      <p class="card-text2">Dr. James Salveo Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 13 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar14.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Enhancing Disaster Readiness and Risk Reduction Education through Authentic Learning Experiences for Students</h4>
+                      <p class="card-text2">Mr. Francoise Noel Amaya</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 14 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar15.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Statistics: The Language of Quantitative Research</h4>
+                      <p class="card-text2">Dr. Russel Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 15 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar16.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">From Idea to Innovation: A comprehensive Guide to Science Investigatory Project</h4>
+                      <p class="card-text2">Dr. Michael Leonard Lubiano</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 16 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar17.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Future of Learning: Harnessing the Power of Artificial Intelligence (AI)</h4>
+                      <p class="card-text2">Dr. Rodulfo, Dr. Penaloza, Dr. Olarve, Dr. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 17 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar18.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">From sage-on-the-stage to guide-on-the-side: Instructional Scaffolding as Strategy to Accelerate Science Literacy</h4>
+                      <p class="card-text2">Dr. Michael Leonard Lubiano</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 18 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar19.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Computer-Assisted Qualitative Data Analysis (CAQDAS)</h4>
+                      <p class="card-text2">Mr. JOVITO C. ANITO</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 19 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar20.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Understanding of Climate Change and Hazard Proofing: An Approach toward Disaster Resilient Community</h4>
+                      <p class="card-text2">Dr. Renato Vergara & Mr. Rey John Bagasina</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 20 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar21.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Physics: Torque, Moment of Inertia, and Angular Momentum</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 21 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar22.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Chemistry: Electronic Structure of Atoms</h4>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 22 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar23.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Biology: Cell Cycle Control System</h4>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 23 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar24.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Science Project: Game Coding and Simulation of a Projectile Motion</h4>
+                      <p class="card-text2">Dr. James Salveo Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 24 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar25.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">International Webinar on Life-long STEAM Education about Virus-laden Aerosols (Virosols)</h4>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 25 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar26.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Mastery of Content in Science (Part 3)</h4>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 26 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar27.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Designing Self-Directed Learning Packets in Teaching Science</h4>
+                      <p class="card-text2">Dr. Resty Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 27 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar28.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Emerging Trends in Science Laboratory: Equipment and Activities</h4>
+                      <p class="card-text2">Dr. James Salveo Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 28 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar29.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">PAPSI Webinar Series Mastery of Content in Science (Part 2): Biology, Chemistry, & Physics</h4>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 29 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar30.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Action Research for Modern Teachers</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 30 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar31.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Mastery of Content in Science Webinar Series: Biology, Chemistry, Physics</h4>
+                      <p class="card-text2">Dr. Billy Joel Almarinez, Dr. David Penaloza, Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 31 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar32.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Particle Physics: Not too small for Curriculum Integration in High School</h4>
+                      <p class="card-text2">Mr. Resty Collado</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 32 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar33.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Action Research: Developments, Characteristics, & Future Directions</h4>
+                      <p class="card-text2">Dr. Marie Paz E. Morales</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 33 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar34.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Physics: Vector Algebra and Basic Calculus</h4>
+                      <p class="card-text2">Dr. Emmanuel T. Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 34 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar35.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Chemistry: Matter & Measurement</h4>
+                      <p class="card-text2">Dr. David P. Penaloza Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 35 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar36.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Action Research Made Easy for Science Educators</h4>
+                      <p class="card-text2">Mr. Jovito C. Anito Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 36 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar37.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Easy Referencing in Writing Research using Mendeley and MS Word</h4>
+                      <p class="card-text2">James Olarve, PhDc</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 37 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar38.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Enhancing Research Productivity in Schools</h4>
+                      <p class="card-text2">Dr. Leonilo B. Capulso</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 38 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar39.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Statistics in Action</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 39 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar40.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Let's Take a S.I.P. (Science Investigatory Project) Webinar Training Series</h4>
+                      <p class="card-text2">Dr. Michael Leonard D. Lubiano</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 40 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar41.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Virtual Laboratories: Reviewing the importance of STEM in a post-pandemic world</h4>
+                      <p class="card-text2">Dr. Chona Camille V. Abeledo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 41 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar42.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Important Role of Social Media in Teaching Disaster Readiness and Risk Reduction (DRRR)</h4>
+                      <p class="card-text2">Mr. Francoise Noel Amaya</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 42 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar43.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Relevant Integrative Scientific Knowledge (RISK) in Teaching Remote Classroom</h4>
+                      <p class="card-text2">Mr. Resty Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 42 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar44.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Let's Take a S.I.P.: The Basics of Science Investigatory Project (SIP)</h4>
+                      <p class="card-text2">Dr. Michael Leonard D. Lubiano</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 43 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar45.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Non-parametric Test of Difference (Part 2)</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 44 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar46.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Disaster Readiness and Risk Reduction (DRRR) Curriculum Innovation in Times of the COVID-19 Pandemic</h4>
+                      <p class="card-text2">Mr. Francoise Noel Amaya</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 45 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar47.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">A simple theoretical approach in teaching EM waves and Optics using PhET simulations</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 46 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar48.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">DIY Tips in Crafting Classroom-based Action Research in the New Normal</h4>
+                      <p class="card-text2">Dr. Michael Leonard Lubiano</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 47 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar49.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Evaluating the Normality of Data and Hypothesis Testing through Non-parametric Test of Difference</h4>
+                      <p class="card-text2">Dr. Russel Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 48 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar50.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Physics of Oscillations and Waves</h4>
+                      <p class="card-text2">Dr. Emmanuel T. Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 49 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar51.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Nuclear 101: Basics of Nuclear Science</h4>
+                      <p class="card-text2">Dr. Jasmine Angelie V. Albelda</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 50 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar52.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Webinar-Workshop on Reliability of Quantitative Research Instruments with MS Excel Application</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 51 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar53.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Reframing Remote Classroom through Universal Design for Learning Science</h4>
+                      <p class="card-text2">Mr. Resty Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 52 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar54.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Providing Authentic Learning Experiences to Students in DRRR (Disaster Readiness and Risk Reduction)</h4>
+                      <p class="card-text2">Mr. Francoise Noel M. Amaya</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 53 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar55.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Reinvigorating Culturally Responsive Science teaching in Remote Classroom</h4>
+                      <p class="card-text2">Mr. Resty Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 54 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar56.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Validity and Reliability of Quantitative Research Instruments for Action Research</h4>
+                      <p class="card-text2">Dr. Russel Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 57 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar57.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Vector Calculus & Maxwell's Equations (Part 2)</h4>
+                      <p class="card-text2">Dr. Emmanuel T. Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 58 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar58.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Chemistry of Solutions</h4>
+                      <p class="card-text2">Dr. David P. Penaloza Jr</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 59 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar59.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Educational Action Research: Improving Professional Practices</h4>
+                      <p class="card-text2">Dr. Maricar S. Prudente</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 60 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar60.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Vector Calculus & Maxwell's Equations (Part 1)</h4>
+                      <p class="card-text2">Dr. Emmanuel T. Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 61 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar61.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Quantum Theory and Atomic Structure</h4>
+                      <p class="card-text2">Dr. David P. Penaloza Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 62 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar62.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Writing Proposed Innovation for Science Classroom in the New Normal of Education</h4>
+                      <p class="card-text2">Mr. Resty C. Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 63 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar63.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Quantitative Data Analysis through Hypothesis Testing and Inferential Statistics (Part 1)</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 64 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar64.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Crafting Science Innovation Plans for Continuous Improvement in Teaching Practices: From Proposal to Implementation</h4>
+                      <p class="card-text2">Mr. Resty C. Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 65 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar65.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Chemical Kinetics</h4>
+                      <p class="card-text2">Dr. David P. Penaloza Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 66 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar66.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Quantitative Data Analysis through Hypothesis Testing and Inferential Statistics (Part 2)</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 67 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar67.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Build Mobile Application like a Pro even if you're a Newbie</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 68 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar68.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Coulomb's Law & Gauss' Law: Vector Calculus Connection & Applications</h4>
+                      <p class="card-text2">Dr. Emmanuel T. Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 69 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar69.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Gas</h4>
+                      <p class="card-text2">Dr. David P. Penaloza Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 70 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar70.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Reviewing Related Literature and Studies for Action research</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 71 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar71.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Green synthesis of nanoparticles and its applications</h4>
+                      <p class="card-text2">Dr. Jose Paolo O. Bantang</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 72 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar72.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">VEXCode Virtual Robot: Teaching Physics Innovatively</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 73 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar73.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Identifying the Inquiry and Stating the Problem for Action Research</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 74 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar74.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Evolving Physics of time (Part 3): Time in Quantum Theory</h4>
+                      <p class="card-text2"></p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 75 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar75.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Utilizing Socrative App as a Tool for In-class Student Engagement</h4>
+                      <p class="card-text2">Dr. David P. Penaloza Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 76 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar76.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Evolving Physics of Time (Part 2)</h4>
+                      <p class="card-text2">Dr. Emmanuel T. Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 77 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar77.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Conceptual Framework of Action Research in Education: Formulating a Research Title through Diagnosing and Action Planning</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 78 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar78.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Test Development: Item Writing and Bias Detection in Standardized Tests</h4>
+                      <p class="card-text2">Ms. Diana Lou E. Sipalay</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 79 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar79.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Evolving Physics of Time</h4>
+                      <p class="card-text2">Dr. Emmanuel T. Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 80 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar80.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Electrochemistry</h4>
+                      <p class="card-text2">Dr. David Penaloza Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 81 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar81.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Analytic Rubrics for the Assessment of Science Process Skills</h4>
+                      <p class="card-text2">Dr. Russel T. Soltura</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 82 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar82.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Designing an Online-Merge-Offline Learning Experience in Science using 7E Inquiry Constructivist Learning Cycle</h4>
+                      <p class="card-text2">Mr. Resty C. Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 83 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar83.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Enhance your WFH setup for an engaging online class: A Tutorial Guide for Teachers</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 84 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar84.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Vector Differential Calculus for Newtonian Dynamics</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 85 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar85.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">LaTeX for Typesetting Scientific Research Paper</h4>
+                      <p class="card-text2">Mr. Mark Jo Torrechiva</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 86 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar86.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Acid-Base Equilibrium</h4>
+                      <p class="card-text2">Dr. David Penaloza</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 87 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar87.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Newton's Dynamics with Vector Calculus</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 88 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar88.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Chemical Thermodynamics and Equilibrium</h4>
+                      <p class="card-text2">Dr. David Penaloza</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 89 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar89.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Calculus for Kinematics</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 90 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar90.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">How and Why: Teaching Scientific Action Research in the Classroom Context from Senior High School to College</h4>
+                      <p class="card-text2">Mr. Resty C. Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 91 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar91.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">From Test Validity to Construct Validity & back: Theory to Application in the Experimental Design in Science Action Research</h4>
+                      <p class="card-text2">Mr. Resty C. Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 92 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar92.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Teaching Genetics in the New Normal</h4>
+                      <p class="card-text2">Dr. Zeba Alam</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 93 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar93.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Understanding the End-to-End Praxis of Science Action Research: from Scratch to Paper Presentation</h4>
+                      <p class="card-text2">Mr. Resty C. Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 94 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar94.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Shedding Light on the Dark Elements of the Universe: Blackholes, Dark energy, and Dark Matter</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 95 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar95.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Organic Chemistry Part 3</h4>
+                      <p class="card-text2">Dr. David Penaloza</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 96 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar96.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Enigmatic Physics of Light, Dark Matter, and Blackholes</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 97 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar97.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Basics of 3D Modelling and 3D Printing</h4>
+                      <p class="card-text2">Mr. Mark Jo Torrechiva</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 98 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar98.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Organic Chemistry Part 2</h4>
+                      <p class="card-text2">Dr. David Penaloza Jr</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 99 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar99.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">From Relativistic Dynamics to General Relativity</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 100 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar100.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Organic Chemistry 1</h4>
+                      <p class="card-text2">Dr. David Penaloza Jr.</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 101 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar101.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Special Relativity: How far can one go without calculus?</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 102 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar102.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Build Mobile Apps easily using Block-based Coding</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 103 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar103.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Astrophysical Drivers of Climate Change</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 104 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar104.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Supremacy of AR: Augmented Reality Technology as part of New Normal Education</h4>
+                      <p class="card-text2">Mr. Ryan V. Hilarion</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 105 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar105.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Introduction to Organic Chemistry</h4>
+                      <p class="card-text2">Dr. David Penaloza Jr</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 106 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar106.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">The Science IP as a Creative Process: Finding Inspirations, Ideating Topics</h4>
+                      <p class="card-text2">Mr. Resty C. Collado</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 107 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar107.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Motion of Charge in an Electric and Magnetic Fields</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 108 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar108.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Teaching Physics using Excel and VPython Modelling</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 109 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar109.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Systems Thinking: A Science Educator's Perspective</h4>
+                      <p class="card-text2">Dr. Emmanuel Garcia</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 110 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar110.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Advance PPT Skills: Creating SLRM for Projectile Motion and Forces</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 111 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar111.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Smart Learning Resource Material for General Physics 1</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 112 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar112.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Physics Education Technology (PHet) as a Tool for Online Active Learning in Physics</h4>
+                      <p class="card-text2">Mr. Ivan B. Culaba</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 113 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar113.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Online-Merge-Offline Classroom Model in teaching 21st century learners in the new normal</h4>
+                      <p class="card-text2">Mr. Resty C. Samosa</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 114 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar114.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">No-Microscope Hacks</h4>
+                      <p class="card-text2">Dr. Billy Joel Almarinez</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 115 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar115.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Flexible Learning Experiences in Earth Science</h4>
+                      <p class="card-text2">Mr. Rex S. Forteza</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 116 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar116.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Student Centered Teaching Strategy and Lesson Delivery Modality in the New Normal</h4>
+                      <p class="card-text2">Ruby Michelle N. Buot, JD</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 117 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar117.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">How to Record your Video Lectures using OBS and PPT?</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 118 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar118.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Treading the Virtual Path for Chemistry Instruction: Tooling the Teachers and the Learners</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 119 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar119.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Live Processing of Equations for Online Algebra, Trigonometry, and Calculus Classes</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 120 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar120.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Using Active Equation Editors in Online Physics and Math Classes</h4>
+                      <p class="card-text2">Dr. Emmanuel Rodulfo</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 121 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar121.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Zotero & Mendeley: Not just for Citations</h4>
+                      <p class="card-text2">Dr. Jasmine Angelie V. Albelda</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 122 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar122.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Best Techniques in Creating Interactive Powerpoint Presentation</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 123 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar123.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">Understanding Nature of Science at the comfort of your Home</h4>
+                      <p class="card-text2">Dr. Arra Q. Abaniel</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 124 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar124.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">How to use OneNote in Distance Learning</h4>
+                      <p class="card-text2">Mr. Mark Jo Torrechiva</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 125 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar125.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">How to Create a Quiz using Google Forms</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+            <!-- Card 126 -->
+            <div class="col-lg-3 col-sm-6 mx-auto mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                  <img class="card-img-top rounded-0" src="images/webinar/webinar126.png" alt="research thumb" onclick="openFullscreen(this)">
+                  <div class="card-body text-center">
+                      <h4 class="card-title2">How to use the Google Classroom</h4>
+                      <p class="card-text2">Mr. James Olarve</p>
+                  </div>
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+            
+
+        </div>
+    </div>
+
+    
+</section>
+<!-- /research -->
+
+<!-- footer -->
+<footer>
+  <!-- newsletter -->
+  <div class="newsletter">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9 ml-auto bg-primary py-5 newsletter-block">
+          <h3 class="text-white">Subscribe Now</h3>
+          <form action="#">
+            <div class="input-wrapper">
+              <input type="email" class="form-control border-0" id="newsletter" name="newsletter" placeholder="Enter Your Email...">
+              <button type="submit" value="send" class="btn btn-primary">Join</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- footer content -->
+  <div class="footer bg-footer section border-bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 col-sm-8 mb-5 mb-lg-0">
+          <!-- logo -->
+          <a class="logo-footer" href="index.html"><img class="img-fluid mb-4" src="images/logo.png" alt="logo"></a>
+          <ul class="list-unstyled">
+            <li class="mb-2">Office of the DLSU STC Vice Chancellor, De La Salle University, 2401 Taft Ave, Malate, Manila, 1004 Metro Manila</li>
+            <li class="mb-2">9:00am - 5:00pm</li>
+            <li class="mb-2">0966-165-2084</li>
+            <li class="mb-2">papsi.seminar@gmail.com</li>
+          </ul>
+        </div>
+        <!-- company -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">COMPANY</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="about.html">About Us</a></li>
+            <li class="mb-3"><a class="text-color" href="membership.html">Membership</a></li>
+            <li class="mb-3"><a class="text-color" href="certificate.html">Certificate</a></li>
+          </ul>
+        </div>
+        <!-- links -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">VERIFICATION</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="verification.html">By Certificate</a></li>
+            <li class="mb-3"><a class="text-color" href="verification.html">By Membership</a></li>
+          </ul>
+        </div>
+              <!-- support -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">SEARCH</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="searchmember.html">By Member</a></li>
+            <li class="mb-3"><a class="text-color" href="searchtraining.html">By Training</a></li>
+          </ul>
+        </div>
+        <!-- support -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">SERVICES</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="seminar.html">Seminar</a></li>
+            <li class="mb-3"><a class="text-color" href="webinar.html">Webinar</a></li>
+            <li class="mb-3"><a class="text-color" href="conference.html">Conference</a></li>
+            <li class="mb-3"><a class="text-color" href="training.html">Training Bundle</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- copyright -->
+  <div class="copyright py-4 bg-footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-7 text-sm-left text-center">
+          <p class="mb-0">Copyright &copy;
+            <script>
+              var CurrentYear = new Date().getFullYear()
+              document.write(CurrentYear)
+            </script> 
+            Developed for <a href="https://papsitraining.com/" class="text-muted">PAPSI</a>
+          </p>
+        </div>
+        <div class="col-sm-5 text-sm-right text-center">
+          <ul class="list-inline">
+            <li class="list-inline-item"><a class="d-inline-block p-2" href="https://facebook.com/papsifbpage"><i class="ti-facebook text-primary"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- /footer -->
+
+<!-- jQuery -->
+<script src="plugins/jQuery/jquery.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="plugins/bootstrap/bootstrap.min.js"></script>
+<!-- slick slider -->
+<script src="plugins/slick/slick.min.js"></script>
+<!-- aos -->
+<script src="plugins/aos/aos.js"></script>
+<!-- venobox popup -->
+<script src="plugins/venobox/venobox.min.js"></script>
+<!-- filter -->
+<script src="plugins/filterizr/jquery.filterizr.min.js"></script>
+<!-- google map -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcABaamniA6OL5YvYSpB3pFMNrXwXnLwU"></script>
+<script src="plugins/google-map/gmap.js"></script>
+
+<!-- Main Script -->
+<script src="js/script.js"></script>
+<!-- JavaScript to handle full-screen functionality -->
+<script>
+  function openFullscreen(element) {
+      // Check if the document is currently in full-screen mode
+      if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+          // Request full-screen mode
+          if (element.requestFullscreen) {
+              element.requestFullscreen();
+          } else if (element.mozRequestFullScreen) { // Firefox
+              element.mozRequestFullScreen();
+          } else if (element.webkitRequestFullscreen) { // Chrome, Safari and Opera
+              element.webkitRequestFullscreen();
+          } else if (element.msRequestFullscreen) { // IE/Edge
+              element.msRequestFullscreen();
+          }
+      } else {
+          // Exit full-screen mode
+          if (document.exitFullscreen) {
+              document.exitFullscreen();
+          } else if (document.mozCancelFullScreen) { // Firefox
+              document.mozCancelFullScreen();
+          } else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera
+              document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) { // IE/Edge
+              document.msExitFullscreen();
+          }
+      }
+  }
+</script>
+</body>
+</html>

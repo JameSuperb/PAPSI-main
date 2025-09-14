@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+
+<!--
+ // WEBSITE: https://themefisher.com
+ // TWITTER: https://twitter.com/themefisher
+ // FACEBOOK: https://www.facebook.com/themefisher
+ // GITHUB: https://github.com/themefisher/
+-->
+
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+	================================================== -->
+  <meta charset="utf-8">
+  <title>PAPSI (About)</title>
+
+  <!-- Mobile Specific Metas
+	================================================== -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Construction Html5 Template">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="author" content="Themefisher">
+  <meta name="generator" content="Themefisher Educenter HTML Template v1.0">
+
+  <!-- ** Plugins Needed for the Project ** -->
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+  <!-- slick slider -->
+  <link rel="stylesheet" href="plugins/slick/slick.css">
+  <!-- themefy-icon -->
+  <link rel="stylesheet" href="plugins/themify-icons/themify-icons.css">
+  <!-- animation css -->
+  <link rel="stylesheet" href="plugins/animate/animate.css">
+  <!-- aos -->
+  <link rel="stylesheet" href="plugins/aos/aos.css">
+  <!-- venobox popup -->
+  <link rel="stylesheet" href="plugins/venobox/venobox.css">
+
+  <!-- Main Stylesheet -->
+  <link href="css/style.css" rel="stylesheet">
+
+  <!--Favicon-->
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+  <link rel="icon" href="images/favicon.png" type="image/x-icon">
+
+</head>
+
+<body>
+  <!-- preloader start -->
+  <div class="preloader">
+    <img src="images/preloader.gif" alt="preloader">
+  </div>
+  <!-- preloader end -->
+
+<!-- header -->
+<header class="fixed-top header">
+  <!-- top header -->
+  <div class="top-header py-2 bg-white">
+    <div class="container">
+      <div class="row no-gutters align-items-center"> <!-- Add align-items-center class -->
+        <div class="col-lg-7 text-center text-lg-left">
+          <strong>PHILIPPINE ASSOCIATION OF PHYSICS AND SCIENCE INSTRUCTORS</strong>
+        </div>
+    
+        <div class="col-lg-5 text-center text-lg-right">
+          <ul class="list-inline">
+            <li class="list-inline-item ti-search"></li>
+            <a class="text-uppercase text-color p-sm-2 py-2 px-0 d-inline-block" href="searchmember.html">Search by Member</a>
+            <li class="list-inline-item ti-search"></li>
+            <a class="text-uppercase text-color p-sm-2 py-2 px-0 d-inline-block" href="searchtraining.html">Search by Training</a>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+    <!-- navbar -->
+    <div class="navigation w-100">
+      <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark p-0">
+          <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo"></a>
+          <button class="navbar-toggler rounded-0" type="button" data-toggle="collapse" data-target="#navigation"
+            aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+  
+          <div class="collapse navbar-collapse" id="navigation">
+            <ul class="navbar-nav ml-auto text-center">
+              <li class="nav-item active">
+                <a class="nav-link" href="index.html">Home</a>
+              </li>
+              <li class="nav-item @@about">
+                <a class="nav-link" href="about.html">About</a>
+              </li>
+              <li class="nav-item @@about">
+                <a class="nav-link" href="membership.html">Membership</a>
+              </li>
+              <li class="nav-item @@courses">
+                <a class="nav-link" href="certificate.html">Certificate</a>
+              </li>
+              <li class="nav-item @@events">
+                <a class="nav-link" href="verification.html">Verification</a>
+              </li>
+              <li class="nav-item dropdown view">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Services
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  
+                  <li><a class="dropdown-item" href="seminar.html">Seminar</a></li>
+                  <li><a class="dropdown-item" href="webinar.html">Webinar</a></li>
+                  <li><a class="dropdown-item" href="conference.html">Conference</a></li>
+                  <li><a class="dropdown-item" href="training.html">Training Bundles</a></li>
+                </ul>
+              </li>
+  
+              <li class="nav-item @@contact">
+                <a class="nav-link" href="contact.html">CONTACT</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <!-- /header -->
+<!-- Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0 border-0 p-4">
+            <div class="modal-header border-0">
+                <h3>Register</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="login">
+                    <form action="#" class="row">
+                        <div class="col-12">
+                            <input type="text" class="form-control mb-3" id="signupPhone" name="signupPhone" placeholder="Phone">
+                        </div>
+                        <div class="col-12">
+                            <input type="text" class="form-control mb-3" id="signupName" name="signupName" placeholder="Name">
+                        </div>
+                        <div class="col-12">
+                            <input type="email" class="form-control mb-3" id="signupEmail" name="signupEmail" placeholder="Email">
+                        </div>
+                        <div class="col-12">
+                            <input type="password" class="form-control mb-3" id="signupPassword" name="signupPassword" placeholder="Password">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">SIGN UP</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0 border-0 p-4">
+            <div class="modal-header border-0">
+                <h3>Login</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#" class="row">
+                    <div class="col-12">
+                        <input type="text" class="form-control mb-3" id="loginPhone" name="loginPhone" placeholder="Phone">
+                    </div>
+                    <div class="col-12">
+                        <input type="text" class="form-control mb-3" id="loginName" name="loginName" placeholder="Name">
+                    </div>
+                    <div class="col-12">
+                        <input type="password" class="form-control mb-3" id="loginPassword" name="loginPassword" placeholder="Password">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">LOGIN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- page title -->
+<section class="page-title-section overlay" data-background="images/banner1.png">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <ul class="list-inline custom-breadcrumb mb-2">
+          <li class="list-inline-item"><a class="h2 text-primary font-secondary" href="index.html">Home</a></li>
+          <li class="list-inline-item text-white h3 font-secondary nasted">About Us</li>
+        </ul>
+        <p class="text-lighten mb-0">​PAPSI (Physics and Science Instructors of the Philippines) is a distinguished national organization dedicated to promoting and enhancing learning in the Sciences and Education. </p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /page title -->
+
+<!-- about -->
+<section class="section">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <!--<img class="img-fluid w-100 mb-4" src="images/about/about-page.jpg" alt="about image">-->
+        <h2 class="section-title">ABOUT US</h2>
+        <p>PAPSI (Physics and Science Instructors of the Philippines) is a distinguished national organization dedicated to promoting and enhancing learning in the Sciences and Education. Led by the esteemed Dr. Gil Nonato C. Santos in partnership with De La Salle University and other schools, PAPSI focuses on upgrading the quality of science educators and disciplines at all levels. Their initiatives include conducting seminars, webinars, and workshops on various subjects such as Physics, Chemistry, Biology, Earth and Environmental Science, Disaster Readiness, Risk Reduction, Research, Statistics, and ICT. Additionally, PAPSI is actively involved in curriculum planning and enhancement, striving to improve science courses offered in both college and K to 12 programs.</p>
+        <p>Moreover, PAPSI plays a vital role in fostering international collaboration and recognition. Annually, the organization hosts a prestigious international research conference, providing a platform for researchers and educators from around the world to present their cutting-edge discoveries and share knowledge. Furthermore, PAPSI acknowledges the outstanding contributions of its members and schools by granting awards for excellence in science education, research, and innovation. These accolades serve to motivate and inspire educators and institutions to continue their pursuit of excellence in the field of science education. </p>
+        <p>PAPSI fosters collaboration and knowledge exchange among educators and experts from different institutions. Through their efforts, they aim to create a supportive and dynamic community of science educators across the Philippines and other countries, working together to advance science education and cultivate critical thinkers and innovators. By equipping educators with the latest insights and teaching methodologies, PAPSI significantly contributes to the growth and development of science education in the country, preparing students for a promising future in the field of science and beyond.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /about -->
+
+<!-- funfacts -->
+<section class="section-sm bg-primary">
+  <div class="container">
+    <div class="row">
+      <!-- funfacts item -->
+      <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="text-center">
+          <h2 class="count text-white" data-count="3791">3000</h2>
+          <h5 class="text-white">MEMBERS</h5>
+        </div>
+      </div>
+      <!-- funfacts item -->
+      <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="text-center">
+          <h2 class="count text-white" data-count="3217">2500</h2>
+          <h5 class="text-white">ACTIVE MEMBERS</h5>
+        </div>
+      </div>
+      <!-- funfacts item -->
+      <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="text-center">
+          <h2 class="count text-white" data-count="155">50</h2>
+          <h5 class="text-white">WEBINARS</h5>
+        </div>
+      </div>
+      <!-- funfacts item -->
+      <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="text-center">
+          <h2 class="count text-white" data-count="322">100</h2>
+          <h5 class="text-white">AVERAGE ATTENDANCE YEARLY</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /funfacts -->
+
+<!-- mission -->
+<section class="section">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <!--<img class="img-fluid w-100 mb-4" src="images/about/about-page.jpg" alt="about image">-->
+        <h2 class="section-title">MISSION</h2>
+        <p>PAPSI is geared towards the enhancement and appreciation of science through teaching. We are committed to providing the breadth and depth of understanding science in various fields such as physics, chemistry, biology, earth and environmental science, coupled with the latest pedagogical skills and effective teaching methods to improve science learning at all levels.</p>
+      
+        <h2 class="section-title">VISION</h2>
+        <p>To be the leading professional organization that promote science education in the Philippines. We are purposely driven to produce competent and confident science educators who have a deeper appreciation of the teaching profession.</p>
+      
+        <h2 class="section-title">GOALS</h2>
+        <p><b>Professional Development:</b> To continuously upgrade the skills and expertise of science educators in various fields, including physics, chemistry, biology, earth and environmental science, by organizing regular seminars, webinars, workshops, and training programs. <br><b>Curriculum Enhancement:</b> To actively participate in curriculum planning and enhancement initiatives, working closely with educational institutions, to improve and innovate science courses offered in both college and K to 12 programs, ensuring they align with the latest advancements and global standards.<br><b>International Collaboration and Recognition:</b> To foster global engagement and recognition in science education by organizing prestigious international training and research conferences that serve as a platform for researchers and educators worldwide to present cutting-edge discoveries, share knowledge, and establish international collaborations.<br><b>Excellence in Science Education:</b> To recognize and reward outstanding contributions in science education, research, and innovation by granting awards to members and schools that exhibit excellence and innovation in their teaching methods, research projects, and educational practices.<br><b>Community Building:</b> To create a vibrant and supportive community of science educators across the Philippines and other countries, encouraging collaboration and knowledge exchange among educators and experts from different institutions to collectively advance science education and nurture critical thinkers and innovators.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /goal -->
+
+<!-- teachers -->
+<section class="section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <h2 class="section-title">Founding Officers</h2>
+      </div>
+  
+      <!-- teacher -->
+      <div class="col-lg-3 col-sm-6 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <img class="card-img-top rounded-0" src="images/blankprofile.png" alt="teacher">
+          <div class="card-body">
+            <a href="">
+              <h4 class="card-title">Dr. Melecio Deauna</h4>
+            </a>
+            <p>former PAPI president</p>
+
+          </div>
+        </div>
+      </div>
+      <!-- teacher -->
+      <div class="col-lg-3 col-sm-6 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <img class="card-img-top rounded-0" src="images/professors/scheiter.png" alt="teacher">
+          <div class="card-body">
+            <a href="#">
+              <h4 class="card-title">Brother Joseph Scheiter</h4>
+            </a>
+            <p>FSC Science Ed expert in Physics</p>
+
+          </div>
+        </div>
+      </div>
+  <!-- teacher -->
+      <div class="col-lg-3 col-sm-6 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <img class="card-img-top rounded-0" src="images/professors/cesareo.png" alt="teacher">
+          <div class="card-body">
+            <a href="">
+              <h4 class="card-title">Mr. Cesareo Bermundo</h4>
+            </a>
+            <p>Industry consultant</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <h2 class="section-title">Current Set of Officers</h2>
+      </div>
+      <!-- teacher -->
+      <div class="col-lg-2 col-sm-4 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <div class="image-container" style="background: radial-gradient(circle, rgba(224, 242, 238, 0.216) 0%, rgba(224, 242, 238, 0) 100%);">
+            <img class="card-img-top rounded-0" src="images/professors/sirnoni.png" alt="teacher">
+          </div>
+          <div class="card-body">
+            <a href="#">
+              <h6 class="professor">Dr. Gil Nonato Santos</h6>
+            </a>
+            <p class="caption_paragraph">PAPSI Convenor</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- teacher -->
+      <div class="col-lg-2 col-sm-4 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <div class="image-container" style="background: radial-gradient(circle, rgba(224, 242, 238, 0.216) 0%, rgba(224, 242, 238, 0) 100%);">
+            <img class="card-img-top rounded-0" src="images/professors/olarve.png" alt="teacher">
+          </div>
+          <div class="card-body">
+            <a href="#">
+              <h6 class="professor">Dr. James Salveo Olarve</h6>
+            </a>
+            <p class="caption_paragraph">Training Specialist</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- teacher -->
+      <div class="col-lg-2 col-sm-4 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <div class="image-container" style="background: radial-gradient(circle, rgba(224, 242, 238, 0.216) 0%, rgba(224, 242, 238, 0) 100%);">
+            <img class="card-img-top rounded-0" src="images/professors/Vhea.png" alt="teacher">
+          </div>
+          <div class="card-body">
+            <a href="#">
+              <h6 class="professor">Mrs. Verna Lyza Olarve</h6>
+            </a>
+            <p class="caption_paragraph">Secretariat</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- teacher -->
+      <div class="col-lg-2 col-sm-4 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <div class="image-container" style="background: radial-gradient(circle, rgba(224, 242, 238, 0.216) 0%, rgba(224, 242, 238, 0) 100%);">
+            <img class="card-img-top rounded-0" src="images/professors/raymund.png" alt="teacher">
+          </div>
+          <div class="card-body">
+            <a href="#">
+              <h6 class="professor">Mr. Raymund Salveo Olarve</h6>
+            </a>
+            <p class="caption_paragraph">Web Developer</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- teacher -->
+      <div class="col-lg-2 col-sm-4 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <div class="image-container" style="background: radial-gradient(circle, rgba(224, 242, 238, 0.216) 0%, rgba(224, 242, 238, 0) 100%);">
+            <img class="card-img-top rounded-0" src="images/professors/espadera.png" alt="teacher"></div>
+          <div class="card-body">
+            <a href="#">
+              <h6 class="professor">Ms. Hernita Espadera</h6>
+            </a>
+            <p class="caption_paragraph">Finance/Accountant</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- teacher -->
+      <div class="col-lg-2 col-sm-4 mb-5 mb-lg-0">
+        <div class="card border-0 rounded-0 hover-shadow">
+          <div class="image-container" style="background: radial-gradient(circle, rgba(224, 242, 238, 0.216) 0%, rgba(224, 242, 238, 0) 100%);">
+            <img class="card-img-top rounded-0" src="images/professors/sales.png" alt="teacher">
+        </div>
+        
+          <div class="card-body">
+            <a href="#">
+              <h6 class="professor">Mr. Gilbert Sales</h6>
+            </a>
+            <p class="caption_paragraph">Tax Consultant</p>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <ul class="list-unstyled">
+          <!-- notice item -->
+          <li class="d-md-table mb-4 w-100 border-bottom hover-shadow">
+            <div class="d-md-table-cell text-center p-4 bg-primary text-white mb-4 mb-md-0" ><span class="h4 d-block">CONSTITUTION <br> AND BY LAWS</span></div>
+            <div class="d-md-table-cell px-4 vertical-align-middle mb-4 mb-md-0">
+
+              <p class="mb-0">Constitution & Bylaws define the organization's purpose, membership rules, and foster collaboration in science education.</p>
+            </div>
+            <div class="d-md-table-cell text-right pr-0 pr-md-4"><a href="constitution.html" class="btn btn-primary">read more</a></div>
+          </li>
+     <!-- notice item -->
+          <li class="d-md-table mb-4 w-100 border-bottom hover-shadow">
+            <div class="d-md-table-cell text-center p-4 bg-primary text-white mb-4 mb-md-0"><span class="h4 d-block">BUSINESS PERMIT</span></div>
+            <div class="d-md-table-cell px-4 vertical-align-middle mb-4 mb-md-0">
+
+              <p class="mb-0">​PAPSI operates as a sole proprietorship, meaning it is registered under this legal structure and, therefore, only requires a DTI permit instead of a full SEC registration.</p>
+            </div>
+            <div class="d-md-table-cell text-right pr-0 pr-md-4"><a href="businesspermit.html" class="btn btn-primary">read more</a></div>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /notice -->
+
+<!-- footer -->
+<footer>
+  <!-- newsletter -->
+  <div class="newsletter">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9 ml-auto bg-primary py-5 newsletter-block">
+          <h3 class="text-white">Subscribe Now</h3>
+          <form action="#">
+            <div class="input-wrapper">
+              <input type="email" class="form-control border-0" id="newsletter" name="newsletter" placeholder="Enter Your Email...">
+              <button type="submit" value="send" class="btn btn-primary">Join</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- footer content -->
+  <div class="footer bg-footer section border-bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 col-sm-8 mb-5 mb-lg-0">
+          <!-- logo -->
+          <a class="logo-footer" href="index.html"><img class="img-fluid mb-4" src="images/logo.png" alt="logo"></a>
+          <ul class="list-unstyled">
+            <li class="mb-2">Office of the DLSU STC Vice Chancellor, De La Salle University, 2401 Taft Ave, Malate, Manila, 1004 Metro Manila</li>
+            <li class="mb-2">9:00am - 5:00pm</li>
+            <li class="mb-2">0966-165-2084</li>
+            <li class="mb-2">papsi.seminar@gmail.com</li>
+          </ul>
+        </div>
+        <!-- company -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">COMPANY</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="about.html">About Us</a></li>
+            <li class="mb-3"><a class="text-color" href="membership.html">Membership</a></li>
+            <li class="mb-3"><a class="text-color" href="certificate.html">Certificate</a></li>
+          </ul>
+        </div>
+        <!-- links -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">VERIFICATION</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="verification.html">By Certificate</a></li>
+            <li class="mb-3"><a class="text-color" href="verification.html">By Membership</a></li>
+          </ul>
+        </div>
+              <!-- support -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">SEARCH</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="searchmember.html">By Member</a></li>
+            <li class="mb-3"><a class="text-color" href="searchtraining.html">By Training</a></li>
+          </ul>
+        </div>
+        <!-- support -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">SERVICES</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="seminar.html">Seminar</a></li>
+            <li class="mb-3"><a class="text-color" href="webinar.html">Webinar</a></li>
+            <li class="mb-3"><a class="text-color" href="conference.html">Conference</a></li>
+            <li class="mb-3"><a class="text-color" href="training.html">Training Bundle</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- copyright -->
+  <div class="copyright py-4 bg-footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-7 text-sm-left text-center">
+          <p class="mb-0">Copyright &copy;
+            <script>
+              var CurrentYear = new Date().getFullYear()
+              document.write(CurrentYear)
+            </script> 
+            Developed for <a href="https://papsitraining.com/" class="text-muted">PAPSI</a>
+          </p>
+        </div>
+        <div class="col-sm-5 text-sm-right text-center">
+          <ul class="list-inline">
+            <li class="list-inline-item"><a class="d-inline-block p-2" href="https://facebook.com/papsifbpage"><i class="ti-facebook text-primary"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- /footer -->
+
+<!-- jQuery -->
+<script src="plugins/jQuery/jquery.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="plugins/bootstrap/bootstrap.min.js"></script>
+<!-- slick slider -->
+<script src="plugins/slick/slick.min.js"></script>
+<!-- aos -->
+<script src="plugins/aos/aos.js"></script>
+<!-- venobox popup -->
+<script src="plugins/venobox/venobox.min.js"></script>
+<!-- filter -->
+<script src="plugins/filterizr/jquery.filterizr.min.js"></script>
+<!-- google map -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcABaamniA6OL5YvYSpB3pFMNrXwXnLwU"></script>
+<script src="plugins/google-map/gmap.js"></script>
+
+<!-- Main Script -->
+<script src="js/script.js"></script>
+
+</body>
+</html>

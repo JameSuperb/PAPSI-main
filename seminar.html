@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+<!--
+ // WEBSITE: https://themefisher.com
+ // TWITTER: https://twitter.com/themefisher
+ // FACEBOOK: https://www.facebook.com/themefisher
+ // GITHUB: https://github.com/themefisher/
+-->
+
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+	================================================== -->
+  <meta charset="utf-8">
+  <title>PAPSI - Seminar</title>
+
+  <!-- Mobile Specific Metas
+	================================================== -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Construction Html5 Template">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="author" content="Themefisher">
+  <meta name="generator" content="Themefisher Educenter HTML Template v1.0">
+
+  <!-- ** Plugins Needed for the Project ** -->
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+  <!-- slick slider -->
+  <link rel="stylesheet" href="plugins/slick/slick.css">
+  <!-- themefy-icon -->
+  <link rel="stylesheet" href="plugins/themify-icons/themify-icons.css">
+  <!-- animation css -->
+  <link rel="stylesheet" href="plugins/animate/animate.css">
+  <!-- aos -->
+  <link rel="stylesheet" href="plugins/aos/aos.css">
+  <!-- venobox popup -->
+  <link rel="stylesheet" href="plugins/venobox/venobox.css">
+
+  <!-- Main Stylesheet -->
+  <link href="css/style.css" rel="stylesheet">
+
+  <!--Favicon-->
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+  <link rel="icon" href="images/favicon.png" type="image/x-icon">
+
+</head>
+
+<body>
+  <!-- preloader start -->
+  <div class="preloader">
+    <img src="images/preloader.gif" alt="preloader">
+  </div>
+  <!-- preloader end -->
+
+<!-- header -->
+<header class="fixed-top header">
+  <!-- top header -->
+  <div class="top-header py-2 bg-white">
+    <div class="container">
+      <div class="row no-gutters align-items-center"> <!-- Add align-items-center class -->
+        <div class="col-lg-7 text-center text-lg-left">
+          <strong>PHILIPPINE ASSOCIATION OF PHYSICS AND SCIENCE INSTRUCTORS</strong>
+        </div>
+    
+        <div class="col-lg-5 text-center text-lg-right">
+          <ul class="list-inline">
+            <li class="list-inline-item ti-search"></li>
+            <a class="text-uppercase text-color p-sm-2 py-2 px-0 d-inline-block" href="searchmember.html">Search by Member</a>
+            <li class="list-inline-item ti-search"></li>
+            <a class="text-uppercase text-color p-sm-2 py-2 px-0 d-inline-block" href="searchtraining.html">Search by Training</a>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+    <!-- navbar -->
+    <div class="navigation w-100">
+      <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark p-0">
+          <a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="logo"></a>
+          <button class="navbar-toggler rounded-0" type="button" data-toggle="collapse" data-target="#navigation"
+            aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+  
+          <div class="collapse navbar-collapse" id="navigation">
+            <ul class="navbar-nav ml-auto text-center">
+              <li class="nav-item active">
+                <a class="nav-link" href="index.html">Home</a>
+              </li>
+              <li class="nav-item @@about">
+                <a class="nav-link" href="about.html">About</a>
+              </li>
+              <li class="nav-item @@about">
+                <a class="nav-link" href="membership.html">Membership</a>
+              </li>
+              <li class="nav-item @@courses">
+                <a class="nav-link" href="certificate.html">Certificate</a>
+              </li>
+              <li class="nav-item @@events">
+                <a class="nav-link" href="verification.html">Verification</a>
+              </li>
+              <li class="nav-item dropdown view">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Services
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  
+                  <li><a class="dropdown-item" href="seminar.html">Seminar</a></li>
+                  <li><a class="dropdown-item" href="webinar.html">Webinar</a></li>
+                  <li><a class="dropdown-item" href="conference.html">Conference</a></li>
+                  <li><a class="dropdown-item" href="training.html">Training Bundles</a></li>
+                </ul>
+              </li>
+  
+              <li class="nav-item @@contact">
+                <a class="nav-link" href="contact.html">CONTACT</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <!-- /header -->
+<!-- Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0 border-0 p-4">
+            <div class="modal-header border-0">
+                <h3>Register</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="login">
+                    <form action="#" class="row">
+                        <div class="col-12">
+                            <input type="text" class="form-control mb-3" id="signupPhone" name="signupPhone" placeholder="Phone">
+                        </div>
+                        <div class="col-12">
+                            <input type="text" class="form-control mb-3" id="signupName" name="signupName" placeholder="Name">
+                        </div>
+                        <div class="col-12">
+                            <input type="email" class="form-control mb-3" id="signupEmail" name="signupEmail" placeholder="Email">
+                        </div>
+                        <div class="col-12">
+                            <input type="password" class="form-control mb-3" id="signupPassword" name="signupPassword" placeholder="Password">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">SIGN UP</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content rounded-0 border-0 p-4">
+            <div class="modal-header border-0">
+                <h3>Login</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#" class="row">
+                    <div class="col-12">
+                        <input type="text" class="form-control mb-3" id="loginPhone" name="loginPhone" placeholder="Phone">
+                    </div>
+                    <div class="col-12">
+                        <input type="text" class="form-control mb-3" id="loginName" name="loginName" placeholder="Name">
+                    </div>
+                    <div class="col-12">
+                        <input type="password" class="form-control mb-3" id="loginPassword" name="loginPassword" placeholder="Password">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">LOGIN</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- page title -->
+<section class="page-title-section overlay" data-background="images/backgrounds/page-title.jpg">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <ul class="list-inline custom-breadcrumb mb-2">
+          <li class="list-inline-item"><a class="h2 text-primary font-secondary" href="index.html">PAPSI</a></li>
+          <li class="list-inline-item text-white h3 font-secondary nasted">Seminar</li>
+        </ul>
+        <p class="text-lighten mb-0">Explore a Year of Enrichment: Uncover a Spectrum of Seminars and Workshops Tailored for Your Growth and Development</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /page title -->
+
+<!-- research -->
+<section class="section">
+  <div class="container">
+    <!-- Title -->
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="section-title">2020 Seminars and Workshops</h3>
+      </div>
+    </div>
+    
+    <div class="row">
+      <!-- research item -->
+      <<div class="col-lg-4 col-sm-6 mx-auto mb-4">
+        <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+          <img class="card-img-top rounded-0" src="images/seminar/2020-s1.png" alt="research thumb">
+          <div class="card-body text-center">
+            <h4 class="card-title">STEMx</h4>
+            <p class="card-text">
+              What's Next Conference & PAPSI Training Workshops
+            </p>
+            <p class="card-date"><em>January 23-24, 2020</em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+    <!-- 2019 -->
+  <section class="training">
+    <div class="container">
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="section-title">2019 Seminars and Workshops</h3>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Seminar item 1 -->
+      <div class="col-lg-4 col-sm-6 mb-4">
+        <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+          <img class="card-img-top rounded-0" src="images/seminar/2019-s1.png" alt="seminar thumb">
+          <div class="card-body text-center">
+            <h4 class="card-title">Science Investigatory Project</h4>
+            <p class="card-text">with 3D printing, PASCO Workshop, SEM-EDX Workshop.</p>
+            <p class="card-date"><em>November 16, 2019</em></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seminar item 2 -->
+      <div class="col-lg-4 col-sm-6 mb-4">
+        <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+          <img class="card-img-top rounded-0" src="images/seminar/2019-s2.png" alt="seminar thumb">
+          <div class="card-body text-center">
+            <h4 class="card-title">Earth and Life</h4>
+            <p class="card-text">PAPSI National Training Seminar for Science Teachers in Earth and Life.</p>
+            <p class="card-date"><em>October 19, 2019</em></p>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Seminar item 3 -->
+      <div class="col-lg-4 col-sm-6 mb-4">
+        <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+          <img class="card-img-top rounded-0" src="images/seminar/2019-s3.png" alt="seminar thumb">
+          <div class="card-body text-center">
+            <h4 class="card-title">General Physics 2</h4>
+            <p class="card-text">PAPSI National Training Seminar for Science Teachers in General Physics 2.</p>
+            <p class="card-date"><em>September 28, 2019</em></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seminar item 4 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s4.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">Chemistry</h4>
+      <p class="card-text">Organic Chemistry, 3D printing & Materials Characterization.</p>
+      <p class="card-date"><em>August 24, 2019</em></p>
+    </div>
+  </div>
+</div>
+
+<!-- Seminar item 5 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s5.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">General Biology</h4>
+      <p class="card-text">with SEM, EDX, QGIS Workshop.</p>
+      <p class="card-date"><em>July 27, 2019</em></p>
+    </div>
+  </div>
+</div>
+
+<!-- Seminar item 6 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s6.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">General Physics & General Chemistry</h4>
+      <p class="card-text">with 3D Printing Workshop.</p>
+      <p class="card-date"><em>June 22, 2019</em></p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Seminar item 7 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s7.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">National Teachers' Training</h4>
+      <p class="card-text">2nd PAPSI National Teachers' Training in Bicol.</p>
+      <p class="card-date"><em>May 4-5, 2019</em></p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Seminar item 8 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s8.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">PAPSI goes Interdisciplinary</h4>
+      <p class="card-text">Science with Arts and Design.</p>
+      <p class="card-date"><em>April 27, 2019</em></p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Seminar item 9 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s9.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">National Seminar Workshop</h4>
+      <p class="card-text">2nd PAPSI Lecture series and seminar workshop in Davao.</p>
+      <p class="card-date"><em>March 17-18, 2019</em></p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Seminar item 10 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s10.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">General Biology & General Physics 2</h4>
+      <p class="card-text">National Teachers' Training.</p>
+      <p class="card-date"><em>February 23, 2019</em></p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Seminar item 11 -->
+<div class="col-lg-4 col-sm-6 mb-4">
+  <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+    <img class="card-img-top rounded-0" src="images/seminar/2019-s11.png" alt="seminar thumb">
+    <div class="card-body text-center">
+      <h4 class="card-title">General Biology & General Physics 1</h4>
+      <p class="card-text">International Seminar.</p>
+      <p class="card-date"><em>January 26, 2019</em></p>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</section>
+<!-- 2018 -->
+<section class="section">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="section-title">2018 Seminars and Workshops</h3>
+      </div>
+    </div>
+
+          <div class="row">
+            <!-- Seminar item 1 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2018-s1.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">General Physics 2</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>January 27, 2018</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 2 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2018-s2.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">Biology & Chemistry</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>February 24, 2018</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 3 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2018-s3.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">Physical Science & Earth and Life</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>March 17, 2018</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 4 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2018-s4.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">General Physics 1 & 2</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>April 27-28, 2018</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 5 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2018-s5.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">ARTISt International Seminar & Earth Science</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>May 18-19, 2018</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 6 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s6.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">Physical Science</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>June 23, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 7 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s7.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">General Biology</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>July 28, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 8 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s8.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">Math for Science Teachers</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>August 11, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 9 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s9.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">General Physics 1 & General Chemistry 1</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>September 1, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 10 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s10.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">Science Investigatory Project</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>September 22 & 29, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 11 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s11.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">Earth Science with SPARK</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>October 6, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 12 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s12.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">General Science & Physical Science with SPARK</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>October 20, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 13 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s13.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">General Chemistry</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>November 17, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 14 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s14.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">National Science Teachers' Training</h4>
+              <p class="card-text">Phil. Science High School - Southern Mindanao Campus</p>
+              <p class="card-date"><em>November 30 - December 1, 2018</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seminar item 15 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2018-s15.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">National Science Teachers' Training</h4>
+              <p class="card-text">STI College Naga - Camarines Sur</p>
+              <p class="card-date"><em>December 8-9, 2018</em></p>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+</section>
+    <!-- 2017 -->
+<section class="training">
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="section-title">2017 Seminars and Workshops</h3>
+      </div>
+    </div>
+
+          <div class="row">
+            <!-- Seminar item 1 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2017-s1.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">General Physics</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>May 20, 2017</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 2 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2017-s2.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">General Biology</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>July 15, 2017</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 3 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2017-s3.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">Earth Science</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>September 2, 2017</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 4 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2017-s4.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">Earth and Life Science</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>September 30, 2017</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 5 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2017-s5.png" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">Physical Science</h4>
+                  <p class="card-text">De La Salle University - Manila</p>
+                  <p class="card-date"><em>October 21, 2017</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 6 -->
+        <div class="col-lg-4 col-sm-6 mb-4">
+          <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+            <img class="card-img-top rounded-0" src="images/seminar/2017-s6.png" alt="seminar thumb">
+            <div class="card-body text-center">
+              <h4 class="card-title">General Chemistry</h4>
+              <p class="card-text">De La Salle University - Manila</p>
+              <p class="card-date"><em>November 25, 2017</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</section>
+
+        <!-- 2016 -->
+        <section class="section">
+          <div class="container">
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <h3 class="section-title">2016 Seminars and Workshops</h3>
+      </div>
+    </div>
+
+          <div class="row">
+            <!-- Seminar item 1 -->
+            <div class="col-lg-4 col-sm-6 mb-4">
+              <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+                <img class="card-img-top rounded-0" src="images/seminar/2016-s1.jpg" alt="seminar thumb">
+                <div class="card-body text-center">
+                  <h4 class="card-title">Earth Science</h4>
+                  <p class="card-text">Disrupting to LEARN, TEACH, and SERVE in the Grade 11 Curriculum: Innovate for competitive advantage</p>
+                  <p class="card-date"><em>April 2, 2016</em></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seminar item 2 -->
+          <div class="col-lg-4 col-sm-6 mb-4">
+            <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+              <img class="card-img-top rounded-0" src="images/seminar/2016-s2.jpg" alt="seminar thumb">
+              <div class="card-body text-center">
+                <h4 class="card-title">Earth and Life</h4>
+                <p class="card-text">Disrupting to LEARN, TEACH, and SERVE in the Grade 11 Curriculum: Innovate for competitive advantage</p>
+                <p class="card-date"><em>April 16, 2016</em></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seminar item 3 -->
+          <div class="col-lg-4 col-sm-6 mb-4">
+            <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+              <img class="card-img-top rounded-0" src="images/seminar/2016-s3.jpg" alt="seminar thumb">
+              <div class="card-body text-center">
+                <h4 class="card-title">Physical Science</h4>
+                <p class="card-text">Disrupting to LEARN, TEACH, and SERVE in the Grade 11 Curriculum: Innovate for competitive advantage</p>
+                <p class="card-date"><em>April 23, 2016</em></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seminar item 4 -->
+          <div class="col-lg-4 col-sm-6 mb-4">
+            <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+              <img class="card-img-top rounded-0" src="images/seminar/2016-s4.jpg" alt="seminar thumb">
+              <div class="card-body text-center">
+                <h4 class="card-title">General Biology</h4>
+                <p class="card-text">Disrupting to LEARN, TEACH, and SERVE in the Grade 11 Curriculum: Innovate for competitive advantage</p>
+                <p class="card-date"><em>April 30, 2016</em></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seminar item 5 -->
+          <div class="col-lg-4 col-sm-6 mb-4">
+            <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+              <img class="card-img-top rounded-0" src="images/seminar/2016-s5.jpg" alt="seminar thumb">
+              <div class="card-body text-center">
+                <h4 class="card-title">General Chemistry</h4>
+                <p class="card-text">Disrupting to LEARN, TEACH, and SERVE in the Grade 11 Curriculum: Innovate for competitive advantage</p>
+                <p class="card-date"><em>May 14, 2016</em></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seminar item 6 -->
+          <div class="col-lg-4 col-sm-6 mb-4">
+            <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+              <img class="card-img-top rounded-0" src="images/seminar/2016-s6.jpg" alt="seminar thumb">
+              <div class="card-body text-center">
+                <h4 class="card-title">General Physics</h4>
+                <p class="card-text">Disrupting to LEARN, TEACH, and SERVE in the Grade 11 Curriculum: Innovate for competitive advantage</p>
+                <p class="card-date"><em>May 21, 2016</em></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seminar item 7 -->
+          <div class="col-lg-4 col-sm-6 mb-4">
+            <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+              <img class="card-img-top rounded-0" src="images/seminar/2016-s7.jpg" alt="seminar thumb">
+              <div class="card-body text-center">
+                <h4 class="card-title">Disaster Readiness and Risk Reduction</h4>
+                <p class="card-text">De La Salle University - Manila</p>
+                <p class="card-date"><em>May 28, 2016</em></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seminar item 8 -->
+          <div class="col-lg-4 col-sm-6 mb-4">
+            <div class="card rounded-0 hover-shadow border-top-0 border-left-0 border-right-0">
+              <img class="card-img-top rounded-0" src="images/seminar/2016-s8.jpg" alt="seminar thumb">
+              <div class="card-body text-center">
+                <h4 class="card-title">Laboratory Training and Workshop</h4>
+                <p class="card-text">Disrupting to Learn and Teach Hands On Earth Science, Chemistry, and Physics for the Senior High School</p>
+                <p class="card-date"><em>July 2, 2016</em></p>
+              </div>
+            </div>
+          </div>
+
+
+  
+</section>
+<!-- /research -->
+
+<!-- footer -->
+<footer>
+  <!-- newsletter -->
+  <div class="newsletter">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9 ml-auto bg-primary py-5 newsletter-block">
+          <h3 class="text-white">Subscribe Now</h3>
+          <form action="#">
+            <div class="input-wrapper">
+              <input type="email" class="form-control border-0" id="newsletter" name="newsletter" placeholder="Enter Your Email...">
+              <button type="submit" value="send" class="btn btn-primary">Join</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- footer content -->
+  <div class="footer bg-footer section border-bottom">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 col-sm-8 mb-5 mb-lg-0">
+          <!-- logo -->
+          <a class="logo-footer" href="index.html"><img class="img-fluid mb-4" src="images/logo.png" alt="logo"></a>
+          <ul class="list-unstyled">
+            <li class="mb-2">Office of the DLSU STC Vice Chancellor, De La Salle University, 2401 Taft Ave, Malate, Manila, 1004 Metro Manila</li>
+            <li class="mb-2">9:00am - 5:00pm</li>
+            <li class="mb-2">0966-165-2084</li>
+            <li class="mb-2">papsi.seminar@gmail.com</li>
+          </ul>
+        </div>
+        <!-- company -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">COMPANY</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="about.html">About Us</a></li>
+            <li class="mb-3"><a class="text-color" href="membership.html">Membership</a></li>
+            <li class="mb-3"><a class="text-color" href="certificate.html">Certificate</a></li>
+          </ul>
+        </div>
+        <!-- links -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">VERIFICATION</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="verification.html">By Certificate</a></li>
+            <li class="mb-3"><a class="text-color" href="verification.html">By Membership</a></li>
+          </ul>
+        </div>
+              <!-- support -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">SEARCH</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="searchmember.html">By Member</a></li>
+            <li class="mb-3"><a class="text-color" href="searchtraining.html">By Training</a></li>
+          </ul>
+        </div>
+        <!-- support -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
+          <h4 class="text-white mb-5">SERVICES</h4>
+          <ul class="list-unstyled">
+            <li class="mb-3"><a class="text-color" href="seminar.html">Seminar</a></li>
+            <li class="mb-3"><a class="text-color" href="webinar.html">Webinar</a></li>
+            <li class="mb-3"><a class="text-color" href="conference.html">Conference</a></li>
+            <li class="mb-3"><a class="text-color" href="training.html">Training Bundle</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- copyright -->
+  <div class="copyright py-4 bg-footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-7 text-sm-left text-center">
+          <p class="mb-0">Copyright &copy;
+            <script>
+              var CurrentYear = new Date().getFullYear()
+              document.write(CurrentYear)
+            </script> 
+            Developed for <a href="https://papsitraining.com/" class="text-muted">PAPSI</a>
+          </p>
+        </div>
+        <div class="col-sm-5 text-sm-right text-center">
+          <ul class="list-inline">
+            <li class="list-inline-item"><a class="d-inline-block p-2" href="https://facebook.com/papsifbpage"><i class="ti-facebook text-primary"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- /footer -->
+
+<!-- jQuery -->
+<script src="plugins/jQuery/jquery.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="plugins/bootstrap/bootstrap.min.js"></script>
+<!-- slick slider -->
+<script src="plugins/slick/slick.min.js"></script>
+<!-- aos -->
+<script src="plugins/aos/aos.js"></script>
+<!-- venobox popup -->
+<script src="plugins/venobox/venobox.min.js"></script>
+<!-- filter -->
+<script src="plugins/filterizr/jquery.filterizr.min.js"></script>
+<!-- google map -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcABaamniA6OL5YvYSpB3pFMNrXwXnLwU"></script>
+<script src="plugins/google-map/gmap.js"></script>
+
+<!-- Main Script -->
+<script src="js/script.js"></script>
+
+</body>
+</html>

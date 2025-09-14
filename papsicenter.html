@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPSI Training Hub - Browse, Select, Enroll, and Learn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0B6B5F',
+                        accent: '#1E88E5',
+                        text: '#1F2937',
+                        surface: '#FFFFFF',
+                        muted: '#F3F4F6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+        .focus-trap {
+            outline: 2px solid #1E88E5;
+            outline-offset: 2px;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0B6B5F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .checkout-slide {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-muted min-h-screen font-sans">
+    <!-- Toast for errors -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+        <div class="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg toast flex items-center gap-3">
+            <span id="toast-message">Failed to load webinars</span>
+            <button id="retry-btn" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm font-medium">
+                Retry
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-surface shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-primary">PAPSI Center for Teacher Excellence</h1>
+                    <p class="text-lg text-gray-600 mt-1">Browse, Select, Enroll, and Learn</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-primary text-white px-4 py-2 rounded-full">
+                        <span id="results-count" class="font-semibold">0 webinars</span>
+                    </div>
+                    <button id="refresh-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span>Refresh</span>
+                    </button>
+
+                    <button id="cart-toggle" class="relative bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"></path>
+                        </svg>
+                        <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold hidden">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading" class="flex justify-center items-center py-20">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading webinars...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="hidden">
+        <!-- Control Bar -->
+        <div class="bg-surface shadow-sm border-b border-gray-200 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <!-- Mobile toggle -->
+                <button id="mobile-filter-toggle" class="lg:hidden mb-4 bg-primary text-white px-4 py-2 rounded-lg">
+                    <span id="filter-toggle-text">Show Filters</span>
+                </button>
+                
+                <div id="filter-controls" class="hidden lg:block">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Search -->
+                        <div>
+                            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                            <input type="text" id="search" placeholder="Search webinars..." 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent">
+                        </div>
+                        
+                        <!-- Category Filter -->
+                        <div>
+                            <label for="category-filter" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="category-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Speaker Filter -->
+                        <div>
+                            <label for="speaker-filter" class="block text-sm font-medium text-gray-700 mb-1">Speaker</label>
+                            <select id="speaker-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent">
+                                <option value="">All Speakers</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Sort -->
+                        <div>
+                            <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
+                            <select id="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent">
+                                <option value="newest">Newest</option>
+                                <option value="oldest">Oldest</option>
+                                <option value="attendees">Most Attendees</option>
+                                <option value="title">A–Z Title</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Webinars Grid -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div id="webinars-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Cards will be inserted here -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-20">
+                <div class="bg-surface rounded-xl p-8 shadow-sm max-w-md mx-auto">
+                    <div class="text-6xl mb-4">🔍</div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No webinars found</h3>
+                    <p class="text-gray-600">No webinars match your current search and filters. Try adjusting your criteria.</p>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <div id="pagination" class="flex justify-center items-center mt-12 gap-2">
+                <!-- Pagination will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-backdrop bg-black bg-opacity-50 absolute inset-0" id="modal-backdrop"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+            <div class="bg-surface rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h2 id="modal-title" class="text-2xl font-bold text-gray-900"></h2>
+                        <button id="modal-close" class="text-gray-400 hover:text-gray-600 text-2xl font-bold" aria-label="Close modal">
+                            ×
+                        </button>
+                    </div>
+                    <div id="modal-content">
+                        <!-- Modal content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 hidden">
+        <div class="bg-black bg-opacity-50 absolute inset-0" id="cart-backdrop"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 translate-x-full" id="cart-panel">
+            <div class="flex flex-col h-full">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Shopping Cart</h2>
+                    <button id="cart-close" class="text-gray-400 hover:text-gray-600 text-2xl font-bold" aria-label="Close cart">
+                        ×
+                    </button>
+                </div>
+                
+                <!-- Cart Content -->
+                <div class="flex-1 overflow-y-auto p-6">
+                    <div id="cart-items" class="space-y-4">
+                        <!-- Cart items will be inserted here -->
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="cart-empty" class="text-center py-12">
+                        <div class="text-6xl mb-4">🛒</div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
+                        <p class="text-gray-600">Add webinars to begin.</p>
+                    </div>
+                </div>
+                
+                <!-- Cart Footer -->
+                <div id="cart-footer" class="border-t border-gray-200 p-6 hidden">
+                    <!-- Discount Code -->
+                    <div class="mb-4">
+                        <label for="discount-code" class="block text-sm font-medium text-gray-700 mb-2">Discount Code</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="discount-code" placeholder="Enter code" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <button id="apply-discount" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                Apply
+                            </button>
+                        </div>
+                        <div id="discount-message" class="mt-2 text-sm hidden"></div>
+                    </div>
+                    
+                    <!-- Totals -->
+                    <div class="space-y-2 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span id="cart-subtotal" class="font-medium">₱0</span>
+                        </div>
+                        <div id="discount-row" class="flex justify-between text-sm text-green-600 hidden">
+                            <span>Discount (10%):</span>
+                            <span id="cart-discount">-₱0</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-semibold border-t border-gray-200 pt-2">
+                            <span>Total:</span>
+                            <span id="cart-total">₱0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Checkout Button -->
+                    <button id="checkout-btn" class="w-full bg-primary hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Panel -->
+    <div id="checkout-panel" class="fixed inset-0 z-[9998] hidden">
+        <div class="bg-black bg-opacity-50 absolute inset-0" id="checkout-backdrop"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-xl transform checkout-slide translate-x-full" id="checkout-drawer">
+            <div class="flex flex-col h-full">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Checkout</h2>
+                    <button id="checkout-close" class="text-gray-400 hover:text-gray-600 text-2xl font-bold" aria-label="Close checkout">
+                        ×
+                    </button>
+                </div>
+                
+                <!-- Order Summary -->
+                <div class="p-6 bg-gray-50 border-b border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-900 mb-3">Order Summary</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Items:</span>
+                            <span id="checkout-items-count" class="font-medium">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span id="checkout-subtotal" class="font-medium">₱0</span>
+                        </div>
+                        <div id="checkout-discount-row" class="flex justify-between text-green-600 hidden">
+                            <span>Discount (10%):</span>
+                            <span id="checkout-discount">-₱0</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-semibold border-t border-gray-200 pt-2">
+                            <span>Total:</span>
+                            <span id="checkout-total">₱0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Content -->
+                <div class="flex-1 overflow-y-auto p-6">
+                    <form id="checkout-form" class="space-y-4">
+                        <!-- Email Address -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                                Email Address <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <div id="email-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- Title -->
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
+                                Title <span class="text-red-500">*</span>
+                            </label>
+                            <select id="title" name="title" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                                <option value="">Select Title</option>
+                                <option value="Mr.">Mr.</option>
+                                <option value="Ms.">Ms.</option>
+                                <option value="Miss">Miss</option>
+                                <option value="Mrs.">Mrs.</option>
+                                <option value="Mx.">Mx.</option>
+                                <option value="Dr.">Dr.</option>
+                            </select>
+                            <div id="title-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- First Name -->
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">
+                                First Name <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="firstName" name="firstName" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <div id="firstName-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- Middle Initial -->
+                        <div>
+                            <label for="middleInitial" class="block text-sm font-medium text-gray-700 mb-1">
+                                Middle Initial
+                            </label>
+                            <input type="text" id="middleInitial" name="middleInitial" maxlength="2"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                        </div>
+                        
+                        <!-- Last Name -->
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">
+                                Last Name <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="lastName" name="lastName" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <div id="lastName-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- Suffix -->
+                        <div>
+                            <label for="suffix" class="block text-sm font-medium text-gray-700 mb-1">
+                                Suffix
+                            </label>
+                            <input type="text" id="suffix" name="suffix"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                        </div>
+                        
+                        <!-- Mobile Number -->
+                        <div>
+                            <label for="mobile" class="block text-sm font-medium text-gray-700 mb-1">
+                                Mobile Number <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel" id="mobile" name="mobile" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <div id="mobile-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- Specialization -->
+                        <div>
+                            <label for="specialization" class="block text-sm font-medium text-gray-700 mb-1">
+                                Specialization <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="specialization" name="specialization" required
+                                   placeholder="Physics, Chemistry, Biology, Physical Science, General Science"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <div id="specialization-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- Name of School -->
+                        <div>
+                            <label for="schoolName" class="block text-sm font-medium text-gray-700 mb-1">
+                                Name of School <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="schoolName" name="schoolName" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm">
+                            <div id="schoolName-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- Type -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Type <span class="text-red-500">*</span>
+                            </label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="type" value="public" required
+                                           class="mr-2 text-accent focus:ring-accent">
+                                    <span class="text-sm">Public</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="type" value="private" required
+                                           class="mr-2 text-accent focus:ring-accent">
+                                    <span class="text-sm">Private</span>
+                                </label>
+                            </div>
+                            <div id="type-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                        
+                        <!-- Address of School -->
+                        <div>
+                            <label for="schoolAddress" class="block text-sm font-medium text-gray-700 mb-1">
+                                Address of School <span class="text-red-500">*</span>
+                            </label>
+                            <textarea id="schoolAddress" name="schoolAddress" required rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent text-sm resize-none"></textarea>
+                            <div id="schoolAddress-error" class="text-red-500 text-xs mt-1 hidden" role="alert"></div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Footer -->
+                <div class="border-t border-gray-200 p-6">
+                    <button id="confirm-checkout" class="w-full bg-primary hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Confirm Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 z-[9999] hidden">
+        <div class="bg-black bg-opacity-50 absolute inset-0"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+                <div class="text-center">
+                    <div class="text-6xl mb-4">✅</div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Order Confirmed!</h3>
+                    <p class="text-gray-600 mb-6">
+                        Thank you for enrolling in our PAPSI Training. You will receive a confirmation email within 10 minutes containing the payment instructions.
+                    </p>
+                    <button id="success-close" class="w-full bg-primary hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="success-toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg toast flex items-center gap-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="success-message">Added to cart</span>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="error-toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg toast flex items-center gap-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span id="error-message">Please complete all required fields correctly.</span>
+        </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="image-viewer" class="fixed inset-0 z-[9999] hidden">
+        <div class="bg-black bg-opacity-75 absolute inset-0" id="image-viewer-backdrop"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                <!-- Header with close button -->
+                <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                    <h3 id="image-viewer-title" class="text-lg font-semibold text-gray-900">Webinar Poster</h3>
+                    <button id="image-viewer-close" class="text-gray-400 hover:text-gray-600 text-2xl font-bold" aria-label="Close image viewer">
+                        ×
+                    </button>
+                </div>
+                
+                <!-- Image container -->
+                <div class="relative bg-gray-100 flex items-center justify-center overflow-hidden cursor-move" style="height: 475px;" id="image-container">
+                    <img id="viewer-image" src="" alt="" class="max-w-full max-h-full object-contain transition-transform duration-200 select-none" style="transform: scale(1) translate(0px, 0px);">
+                </div>
+                
+                <!-- Controls -->
+                <div class="p-4 bg-gray-50">
+                    <!-- Zoom Controls -->
+                    <div class="flex items-center justify-center gap-4 mb-4">
+                        <button id="zoom-out" class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition-colors" aria-label="Zoom out">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path>
+                            </svg>
+                        </button>
+                        <span id="zoom-level" class="text-gray-700 text-sm font-medium min-w-[60px] text-center">100%</span>
+                        <button id="zoom-in" class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition-colors" aria-label="Zoom in">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                            </svg>
+                        </button>
+                        <button id="zoom-reset" class="bg-primary hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium" aria-label="Reset zoom">
+                            Reset
+                        </button>
+                    </div>
+                    
+                    <!-- Navigation Controls -->
+                    <div id="nav-controls" class="flex items-center justify-center opacity-50 pointer-events-none transition-opacity">
+                        <div class="grid grid-cols-3 gap-1">
+                            <!-- Top row -->
+                            <div></div>
+                            <button id="move-up" class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition-colors" aria-label="Move up">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                </svg>
+                            </button>
+                            <div></div>
+                            
+                            <!-- Middle row -->
+                            <button id="move-left" class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition-colors" aria-label="Move left">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="w-8 h-8"></div>
+                            <button id="move-right" class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition-colors" aria-label="Move right">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Bottom row -->
+                            <div></div>
+                            <button id="move-down" class="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition-colors" aria-label="Move down">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        class WebinarApp {
+            constructor() {
+                this.webinars = [];
+                this.filteredWebinars = [];
+                this.currentPage = 1;
+                this.pageSize = 12;
+                this.searchTimeout = null;
+                this.currentZoom = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+                this.isDragging = false;
+                this.dragStartX = 0;
+                this.dragStartY = 0;
+                this.csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR081wscv4mvgeszB7ExexOhUFNbQtma5HdREBgNxJehDt-7Ucuw0tkAv2y44a3zYfQ_emZ3qHk22l3/pub?gid=0&single=true&output=csv';
+                this.rawCSVData = ''; // Store raw CSV for debugging
+                
+                // Cart properties
+                this.cart = [];
+                this.discountApplied = false;
+                this.discountCode = '';
+                
+                this.init();
+            }
+
+            async init() {
+                this.setupEventListeners();
+                this.loadStateFromURL();
+                this.loadCartFromStorage();
+                await this.loadWebinars();
+            }
+
+            setupEventListeners() {
+                // Search with debounce
+                document.getElementById('search').addEventListener('input', (e) => {
+                    clearTimeout(this.searchTimeout);
+                    this.searchTimeout = setTimeout(() => {
+                        this.applyFilters();
+                        this.updateURL();
+                    }, 250);
+                });
+
+                // Filters and sort
+                ['category-filter', 'speaker-filter', 'sort'].forEach(id => {
+                    document.getElementById(id).addEventListener('change', () => {
+                        this.currentPage = 1;
+                        this.applyFilters();
+                        this.updateURL();
+                    });
+                });
+
+                // Mobile filter toggle
+                document.getElementById('mobile-filter-toggle').addEventListener('click', () => {
+                    const controls = document.getElementById('filter-controls');
+                    const toggleText = document.getElementById('filter-toggle-text');
+                    const isHidden = controls.classList.contains('hidden');
+                    
+                    if (isHidden) {
+                        controls.classList.remove('hidden');
+                        toggleText.textContent = 'Hide Filters';
+                    } else {
+                        controls.classList.add('hidden');
+                        toggleText.textContent = 'Show Filters';
+                    }
+                });
+
+                // Modal
+                document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
+                document.getElementById('modal-backdrop').addEventListener('click', () => this.closeModal());
+                
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (!document.getElementById('image-viewer').classList.contains('hidden')) {
+                            this.closeImageViewer();
+                        } else if (!document.getElementById('checkout-panel').classList.contains('hidden')) {
+                            this.closeCheckout();
+                        } else if (!document.getElementById('cart-drawer').classList.contains('hidden')) {
+                            this.closeCart();
+                        } else if (!document.getElementById('modal').classList.contains('hidden')) {
+                            this.closeModal();
+                        }
+                    }
+                });
+
+                // Image viewer event listeners
+                document.getElementById('image-viewer-close').addEventListener('click', () => this.closeImageViewer());
+                document.getElementById('image-viewer-backdrop').addEventListener('click', () => this.closeImageViewer());
+                document.getElementById('zoom-in').addEventListener('click', () => this.zoomImage(1.2));
+                document.getElementById('zoom-out').addEventListener('click', () => this.zoomImage(0.8));
+                document.getElementById('zoom-reset').addEventListener('click', () => this.resetZoom());
+                
+                // Navigation button event listeners
+                document.getElementById('move-up').addEventListener('click', () => this.moveImage(0, -50));
+                document.getElementById('move-down').addEventListener('click', () => this.moveImage(0, 50));
+                document.getElementById('move-left').addEventListener('click', () => this.moveImage(-50, 0));
+                document.getElementById('move-right').addEventListener('click', () => this.moveImage(50, 0));
+
+                // Image dragging event listeners
+                const imageContainer = document.getElementById('image-container');
+                imageContainer.addEventListener('mousedown', (e) => this.startDrag(e));
+                document.addEventListener('mousemove', (e) => this.drag(e));
+                document.addEventListener('mouseup', () => this.endDrag());
+
+                // Retry button
+                document.getElementById('retry-btn').addEventListener('click', () => {
+                    this.hideToast();
+                    this.loadWebinars();
+                });
+
+                // Refresh button
+                document.getElementById('refresh-btn').addEventListener('click', () => {
+                    this.refreshWebinars();
+                });
+
+
+
+                // URL hash changes
+                window.addEventListener('hashchange', () => {
+                    this.loadStateFromURL();
+                    this.applyFilters();
+                });
+
+                // Cart event listeners
+                document.getElementById('cart-toggle').addEventListener('click', () => this.openCart());
+                document.getElementById('cart-close').addEventListener('click', () => this.closeCart());
+                document.getElementById('cart-backdrop').addEventListener('click', () => this.closeCart());
+                document.getElementById('apply-discount').addEventListener('click', () => this.applyDiscountCode());
+                document.getElementById('checkout-btn').addEventListener('click', () => this.checkout());
+                
+                // Discount code input enter key
+                document.getElementById('discount-code').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.applyDiscountCode();
+                    }
+                });
+
+                // Checkout event listeners
+                document.getElementById('checkout-close').addEventListener('click', () => this.closeCheckout());
+                document.getElementById('checkout-backdrop').addEventListener('click', () => this.closeCheckout());
+                document.getElementById('confirm-checkout').addEventListener('click', () => this.processCheckout());
+                document.getElementById('success-close').addEventListener('click', () => this.closeSuccessModal());
+            }
+
+            async loadWebinars() {
+                try {
+                    document.getElementById('loading').classList.remove('hidden');
+                    document.getElementById('main-content').classList.add('hidden');
+                    
+                    const response = await fetch(this.csvUrl);
+                    if (!response.ok) throw new Error('Failed to fetch CSV');
+                    
+                    const csvText = await response.text();
+                    this.rawCSVData = csvText; // Store for debugging
+                    this.webinars = this.parseCSV(csvText);
+                    
+                    this.populateFilters();
+                    this.applyFilters();
+                    
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('main-content').classList.remove('hidden');
+                    
+                } catch (error) {
+                    console.error('Error loading webinars:', error);
+                    this.showToast('Failed to load webinars. Please check your connection and try again.');
+                    document.getElementById('loading').classList.add('hidden');
+                }
+            }
+
+
+
+            parseCSV(csvText) {
+                const lines = csvText.trim().split('\n');
+                const webinars = [];
+                
+                console.log('=== CSV PARSING DEBUG ===');
+                console.log('Raw CSV length:', csvText.length);
+                console.log('Total lines after split:', lines.length);
+                console.log('First few lines:', lines.slice(0, 3));
+                console.log('Last few lines:', lines.slice(-3));
+                
+                // Skip header row (index 0)
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    // Skip completely empty lines
+                    if (!line) {
+                        console.log(`Line ${i + 1}: EMPTY - skipping`);
+                        continue;
+                    }
+                    
+                    const row = this.parseCSVRow(line);
+                    console.log(`Line ${i + 1}: Parsed ${row.length} columns`);
+                    
+                    // Debug: show first few columns of each row
+                    if (i <= 5 || i % 50 === 0) {
+                        console.log(`  Sample data: [${row.slice(0, 5).map(col => `"${col}"`).join(', ')}...]`);
+                    }
+                    
+                    // More strict validation - need at least title, date, and speaker
+                    if (row.length >= 7) {
+                        const title = (row[1] || '').trim();
+                        const date = (row[2] || '').trim();
+                        const speaker = (row[4] || '').trim();
+                        
+                        // Only add if we have essential data
+                        if (title && date && speaker) {
+                            const webinar = {
+                                title: title,
+                                date: date,
+                                time: (row[3] || '').trim(),
+                                speaker: speaker,
+                                attendees: parseInt(row[5]) || 0,
+                                posterURL: (row[6] || '').trim(),
+                                category: (row[7] || '').trim(),
+                                regularFee: (row[8] || '').trim(),
+                                promoFee: (row[9] || '').trim(),
+                                parsedDate: this.parseDate(row[2])
+                            };
+                            
+                            webinars.push(webinar);
+                            if (webinars.length <= 10 || webinars.length % 25 === 0) {
+                                console.log(`✓ Added webinar ${webinars.length}: "${title}"`);
+                            }
+                        } else {
+                            console.log(`✗ Line ${i + 1}: Missing essential data - Title:"${title}" Date:"${date}" Speaker:"${speaker}"`);
+                        }
+                    } else {
+                        console.log(`✗ Line ${i + 1}: Only ${row.length} columns (need 7+)`);
+                    }
+                }
+                
+                console.log('=== FINAL RESULTS ===');
+                console.log('Total lines processed:', lines.length - 1);
+                console.log('Valid webinars found:', webinars.length);
+                console.log('Expected count: 178');
+                console.log('Actual count:', webinars.length);
+                console.log('Difference:', webinars.length - 178);
+                
+                return webinars;
+            }
+
+            parseCSVRow(row) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < row.length; i++) {
+                    const char = row[i];
+                    
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current);
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                
+                result.push(current);
+                return result;
+            }
+
+            parseDate(dateStr) {
+                if (!dateStr) return new Date(0);
+                
+                // Try parsing various date formats
+                const date = new Date(dateStr);
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+                
+                // If parsing fails, return a very old date to sort at the end
+                return new Date(0);
+            }
+
+            populateFilters() {
+                const categories = [...new Set(this.webinars.map(w => w.category).filter(Boolean))].sort();
+                const speakers = [...new Set(this.webinars.map(w => w.speaker).filter(Boolean))].sort();
+                
+                const categorySelect = document.getElementById('category-filter');
+                const speakerSelect = document.getElementById('speaker-filter');
+                
+                // Clear existing options (except "All")
+                categorySelect.innerHTML = '<option value="">All Categories</option>';
+                speakerSelect.innerHTML = '<option value="">All Speakers</option>';
+                
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelect.appendChild(option);
+                });
+                
+                speakers.forEach(speaker => {
+                    const option = document.createElement('option');
+                    option.value = speaker;
+                    option.textContent = speaker;
+                    speakerSelect.appendChild(option);
+                });
+            }
+
+            applyFilters() {
+                const search = document.getElementById('search').value.toLowerCase().trim();
+                const category = document.getElementById('category-filter').value;
+                const speaker = document.getElementById('speaker-filter').value;
+                const sort = document.getElementById('sort').value;
+                
+                // Filter
+                this.filteredWebinars = this.webinars.filter(webinar => {
+                    // Search through title, speaker, and category
+                    const matchesSearch = !search || 
+                        webinar.title.toLowerCase().includes(search) ||
+                        webinar.speaker.toLowerCase().includes(search) ||
+                        webinar.category.toLowerCase().includes(search);
+                    
+                    const matchesCategory = !category || webinar.category === category;
+                    const matchesSpeaker = !speaker || webinar.speaker === speaker;
+                    
+                    return matchesSearch && matchesCategory && matchesSpeaker;
+                });
+                
+                // Sort
+                this.filteredWebinars.sort((a, b) => {
+                    switch (sort) {
+                        case 'newest':
+                            return b.parsedDate - a.parsedDate;
+                        case 'oldest':
+                            return a.parsedDate - b.parsedDate;
+                        case 'attendees':
+                            return b.attendees - a.attendees;
+                        case 'title':
+                            return a.title.localeCompare(b.title);
+                        default:
+                            return b.parsedDate - a.parsedDate;
+                    }
+                });
+                
+                this.updateResultsCount();
+                this.renderWebinars();
+                this.renderPagination();
+            }
+
+            updateResultsCount() {
+                const count = this.filteredWebinars.length;
+                const text = count === 1 ? '1 webinar' : `${count} webinars`;
+                document.getElementById('results-count').textContent = text;
+                
+                // Debug logging to check the count
+                console.log('Filtered webinars count:', count);
+                console.log('Total webinars loaded:', this.webinars.length);
+            }
+
+            renderWebinars() {
+                const grid = document.getElementById('webinars-grid');
+                const emptyState = document.getElementById('empty-state');
+                
+                if (this.filteredWebinars.length === 0) {
+                    grid.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                
+                const startIndex = (this.currentPage - 1) * this.pageSize;
+                const endIndex = startIndex + this.pageSize;
+                const pageWebinars = this.filteredWebinars.slice(startIndex, endIndex);
+                
+                grid.innerHTML = pageWebinars.map(webinar => this.createWebinarCard(webinar)).join('');
+                
+                // Add event listeners to view poster buttons
+                grid.querySelectorAll('.view-poster-btn').forEach((btn, index) => {
+                    btn.addEventListener('click', () => {
+                        this.openImageViewer(pageWebinars[index].posterURL, pageWebinars[index].title);
+                    });
+                });
+
+                // Add event listeners to add to cart buttons
+                grid.querySelectorAll('.add-to-cart-btn').forEach((btn, index) => {
+                    btn.addEventListener('click', () => {
+                        if (!btn.disabled) {
+                            this.addToCart(pageWebinars[index]);
+                        }
+                    });
+                });
+            }
+
+            createWebinarCard(webinar) {
+                return `
+                    <div class="bg-surface rounded-xl shadow-sm card-hover overflow-hidden">
+                        <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                            <img src="${webinar.posterURL}" 
+                                 alt="Poster for ${webinar.title}"
+                                 class="w-full h-48 object-cover"
+                                 loading="lazy"
+                                 onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="hidden w-full h-48 bg-gray-200 items-center justify-center text-gray-500">
+                                <div class="text-center">
+                                    <div class="text-4xl mb-2">📋</div>
+                                    <div class="text-sm">Poster unavailable</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="mb-3">
+                                <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">${webinar.title}</h3>
+                            </div>
+                            <div class="space-y-2 mb-4">
+                                <p class="text-sm text-gray-600">📅 Date Conducted: ${webinar.date}</p>
+                                <p class="text-sm text-gray-600">🕒 ${webinar.time}</p>
+                                <p class="text-sm text-gray-600">👤 ${webinar.speaker}</p>
+                                <p class="text-sm text-gray-600">👥 ${webinar.attendees} attendees</p>
+                                ${webinar.regularFee || webinar.promoFee ? `
+                                <div class="flex items-center gap-2 text-sm">
+                                    ${webinar.promoFee ? `
+                                        <span class="text-red-500 line-through">₱${webinar.regularFee}</span>
+                                        <span class="text-green-600 font-semibold">₱${webinar.promoFee}</span>
+                                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">PROMO</span>
+                                    ` : `
+                                        <span class="text-gray-900 font-semibold">₱${webinar.regularFee}</span>
+                                    `}
+                                </div>
+                                ` : ''}
+                            </div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="bg-accent text-white text-sm px-4 py-2 rounded-full font-medium">
+                                    ${webinar.category}
+                                </span>
+                                <button class="view-poster-btn bg-primary hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    View Poster
+                                </button>
+                            </div>
+                            <button class="add-to-cart-btn w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium transition-colors ${this.isInCart(webinar) ? 'opacity-50 cursor-not-allowed' : ''}" 
+                                    ${this.isInCart(webinar) ? 'disabled' : ''}>
+                                ${this.isInCart(webinar) ? 'Already in Cart' : 'Add to Cart'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderPagination() {
+                const pagination = document.getElementById('pagination');
+                const totalPages = Math.ceil(this.filteredWebinars.length / this.pageSize);
+                
+                if (totalPages <= 1) {
+                    pagination.innerHTML = '';
+                    return;
+                }
+                
+                let paginationHTML = '';
+                
+                // Previous button
+                if (this.currentPage > 1) {
+                    paginationHTML += `
+                        <button class="pagination-btn px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50" data-page="${this.currentPage - 1}">
+                            Previous
+                        </button>
+                    `;
+                }
+                
+                // Page numbers
+                const startPage = Math.max(1, this.currentPage - 2);
+                const endPage = Math.min(totalPages, this.currentPage + 2);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const isActive = i === this.currentPage;
+                    paginationHTML += `
+                        <button class="pagination-btn px-3 py-2 text-sm font-medium ${isActive ? 'bg-accent text-white' : 'text-gray-500 bg-white hover:bg-gray-50'} border border-gray-300" data-page="${i}">
+                            ${i}
+                        </button>
+                    `;
+                }
+                
+                // Next button
+                if (this.currentPage < totalPages) {
+                    paginationHTML += `
+                        <button class="pagination-btn px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50" data-page="${this.currentPage + 1}">
+                            Next
+                        </button>
+                    `;
+                }
+                
+                pagination.innerHTML = paginationHTML;
+                
+                // Add event listeners
+                pagination.querySelectorAll('.pagination-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.currentPage = parseInt(btn.dataset.page);
+                        this.renderWebinars();
+                        this.renderPagination();
+                        this.updateURL();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                });
+            }
+
+            openModal(webinar) {
+                document.getElementById('modal-title').textContent = webinar.title;
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="space-y-6">
+                        <div class="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden">
+                            <img src="${webinar.posterURL}" 
+                                 alt="Poster for ${webinar.title}"
+                                 class="w-full h-64 object-cover"
+                                 onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="hidden w-full h-64 bg-gray-200 items-center justify-center text-gray-500 rounded-lg">
+                                <div class="text-center">
+                                    <div class="text-6xl mb-4">📋</div>
+                                    <div class="text-lg">Poster unavailable</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Date & Time</h4>
+                                <p class="text-gray-600 mb-1">📅 ${webinar.date}</p>
+                                <p class="text-gray-600">🕒 ${webinar.time}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Speaker</h4>
+                                <p class="text-gray-600">👤 ${webinar.speaker}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Category</h4>
+                                <span class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm">
+                                    ${webinar.category}
+                                </span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Attendance</h4>
+                                <span class="bg-accent text-white px-3 py-1 rounded-full text-sm">
+                                    ${webinar.attendees} live attendees
+                                </span>
+                            </div>
+                            ${webinar.regularFee || webinar.promoFee ? `
+                            <div class="md:col-span-2">
+                                <h4 class="font-semibold text-gray-900 mb-2">Pricing</h4>
+                                <div class="flex items-center gap-3">
+                                    ${webinar.promoFee ? `
+                                        <span class="text-red-500 line-through text-lg">₱${webinar.regularFee}</span>
+                                        <span class="text-green-600 font-bold text-xl">₱${webinar.promoFee}</span>
+                                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">PROMO PRICE</span>
+                                    ` : `
+                                        <span class="text-gray-900 font-bold text-xl">₱${webinar.regularFee}</span>
+                                    `}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('modal').classList.remove('hidden');
+                document.getElementById('modal-close').focus();
+            }
+
+            closeModal() {
+                document.getElementById('modal').classList.add('hidden');
+            }
+
+            openImageViewer(imageUrl, title) {
+                if (!imageUrl) return;
+                
+                const viewer = document.getElementById('image-viewer');
+                const image = document.getElementById('viewer-image');
+                const titleElement = document.getElementById('image-viewer-title');
+                
+                image.src = imageUrl;
+                image.alt = `Poster for ${title}`;
+                titleElement.textContent = title;
+                this.currentZoom = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+                this.updateImageTransform();
+                this.updateZoomDisplay();
+                this.updateNavigationControls();
+                
+                viewer.classList.remove('hidden');
+                document.getElementById('image-viewer-close').focus();
+            }
+
+            closeImageViewer() {
+                document.getElementById('image-viewer').classList.add('hidden');
+                this.currentZoom = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+            }
+
+            zoomImage(factor) {
+                this.currentZoom = Math.max(0.5, Math.min(3, this.currentZoom * factor));
+                this.updateImageTransform();
+                this.updateZoomDisplay();
+                this.updateNavigationControls();
+            }
+
+            moveImage(deltaX, deltaY) {
+                this.translateX += deltaX;
+                this.translateY += deltaY;
+                
+                // Limit movement to reasonable bounds
+                const maxTranslate = 200 * this.currentZoom;
+                this.translateX = Math.max(-maxTranslate, Math.min(maxTranslate, this.translateX));
+                this.translateY = Math.max(-maxTranslate, Math.min(maxTranslate, this.translateY));
+                
+                this.updateImageTransform();
+            }
+
+            resetZoom() {
+                this.currentZoom = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+                this.updateImageTransform();
+                this.updateZoomDisplay();
+                this.updateNavigationControls();
+            }
+
+            updateNavigationControls() {
+                const navControls = document.getElementById('nav-controls');
+                
+                if (this.currentZoom > 1) {
+                    navControls.classList.remove('opacity-50', 'pointer-events-none');
+                    navControls.classList.add('opacity-100');
+                } else {
+                    navControls.classList.add('opacity-50', 'pointer-events-none');
+                    navControls.classList.remove('opacity-100');
+                }
+            }
+
+            updateImageTransform() {
+                const image = document.getElementById('viewer-image');
+                image.style.transform = `scale(${this.currentZoom}) translate(${this.translateX}px, ${this.translateY}px)`;
+            }
+
+            startDrag(e) {
+                if (this.currentZoom <= 1) return; // Only allow dragging when zoomed in
+                
+                this.isDragging = true;
+                this.dragStartX = e.clientX - this.translateX;
+                this.dragStartY = e.clientY - this.translateY;
+                
+                const imageContainer = document.getElementById('image-container');
+                imageContainer.style.cursor = 'grabbing';
+                
+                e.preventDefault();
+            }
+
+            drag(e) {
+                if (!this.isDragging) return;
+                
+                this.translateX = e.clientX - this.dragStartX;
+                this.translateY = e.clientY - this.dragStartY;
+                
+                // Limit dragging to reasonable bounds
+                const maxTranslate = 200 * this.currentZoom;
+                this.translateX = Math.max(-maxTranslate, Math.min(maxTranslate, this.translateX));
+                this.translateY = Math.max(-maxTranslate, Math.min(maxTranslate, this.translateY));
+                
+                this.updateImageTransform();
+                
+                e.preventDefault();
+            }
+
+            endDrag() {
+                if (!this.isDragging) return;
+                
+                this.isDragging = false;
+                const imageContainer = document.getElementById('image-container');
+                imageContainer.style.cursor = this.currentZoom > 1 ? 'move' : 'default';
+            }
+
+            updateZoomDisplay() {
+                const zoomLevel = document.getElementById('zoom-level');
+                zoomLevel.textContent = `${Math.round(this.currentZoom * 100)}%`;
+            }
+
+            showToast(message) {
+                document.getElementById('toast-message').textContent = message;
+                document.getElementById('toast').classList.remove('hidden');
+            }
+
+            hideToast() {
+                document.getElementById('toast').classList.add('hidden');
+            }
+
+            updateURL() {
+                const params = new URLSearchParams();
+                
+                const search = document.getElementById('search').value;
+                const category = document.getElementById('category-filter').value;
+                const speaker = document.getElementById('speaker-filter').value;
+                const sort = document.getElementById('sort').value;
+                
+                if (search) params.set('search', search);
+                if (category) params.set('category', category);
+                if (speaker) params.set('speaker', speaker);
+                if (sort !== 'newest') params.set('sort', sort);
+                if (this.currentPage > 1) params.set('page', this.currentPage);
+                
+                window.location.hash = params.toString();
+            }
+
+            loadStateFromURL() {
+                const params = new URLSearchParams(window.location.hash.substring(1));
+                
+                document.getElementById('search').value = params.get('search') || '';
+                document.getElementById('category-filter').value = params.get('category') || '';
+                document.getElementById('speaker-filter').value = params.get('speaker') || '';
+                document.getElementById('sort').value = params.get('sort') || 'newest';
+                this.currentPage = parseInt(params.get('page')) || 1;
+            }
+
+            // Cart Methods
+            loadCartFromStorage() {
+                try {
+                    const savedCart = localStorage.getItem('papsi-cart');
+                    const savedDiscount = localStorage.getItem('papsi-discount');
+                    
+                    if (savedCart) {
+                        this.cart = JSON.parse(savedCart);
+                    }
+                    
+                    if (savedDiscount) {
+                        const discountData = JSON.parse(savedDiscount);
+                        this.discountApplied = discountData.applied;
+                        this.discountCode = discountData.code;
+                        if (this.discountApplied) {
+                            document.getElementById('discount-code').value = this.discountCode;
+                        }
+                    }
+                    
+                    this.updateCartUI();
+                } catch (error) {
+                    console.error('Error loading cart from storage:', error);
+                    this.cart = [];
+                    this.discountApplied = false;
+                    this.discountCode = '';
+                }
+            }
+
+            saveCartToStorage() {
+                try {
+                    localStorage.setItem('papsi-cart', JSON.stringify(this.cart));
+                    localStorage.setItem('papsi-discount', JSON.stringify({
+                        applied: this.discountApplied,
+                        code: this.discountCode
+                    }));
+                } catch (error) {
+                    console.error('Error saving cart to storage:', error);
+                }
+            }
+
+            isInCart(webinar) {
+                return this.cart.some(item => item.title === webinar.title);
+            }
+
+            addToCart(webinar) {
+                if (this.isInCart(webinar)) {
+                    return;
+                }
+
+                // Get the price (promo price if available, otherwise regular price)
+                const price = webinar.promoFee ? parseFloat(webinar.promoFee) : parseFloat(webinar.regularFee || 0);
+                
+                const cartItem = {
+                    title: webinar.title,
+                    date: webinar.date,
+                    price: price,
+                    originalPrice: parseFloat(webinar.regularFee || 0),
+                    promoPrice: webinar.promoFee ? parseFloat(webinar.promoFee) : null
+                };
+
+                this.cart.push(cartItem);
+                this.saveCartToStorage();
+                this.updateCartUI();
+                this.showSuccessToast('Added to cart');
+                
+                // Re-render webinars to update button states
+                this.renderWebinars();
+            }
+
+            removeFromCart(title) {
+                this.cart = this.cart.filter(item => item.title !== title);
+                this.saveCartToStorage();
+                this.updateCartUI();
+                this.showSuccessToast('Removed from cart');
+                
+                // Re-render webinars to update button states
+                this.renderWebinars();
+            }
+
+            updateCartUI() {
+                const cartBadge = document.getElementById('cart-badge');
+                const cartItems = document.getElementById('cart-items');
+                const cartEmpty = document.getElementById('cart-empty');
+                const cartFooter = document.getElementById('cart-footer');
+
+                // Update badge
+                if (this.cart.length > 0) {
+                    cartBadge.textContent = this.cart.length;
+                    cartBadge.classList.remove('hidden');
+                } else {
+                    cartBadge.classList.add('hidden');
+                }
+
+                // Update cart content
+                if (this.cart.length === 0) {
+                    cartEmpty.classList.remove('hidden');
+                    cartFooter.classList.add('hidden');
+                    cartItems.innerHTML = '';
+                } else {
+                    cartEmpty.classList.add('hidden');
+                    cartFooter.classList.remove('hidden');
+                    
+                    cartItems.innerHTML = this.cart.map(item => `
+                        <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 text-sm line-clamp-2">${item.title}</h4>
+                                <div class="mt-2">
+                                    ${item.promoPrice ? `
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-red-500 line-through text-sm">₱${item.originalPrice}</span>
+                                            <span class="text-green-600 font-semibold">₱${item.price}</span>
+                                        </div>
+                                    ` : `
+                                        <span class="text-gray-900 font-semibold">₱${item.price}</span>
+                                    `}
+                                </div>
+                            </div>
+                            <button class="remove-item text-gray-400 hover:text-red-500 text-xl font-bold" data-title="${item.title}" aria-label="Remove item">
+                                ×
+                            </button>
+                        </div>
+                    `).join('');
+
+                    // Add event listeners to remove buttons
+                    cartItems.querySelectorAll('.remove-item').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            this.removeFromCart(btn.dataset.title);
+                        });
+                    });
+                }
+
+                this.updateCartTotals();
+            }
+
+            updateCartTotals() {
+                const subtotal = this.cart.reduce((sum, item) => sum + item.price, 0);
+                const discount = this.discountApplied ? subtotal * 0.1 : 0;
+                const total = subtotal - discount;
+
+                document.getElementById('cart-subtotal').textContent = `₱${subtotal.toFixed(0)}`;
+                document.getElementById('cart-total').textContent = `₱${total.toFixed(0)}`;
+
+                const discountRow = document.getElementById('discount-row');
+                const discountAmount = document.getElementById('cart-discount');
+                
+                if (this.discountApplied && discount > 0) {
+                    discountRow.classList.remove('hidden');
+                    discountAmount.textContent = `-₱${discount.toFixed(0)}`;
+                } else {
+                    discountRow.classList.add('hidden');
+                }
+            }
+
+            openCart() {
+                const drawer = document.getElementById('cart-drawer');
+                const panel = document.getElementById('cart-panel');
+                
+                drawer.classList.remove('hidden');
+                // Small delay to ensure the element is rendered before animation
+                setTimeout(() => {
+                    panel.classList.remove('translate-x-full');
+                }, 10);
+                
+                document.getElementById('cart-close').focus();
+            }
+
+            closeCart() {
+                const drawer = document.getElementById('cart-drawer');
+                const panel = document.getElementById('cart-panel');
+                
+                panel.classList.add('translate-x-full');
+                
+                // Hide the drawer after animation completes
+                setTimeout(() => {
+                    drawer.classList.add('hidden');
+                }, 300);
+            }
+
+            applyDiscountCode() {
+                const codeInput = document.getElementById('discount-code');
+                const messageDiv = document.getElementById('discount-message');
+                const code = codeInput.value.trim();
+
+                messageDiv.classList.remove('hidden');
+
+                if (code.toLowerCase() === 'kapapsi') {
+                    if (!this.discountApplied) {
+                        this.discountApplied = true;
+                        this.discountCode = code;
+                        this.saveCartToStorage();
+                        this.updateCartTotals();
+                        
+                        messageDiv.textContent = '✅ Discount applied! 10% off your total.';
+                        messageDiv.className = 'mt-2 text-sm text-green-600';
+                        
+                        document.getElementById('apply-discount').textContent = 'Applied';
+                        document.getElementById('apply-discount').disabled = true;
+                        document.getElementById('apply-discount').classList.add('opacity-50', 'cursor-not-allowed');
+                        codeInput.disabled = true;
+                        codeInput.classList.add('opacity-50');
+                    } else {
+                        messageDiv.textContent = 'Discount already applied.';
+                        messageDiv.className = 'mt-2 text-sm text-yellow-600';
+                    }
+                } else {
+                    messageDiv.textContent = 'Invalid discount code.';
+                    messageDiv.className = 'mt-2 text-sm text-red-600';
+                }
+            }
+
+            checkout() {
+                if (this.cart.length === 0) {
+                    return;
+                }
+
+                this.openCheckout();
+            }
+
+            openCheckout() {
+                // Update checkout summary
+                this.updateCheckoutSummary();
+                
+                const panel = document.getElementById('checkout-panel');
+                const drawer = document.getElementById('checkout-drawer');
+                
+                panel.classList.remove('hidden');
+                // Small delay to ensure the element is rendered before animation
+                setTimeout(() => {
+                    drawer.classList.remove('translate-x-full');
+                }, 10);
+                
+                document.getElementById('checkout-close').focus();
+            }
+
+            closeCheckout() {
+                const panel = document.getElementById('checkout-panel');
+                const drawer = document.getElementById('checkout-drawer');
+                
+                drawer.classList.add('translate-x-full');
+                
+                // Hide the panel after animation completes
+                setTimeout(() => {
+                    panel.classList.add('hidden');
+                    this.resetCheckoutForm();
+                }, 300);
+            }
+
+            updateCheckoutSummary() {
+                const subtotal = this.cart.reduce((sum, item) => sum + item.price, 0);
+                const discount = this.discountApplied ? subtotal * 0.1 : 0;
+                const total = subtotal - discount;
+
+                document.getElementById('checkout-items-count').textContent = this.cart.length;
+                document.getElementById('checkout-subtotal').textContent = `₱${subtotal.toFixed(0)}`;
+                document.getElementById('checkout-total').textContent = `₱${total.toFixed(0)}`;
+
+                const discountRow = document.getElementById('checkout-discount-row');
+                const discountAmount = document.getElementById('checkout-discount');
+                
+                if (this.discountApplied && discount > 0) {
+                    discountRow.classList.remove('hidden');
+                    discountAmount.textContent = `-₱${discount.toFixed(0)}`;
+                } else {
+                    discountRow.classList.add('hidden');
+                }
+            }
+
+            resetCheckoutForm() {
+                const form = document.getElementById('checkout-form');
+                form.reset();
+                
+                // Clear all error messages
+                const errorElements = form.querySelectorAll('[id$="-error"]');
+                errorElements.forEach(el => {
+                    el.classList.add('hidden');
+                    el.textContent = '';
+                });
+                
+                // Remove error styling
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.classList.remove('border-red-500');
+                    input.removeAttribute('aria-invalid');
+                });
+            }
+
+            processCheckout() {
+                if (!this.validateCheckoutForm()) {
+                    this.showErrorToast('Please complete all required fields correctly.');
+                    return;
+                }
+
+                this.submitToGoogleForm();
+            }
+
+            validateCheckoutForm() {
+                const form = document.getElementById('checkout-form');
+                let isValid = true;
+                let firstInvalidField = null;
+
+                // Clear previous errors
+                const errorElements = form.querySelectorAll('[id$="-error"]');
+                errorElements.forEach(el => {
+                    el.classList.add('hidden');
+                    el.textContent = '';
+                });
+
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.classList.remove('border-red-500');
+                    input.removeAttribute('aria-invalid');
+                });
+
+                // Email validation
+                const email = document.getElementById('email');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email.value.trim()) {
+                    this.showFieldError('email', 'Email address is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = email;
+                } else if (!emailRegex.test(email.value.trim())) {
+                    this.showFieldError('email', 'Please enter a valid email address.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = email;
+                }
+
+                // Title validation
+                const title = document.getElementById('title');
+                if (!title.value) {
+                    this.showFieldError('title', 'Title is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = title;
+                }
+
+                // First Name validation
+                const firstName = document.getElementById('firstName');
+                if (!firstName.value.trim()) {
+                    this.showFieldError('firstName', 'First name is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = firstName;
+                }
+
+                // Last Name validation
+                const lastName = document.getElementById('lastName');
+                if (!lastName.value.trim()) {
+                    this.showFieldError('lastName', 'Last name is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = lastName;
+                }
+
+                // Mobile validation
+                const mobile = document.getElementById('mobile');
+                const mobileValue = mobile.value.trim();
+                if (!mobileValue) {
+                    this.showFieldError('mobile', 'Mobile number is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = mobile;
+                } else if (!/^[\d\s\+\-\(\)]+$/.test(mobileValue)) {
+                    this.showFieldError('mobile', 'Please enter a valid mobile number.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = mobile;
+                }
+
+                // Specialization validation
+                const specialization = document.getElementById('specialization');
+                if (!specialization.value.trim()) {
+                    this.showFieldError('specialization', 'Specialization is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = specialization;
+                }
+
+                // School Name validation
+                const schoolName = document.getElementById('schoolName');
+                if (!schoolName.value.trim()) {
+                    this.showFieldError('schoolName', 'School name is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = schoolName;
+                }
+
+                // Type validation
+                const typeRadios = document.querySelectorAll('input[name="type"]');
+                const typeSelected = Array.from(typeRadios).some(radio => radio.checked);
+                if (!typeSelected) {
+                    this.showFieldError('type', 'School type is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = typeRadios[0];
+                }
+
+                // School Address validation
+                const schoolAddress = document.getElementById('schoolAddress');
+                if (!schoolAddress.value.trim()) {
+                    this.showFieldError('schoolAddress', 'School address is required.');
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = schoolAddress;
+                }
+
+                // Focus first invalid field
+                if (firstInvalidField) {
+                    firstInvalidField.focus();
+                }
+
+                return isValid;
+            }
+
+            showFieldError(fieldId, message) {
+                const field = document.getElementById(fieldId);
+                const errorElement = document.getElementById(`${fieldId}-error`);
+                
+                field.classList.add('border-red-500');
+                field.setAttribute('aria-invalid', 'true');
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+
+            submitToGoogleForm() {
+                const subtotal = this.cart.reduce((sum, item) => sum + item.price, 0);
+                const discount = this.discountApplied ? subtotal * 0.1 : 0;
+                const total = subtotal - discount;
+
+                const chosenTraining = this.cart.map(item => item.title).join(' | ');
+
+                const email = document.getElementById('email').value.trim();
+                const title = document.getElementById('title').value;
+                const firstName = document.getElementById('firstName').value.trim();
+                const middleInitial = document.getElementById('middleInitial').value.trim();
+                const lastName = document.getElementById('lastName').value.trim();
+                const mobile = document.getElementById('mobile').value.trim();
+                const specialization = document.getElementById('specialization').value.trim();
+                const schoolName = document.getElementById('schoolName').value.trim();
+                const schoolAddress = document.getElementById('schoolAddress').value.trim();
+                
+                const typeRadios = document.querySelectorAll('input[name="type"]');
+                const selectedType = Array.from(typeRadios).find(radio => radio.checked)?.value || '';
+
+                const formData = new FormData();
+                formData.append('entry.1981625342', email);
+                formData.append('entry.139139695', title);
+                formData.append('entry.3660045', firstName);
+                formData.append('entry.612495354', middleInitial);
+                formData.append('entry.114257430', lastName);
+                formData.append('entry.1159064351', mobile);
+                formData.append('entry.236565099', specialization);
+                formData.append('entry.462249690', schoolName);
+                formData.append('entry.776068589', selectedType);
+                formData.append('entry.1941935944', schoolAddress);
+                formData.append('entry.1330977192', chosenTraining);
+                formData.append('entry.2005652959', subtotal.toFixed(0));
+                formData.append('entry.1785268603', total.toFixed(0));
+
+                fetch('https://docs.google.com/forms/d/e/1FAIpQLScBeeoTf0_VC4tohd0_6Xrtyg5TIJ31kyavS7G6KBn4w5Z2Tg/formResponse', {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors'
+                }).then(() => {
+                    this.showSuccessModal();
+                }).catch(() => {
+                    // Even if there's an error, the form might have been submitted
+                    // Google Forms returns CORS errors even on successful submissions
+                    this.showSuccessModal();
+                });
+            }
+
+            showSuccessModal() {
+                document.getElementById('success-modal').classList.remove('hidden');
+                document.getElementById('success-close').focus();
+            }
+
+            closeSuccessModal() {
+                document.getElementById('success-modal').classList.add('hidden');
+                
+                // Clear cart and close all panels
+                this.cart = [];
+                this.discountApplied = false;
+                this.discountCode = '';
+                
+                // Reset discount UI
+                document.getElementById('discount-code').value = '';
+                document.getElementById('discount-code').disabled = false;
+                document.getElementById('discount-code').classList.remove('opacity-50');
+                document.getElementById('apply-discount').textContent = 'Apply';
+                document.getElementById('apply-discount').disabled = false;
+                document.getElementById('apply-discount').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('discount-message').classList.add('hidden');
+                
+                // Save empty cart state
+                this.saveCartToStorage();
+                this.updateCartUI();
+                
+                // Close checkout panel immediately (no animation delay needed)
+                const checkoutPanel = document.getElementById('checkout-panel');
+                const checkoutDrawer = document.getElementById('checkout-drawer');
+                checkoutDrawer.classList.add('translate-x-full');
+                checkoutPanel.classList.add('hidden');
+                this.resetCheckoutForm();
+                
+                // Close cart drawer immediately (no animation delay needed)
+                const cartDrawer = document.getElementById('cart-drawer');
+                const cartPanel = document.getElementById('cart-panel');
+                cartPanel.classList.add('translate-x-full');
+                cartDrawer.classList.add('hidden');
+                
+                // Re-render webinars to update "Add to Cart" button states
+                this.renderWebinars();
+                
+                // Scroll to top of main page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            showErrorToast(message) {
+                const toast = document.getElementById('error-toast');
+                const messageSpan = document.getElementById('error-message');
+                
+                messageSpan.textContent = message;
+                toast.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 4000);
+            }
+
+            showSuccessToast(message) {
+                const toast = document.getElementById('success-toast');
+                const messageSpan = document.getElementById('success-message');
+                
+                messageSpan.textContent = message;
+                toast.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+
+            async refreshWebinars() {
+                const refreshBtn = document.getElementById('refresh-btn');
+                const refreshIcon = refreshBtn.querySelector('svg');
+                const refreshText = refreshBtn.querySelector('span');
+                
+                // Show loading state
+                refreshBtn.disabled = true;
+                refreshBtn.classList.add('opacity-75');
+                refreshIcon.classList.add('animate-spin');
+                refreshText.textContent = 'Refreshing...';
+                
+                try {
+                    // Clear current data
+                    this.webinars = [];
+                    this.filteredWebinars = [];
+                    
+                    // Reload webinars from Google Sheet
+                    const response = await fetch(this.csvUrl + '&t=' + Date.now()); // Add timestamp to prevent caching
+                    if (!response.ok) throw new Error('Failed to fetch CSV');
+                    
+                    const csvText = await response.text();
+                    this.rawCSVData = csvText; // Store for debugging
+                    this.webinars = this.parseCSV(csvText);
+                    
+                    this.populateFilters();
+                    this.applyFilters();
+                    
+                    this.showSuccessToast('Webinars refreshed successfully!');
+                    
+                } catch (error) {
+                    console.error('Error refreshing webinars:', error);
+                    this.showToast('Failed to refresh webinars. Please try again.');
+                } finally {
+                    // Reset button state
+                    refreshBtn.disabled = false;
+                    refreshBtn.classList.remove('opacity-75');
+                    refreshIcon.classList.remove('animate-spin');
+                    refreshText.textContent = 'Refresh';
+                }
+            }
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new WebinarApp();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97c3102263a16e8d',t:'MTc1NzM4MjkyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

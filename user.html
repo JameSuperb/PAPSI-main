@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAPSI Member Page</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: #f7f7f7;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .member-container {
+      max-width: 900px;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px 24px 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .member-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+    }
+    .member-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 220px;
+    }
+    .member-name {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #166938;
+      line-height: 1.1;
+    }
+    .status-badge {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 3px 14px;
+      border-radius: 12px;
+      background: #e6f4ea;
+      color: #166938;
+      margin-right: 8px;
+    }
+    .status-badge.expired { background: #ffeaea; color: #c0392b; }
+    .status-badge.pending { background: #fffbe6; color: #b59f00; }
+    .expire-date {
+      font-size: 1rem;
+      color: #888;
+      margin-top: 2px;
+    }
+    .profile-pic {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e6f4ea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #166938;
+      user-select: none;
+    }
+    .metrics-row {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .metric-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(22,105,56,0.04);
+      padding: 18px 28px;
+      min-width: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #166938;
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #166938;
+      margin-bottom: 2px;
+    }
+    .chart-section {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 18px 18px 8px 18px;
+      margin-bottom: 8px;
+    }
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #166938;
+      margin-bottom: 8px;
+    }
+    .tabs-container {
+      width: 100%;
+      margin-top: 12px;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e6e6e6;
+      gap: 2px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #888;
+      padding: 12px 32px 10px 32px;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      outline: none;
+      transition: color 0.2s, background 0.2s;
+    }
+    .tab-btn.active {
+      color: #166938;
+      background: #f8fafc;
+      border-bottom: 2px solid #166938;
+    }
+    .tab-content {
+      background: #f8fafc;
+      border-radius: 0 0 12px 12px;
+      padding: 24px 12px 12px 12px;
+      min-height: 120px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: flex-start;
+    }
+    .training-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(22,105,56,0.04);
+      padding: 18px 18px 12px 18px;
+      min-width: 220px;
+      max-width: 260px;
+      flex: 1 1 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #222;
+    }
+    .training-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #166938;
+      margin-bottom: 2px;
+    }
+    .training-date {
+      font-size: 0.98rem;
+      color: #888;
+    }
+    @media (max-width: 1000px) {
+      .member-container { max-width: 99vw; padding: 18px 2vw; }
+    }
+    @media (max-width: 700px) {
+      .member-header { flex-direction: column; align-items: stretch; gap: 18px; }
+      .metrics-row { flex-direction: column; gap: 10px; }
+      .tab-btn { padding: 10px 10px 8px 10px; font-size: 1rem; }
+      .tab-content { padding: 14px 2px 8px 2px; }
+      .training-card { min-width: 90vw; max-width: 99vw; }
+    }
+  </style>
+</head>
+<body>
+  <main class="member-container">
+    <section class="member-header">
+      <div class="member-info">
+        <span class="member-name" id="memberName">Juan Dela Cruz</span>
+        <span class="status-badge" id="memberStatus">Regular Member</span>
+        <span class="expire-date" id="expireDate">Expires: December 31, 2025</span>
+        <div class="metrics-row">
+          <div class="metric-card">
+            <span class="metric-value" id="totalTrainings">0</span>
+            Total Trainings Attended
+          </div>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;">
+        <div id="profilePic" class="profile-pic" aria-label="Profile Picture" tabindex="0">JD</div>
+      </div>
+    </section>
+    <section class="chart-section">
+      <div class="chart-title">Trainings Attended per Year</div>
+      <canvas id="trainingsChart" height="80"></canvas>
+    </section>
+    <section class="tabs-container">
+      <nav class="tabs" role="tablist">
+        <button class="tab-btn active" id="tab-attended" role="tab" aria-selected="true" aria-controls="panel-attended" tabindex="0">Training Attended</button>
+        <button class="tab-btn" id="tab-all" role="tab" aria-selected="false" aria-controls="panel-all" tabindex="-1">All PAPSI Training</button>
+      </nav>
+      <div id="panel-attended" class="tab-content" role="tabpanel" aria-labelledby="tab-attended"></div>
+      <div id="panel-all" class="tab-content" style="display:none;" role="tabpanel" aria-labelledby="tab-all"></div>
+    </section>
+  </main>
+  <script>
+    // Demo data (replace with real data as needed)
+    const member = {
+      name: 'Juan Dela Cruz',
+      status: 'Regular Member', // or 'Expired', 'Pending'
+      statusClass: '', // '', 'expired', 'pending'
+      expireDate: '2025-12-31',
+      profilePic: '', // URL or ''
+      trainingsAttended: [
+        { title: 'Physics for Teachers', date: '2023-03-15' },
+        { title: 'Science Seminar', date: '2024-01-20' },
+        { title: 'Math in Action', date: '2024-07-10' }
+      ],
+      allTrainings: [
+        { title: 'Physics for Teachers', date: '2023-03-15' },
+        { title: 'Science Seminar', date: '2024-01-20' },
+        { title: 'Math in Action', date: '2024-07-10' },
+        { title: 'Biology Bootcamp', date: '2022-09-05' },
+        { title: 'Chemistry Workshop', date: '2023-11-12' }
+      ]
+    };
+    // Set member info
+    document.getElementById('memberName').textContent = member.name;
+    document.getElementById('memberStatus').textContent = member.status;
+    if (member.status === 'Expired') document.getElementById('memberStatus').classList.add('expired');
+    if (member.status === 'Pending') document.getElementById('memberStatus').classList.add('pending');
+    document.getElementById('expireDate').textContent = 'Expires: ' + new Date(member.expireDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('totalTrainings').textContent = member.trainingsAttended.length;
+    // Profile pic or initials
+    const profilePicDiv = document.getElementById('profilePic');
+    if (member.profilePic) {
+      profilePicDiv.innerHTML = `<img src="${member.profilePic}" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+    } else {
+      // Initials
+      const initials = member.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+      profilePicDiv.textContent = initials;
+    }
+    // Chart.js for trainings per year
+    const yearCounts = {};
+    member.trainingsAttended.forEach(t => {
+      const y = new Date(t.date).getFullYear();
+      yearCounts[y] = (yearCounts[y]||0)+1;
+    });
+    const years = Object.keys(yearCounts).sort();
+    const counts = years.map(y => yearCounts[y]);
+    new Chart(document.getElementById('trainingsChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [{
+          label: 'Trainings',
+          data: counts,
+          borderColor: '#166938',
+          backgroundColor: 'rgba(22,105,56,0.08)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 5,
+          pointBackgroundColor: '#166938',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision:0 } } }
+      }
+    });
+    // Tab logic
+    const tabAttended = document.getElementById('tab-attended');
+    const tabAll = document.getElementById('tab-all');
+    const panelAttended = document.getElementById('panel-attended');
+    const panelAll = document.getElementById('panel-all');
+    tabAttended.addEventListener('click', () => {
+      tabAttended.classList.add('active');
+      tabAttended.setAttribute('aria-selected','true');
+      tabAttended.setAttribute('tabindex','0');
+      tabAll.classList.remove('active');
+      tabAll.setAttribute('aria-selected','false');
+      tabAll.setAttribute('tabindex','-1');
+      panelAttended.style.display = '';
+      panelAll.style.display = 'none';
+      tabAttended.focus();
+    });
+    tabAll.addEventListener('click', () => {
+      tabAll.classList.add('active');
+      tabAll.setAttribute('aria-selected','true');
+      tabAll.setAttribute('tabindex','0');
+      tabAttended.classList.remove('active');
+      tabAttended.setAttribute('aria-selected','false');
+      tabAttended.setAttribute('tabindex','-1');
+      panelAll.style.display = '';
+      panelAttended.style.display = 'none';
+      tabAll.focus();
+    });
+    // Keyboard accessibility for tabs
+    [tabAttended, tabAll].forEach(tab => {
+      tab.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (tab === tabAttended) tabAll.click();
+          else tabAttended.click();
+        }
+      });
+    });
+    // Render training cards
+    function renderTrainings(container, trainings) {
+      container.innerHTML = '';
+      trainings.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'training-card';
+        card.tabIndex = 0;
+        card.innerHTML = `<div class="training-title">${t.title}</div><div class="training-date">${new Date(t.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>`;
+        container.appendChild(card);
+      });
+    }
+    renderTrainings(panelAttended, member.trainingsAttended);
+    renderTrainings(panelAll, member.allTrainings);
+  </script>
+</body>
+</html>

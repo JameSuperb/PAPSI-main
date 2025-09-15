@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Member - PAPSI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: #f7f7f7;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .portal-container {
+            width: 100%;
+            max-width: 540px;
+            margin: 48px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 36px 32px 28px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .papsi-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 16px;
+        }
+        .main-label {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #166938;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-label {
+            font-size: 1rem;
+            color: #222;
+            margin-bottom: 4px;
+            margin-top: 8px;
+            align-self: flex-start;
+        }
+        .input-box {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1.5px solid #166938;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 0;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .input-box:focus {
+            border-color: #166938;
+        }
+        .subtle {
+            font-size: 0.92rem;
+            color: #888;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+        .verify-btn {
+            width: 100%;
+            background: #166938;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+        .verify-btn:hover {
+            background: #145c31;
+        }
+        .privacy-label {
+            font-size: 0.92rem;
+            color: #888;
+            margin-top: 8px;
+            text-align: center;
+        }
+        @media (max-width: 700px) {
+            .portal-container {
+                max-width: 98vw;
+                padding: 18px 4vw 18px 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-toast" style="display:none;position:fixed;top:24px;right:24px;z-index:9999;background:#fff;border:1.5px solid #166938;padding:18px 22px 14px 22px;border-radius:10px;box-shadow:0 2px 12px rgba(22,105,56,0.08);color:#222;min-width:260px;max-width:90vw;word-break:break-all;font-size:0.98rem;line-height:1.4;">
+        <b>Debug Reply:</b><br>
+        <span id="debug-toast-msg"></span>
+    </div>
+    <div class="portal-container">
+        <img src="files/Logo/papsilogo1.png" alt="PAPSI Logo" class="papsi-logo">
+        <div class="main-label">New Member Registration</div>
+        <div style="font-size:0.98rem;color:#888;text-align:center;margin-bottom:18px;max-width:480px;">
+            <b>Note:</b> If you are already a PAPSI member, please contact us to verify your email and information. Otherwise, kindly complete the form to apply for membership.<br>
+            <button id="contact-btn" type="button" style="margin-top:8px;font-size:0.97rem;padding:4px 14px;background:#e6f4ea;color:#166938;border:1px solid #b6e2c6;border-radius:5px;cursor:pointer;">Contact us</button>
+        </div>
+        <form id="new-member-form" autocomplete="off" style="width:100%">
+            <label class="form-label">Email</label>
+            <input type="email" class="input-box" id="email" name="email" readonly>
+            <label class="form-label">Password</label>
+            <input type="password" class="input-box" id="password" name="password" required>
+            <div id="password-length-feedback" class="subtle" style="min-height:18px;"></div>
+            <label class="form-label">Confirm Password</label>
+            <input type="password" class="input-box" id="confirm-password" name="confirm-password" required>
+            <div id="password-feedback" class="subtle" style="min-height:18px;"></div>
+            <label class="form-label">Title</label>
+            <select class="input-box" id="title" name="title" required>
+                <option value="">Select</option>
+                <option>Mr.</option>
+                <option>Ms.</option>
+                <option>Mrs.</option>
+                <option>Dr.</option>
+                <option>Mx.</option>
+            </select>
+            <label class="form-label">First Name</label>
+            <input type="text" class="input-box" id="firstName" name="firstName" required>
+            <label class="form-label">Middle Initial</label>
+            <input type="text" class="input-box" id="middleInitial" name="middleInitial">
+            <div class="subtle">Leave blank if not applicable</div>
+            <label class="form-label">Last Name</label>
+            <input type="text" class="input-box" id="lastName" name="lastName" required>
+            <label class="form-label">Suffix</label>
+            <input type="text" class="input-box" id="suffix" name="suffix">
+            <div class="subtle">Leave blank if not applicable</div>
+            <label class="form-label">Specialization</label>
+            <select class="input-box" id="specialization-select" name="specialization-select" required>
+                <option value="">Select specialization</option>
+                <option>Physics</option>
+                <option>Biology</option>
+                <option>Chemistry</option>
+                <option>Natural Science</option>
+                <option>Physical Science</option>
+                <option>General Science</option>
+                <option>Earth Science</option>
+                <option>Mathematics</option>
+                <option value="others">Others: specify</option>
+            </select>
+            <div id="specialization-other-container" style="display:none;">
+                <input type="text" class="input-box" id="specialization-other" name="specialization-other" placeholder="Please specify specialization">
+            </div>
+            <label class="form-label">Mobile Number</label>
+            <input type="text" class="input-box" id="mobile" name="mobile" required>
+            <label class="form-label">Name of School</label>
+            <input type="text" class="input-box" id="schoolName" name="schoolName" required>
+            <label class="form-label">Type</label>
+            <select class="input-box" id="type" name="type" required>
+                <option value="">Select</option>
+                <option>Private</option>
+                <option>Public</option>
+            </select>
+            <label class="form-label">Address of School</label>
+            <input type="text" class="input-box" id="schoolAddress" name="schoolAddress" required>
+            <button type="submit" class="verify-btn">Be a PAPSI Member</button>
+        </form>
+        <div class="privacy-label">privacy policy</div>
+    </div>
+    <script>
+    // Set email from query param
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('email').value = params.get('email') || '';
+    // Specialization select logic
+    const specializationSelect = document.getElementById('specialization-select');
+    const specializationOtherContainer = document.getElementById('specialization-other-container');
+    const specializationOtherInput = document.getElementById('specialization-other');
+    specializationSelect.addEventListener('change', function() {
+        if (specializationSelect.value === 'others') {
+            specializationOtherContainer.style.display = '';
+            specializationOtherInput.required = true;
+        } else {
+            specializationOtherContainer.style.display = 'none';
+            specializationOtherInput.required = false;
+            specializationOtherInput.value = '';
+        }
+    });
+
+    document.getElementById('new-member-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        // Validation
+        const requiredFields = [
+            'email', 'password', 'confirm-password', 'title', 'firstName', 'lastName',
+            'mobile', 'schoolName', 'type', 'schoolAddress'
+        ];
+        let valid = true;
+        // Remove previous error styles
+        requiredFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.borderColor = '#166938';
+            }
+        });
+        // Check required fields
+        requiredFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !el.value.trim()) {
+                el.style.borderColor = '#e53e3e';
+                valid = false;
+            }
+        });
+        // Specialization logic
+        const specializationSelect = document.getElementById('specialization-select');
+        let specialization = specializationSelect.value;
+        if (specialization === 'others') {
+            const other = document.getElementById('specialization-other').value.trim();
+            if (!other) {
+                document.getElementById('specialization-other').style.borderColor = '#e53e3e';
+                valid = false;
+            } else {
+                specialization = other;
+            }
+        }
+        // Password match
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        if (password !== confirmPassword) {
+            document.getElementById('confirm-password').style.borderColor = '#e53e3e';
+            valid = false;
+        }
+        // Password length
+        if (password.length < 8) {
+            document.getElementById('password').style.borderColor = '#e53e3e';
+            valid = false;
+        }
+        if (!valid) {
+            showDebugToast('Please fill in all required fields correctly.');
+            return;
+        }
+        // Construct URL
+        const baseURL = 'https://script.google.com/macros/s/AKfycbynKzgZqw_HTGSmbc4jtswUoM1XqK0yQgXKeh46ls7tic8v3YNAkB5TXH7H0ix9YOk/exec';
+        const params = new URLSearchParams({
+            ID: '1EbNzQXqPWgdII7DEoLQ7CsZJewdpPMmx8xoyXghCF5o',
+            SH: 'Sheet1',
+            func: 'create',
+            email: document.getElementById('email').value.trim(),
+            password: password,
+            title: document.getElementById('title').value,
+            firstname: document.getElementById('firstName').value.trim(),
+            middleinitial: document.getElementById('middleInitial').value.trim(),
+            lastname: document.getElementById('lastName').value.trim(),
+            suffix: document.getElementById('suffix').value.trim(),
+            specialization: specialization,
+            mobile: document.getElementById('mobile').value.trim(),
+            school: document.getElementById('schoolName').value.trim(),
+            type: document.getElementById('type').value,
+            address: document.getElementById('schoolAddress').value.trim()
+        });
+        const url = `${baseURL}?${params.toString()}`;
+        showDebugToast('Submitting...<br>' + url);
+        try {
+            const response = await fetch(url);
+            const text = await response.text();
+            showDebugToast(url + '<br><b>Raw Response:</b><br>' + text);
+        } catch (err) {
+            showDebugToast(url + '<br><b>Raw Response:</b><br>Network error.');
+        }
+    });
+
+    function showDebugToast(msg) {
+        const toast = document.getElementById('debug-toast');
+        const toastMsg = document.getElementById('debug-toast-msg');
+        toastMsg.innerHTML = msg;
+        toast.style.display = '';
+        setTimeout(() => { toast.style.display = 'none'; }, 9000);
+    }
+    // Live feedback for confirm password
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm-password');
+    const passwordFeedback = document.getElementById('password-feedback');
+    function checkPasswordLength() {
+        const feedback = document.getElementById('password-length-feedback');
+        if (!passwordInput.value) {
+            feedback.textContent = '';
+        } else if (passwordInput.value.length >= 8) {
+            feedback.textContent = 'Password is valid.';
+            feedback.style.color = '#166938';
+        } else {
+            feedback.textContent = 'Password must be at least 8 characters.';
+            feedback.style.color = '#b45309';
+        }
+    }
+    function checkPasswordMatch() {
+        if (!confirmPasswordInput.value) {
+            passwordFeedback.textContent = '';
+        } else if (passwordInput.value === confirmPasswordInput.value) {
+            passwordFeedback.textContent = 'Passwords match.';
+            passwordFeedback.style.color = '#166938';
+        } else {
+            passwordFeedback.textContent = 'Passwords do not match.';
+            passwordFeedback.style.color = '#b45309';
+        }
+    }
+    passwordInput.addEventListener('input', function() {
+        checkPasswordLength();
+        checkPasswordMatch();
+    });
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+    // Initial feedback clear
+    checkPasswordLength();
+    checkPasswordMatch();
+    // Contact us button (for now, just alert or open mailto)
+    document.getElementById('contact-btn').addEventListener('click', function() {
+        window.open('mailto:papsi.seminar@gmail.com?subject=Membership%20Verification%20Concern', '_blank');
+    });
+    </script>
+</body>
+</html>

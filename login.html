@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - PAPSI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: #f7f7f7;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .portal-container {
+            width: 100%;
+            max-width: 540px;
+            margin: 48px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 36px 32px 28px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .papsi-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 16px;
+        }
+        .main-label {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #166938;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-label {
+            font-size: 1rem;
+            color: #222;
+            margin-bottom: 4px;
+            margin-top: 8px;
+            align-self: flex-start;
+        }
+        .input-box {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1.5px solid #166938;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 0;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .input-box:focus {
+            border-color: #166938;
+        }
+        .subtle {
+            font-size: 0.92rem;
+            color: #888;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+        .verify-btn {
+            width: 100%;
+            background: #166938;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+        .verify-btn:hover {
+            background: #145c31;
+        }
+        .privacy-label {
+            font-size: 0.92rem;
+            color: #888;
+            margin-top: 8px;
+            text-align: center;
+        }
+        @media (max-width: 700px) {
+            .portal-container {
+                max-width: 98vw;
+                padding: 18px 4vw 18px 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-toast" style="display:none;position:fixed;top:24px;right:24px;z-index:9999;background:#fff;border:1.5px solid #166938;padding:18px 22px 14px 22px;border-radius:10px;box-shadow:0 2px 12px rgba(22,105,56,0.08);color:#222;min-width:260px;max-width:90vw;word-break:break-all;font-size:0.98rem;line-height:1.4;">
+        <b>Debug Reply:</b><br>
+        <span id="debug-toast-msg"></span>
+    </div>
+    <div class="portal-container">
+        <img src="files/Logo/papsilogo1.png" alt="PAPSI Logo" class="papsi-logo">
+        <div class="main-label">Login</div>
+        <form id="login-form" autocomplete="off" style="width:100%">
+            <label class="form-label">Email</label>
+            <input type="email" class="input-box" id="email" name="email" readonly>
+            <label class="form-label">Password</label>
+            <input type="password" class="input-box" id="password" name="password" required>
+            <div id="password-length-feedback" class="subtle" style="min-height:18px;"></div>
+            <button type="submit" class="verify-btn">Login</button>
+        </form>
+        <div class="privacy-label">privacy policy</div>
+    </div>
+    <script>
+    // Set email from query param
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('email').value = params.get('email') || '';
+
+    // Password length feedback
+    const passwordInput = document.getElementById('password');
+    const passwordFeedback = document.getElementById('password-length-feedback');
+    function checkPasswordLength() {
+        if (!passwordInput.value) {
+            passwordFeedback.textContent = '';
+        } else if (passwordInput.value.length >= 8) {
+            passwordFeedback.textContent = 'Password is valid.';
+            passwordFeedback.style.color = '#166938';
+        } else {
+            passwordFeedback.textContent = 'Password must be at least 8 characters.';
+            passwordFeedback.style.color = '#b45309';
+        }
+    }
+    passwordInput.addEventListener('input', checkPasswordLength);
+    checkPasswordLength();
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        // Validation
+        let valid = true;
+        document.getElementById('password').style.borderColor = '#166938';
+        if (!password || password.length < 8) {
+            document.getElementById('password').style.borderColor = '#e53e3e';
+            valid = false;
+        }
+        if (!valid) {
+            showDebugToast('Please enter a valid password (at least 8 characters).');
+            return;
+        }
+        // Construct URL
+        const baseURL = 'https://script.google.com/macros/s/AKfycbynKzgZqw_HTGSmbc4jtswUoM1XqK0yQgXKeh46ls7tic8v3YNAkB5TXH7H0ix9YOk/exec';
+        const params = new URLSearchParams({
+            ID: '1EbNzQXqPWgdII7DEoLQ7CsZJewdpPMmx8xoyXghCF5o',
+            SH: 'Sheet1',
+            func: 'login',
+            email: email,
+            password: password
+        });
+        const url = `${baseURL}?${params.toString()}`;
+        showDebugToast('Submitting...<br>' + url);
+        try {
+            const response = await fetch(url);
+            const text = await response.text();
+            showDebugToast(url + '<br><b>Raw Response:</b><br>' + text);
+        } catch (err) {
+            showDebugToast(url + '<br><b>Raw Response:</b><br>Network error.');
+        }
+    });
+
+    function showDebugToast(msg) {
+        const toast = document.getElementById('debug-toast');
+        const toastMsg = document.getElementById('debug-toast-msg');
+        toastMsg.innerHTML = msg;
+        toast.style.display = '';
+        setTimeout(() => { toast.style.display = 'none'; }, 9000);
+    }
+    </script>
+</body>
+</html>

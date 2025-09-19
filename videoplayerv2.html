@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Video Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .video-container {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            min-height: 300px;
+            background: #000;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, #2c2c2c, #404040);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 18px;
+            border-radius: 12px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .play-btn:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .fullscreen-btn {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .progress-slider {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            position: relative;
+        }
+
+        .progress-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .progress-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 12px rgba(255, 107, 107, 0.6);
+        }
+
+        .progress-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 0 20px;
+        }
+
+        .volume-icon {
+            color: #4facfe;
+            font-size: 20px;
+            min-width: 24px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            max-width: 200px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(79, 172, 254, 0.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(79, 172, 254, 0.3);
+        }
+
+        .volume-value {
+            color: #4facfe;
+            font-weight: 600;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .time-display {
+            color: #888;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                gap: 10px;
+            }
+            
+            .control-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+            }
+            
+            .play-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <div class="video-wrapper" id="videoWrapper" style="background:#000;display:flex;align-items:center;justify-content:center;min-height:300px;flex-direction:column;">
+            <iframe id="gdriveVideo" src="https://drive.google.com/file/d/1TIWtk4WlcTFA7YjNYl6mBL6_Hzn4Z0Mu/preview" width="640" height="360" allow="autoplay" style="border:none;border-radius:12px;max-width:100%;transition:width 0.3s,height 0.3s;"></iframe>
+                        <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+                            <button id="normalBtn" style="padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(90deg,#667eea,#764ba2);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(102,126,234,0.18);">Normal Size</button>
+                            <button id="largeBtn" style="padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(90deg,#43cea2,#185a9d);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(67,206,162,0.18);">Large Size</button>
+                            <button id="fullscreenBtn" style="padding:10px 18px;border-radius:8px;border:none;background:linear-gradient(90deg,#ff512f,#dd2476);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(255,81,47,0.18);">Full Screen</button>
+                        </div>
+        </div>
+
+                <!-- Controls removed for Google Drive embed -->
+                        <script>
+                                const gdriveVideo = document.getElementById('gdriveVideo');
+                                const normalBtn = document.getElementById('normalBtn');
+                                const largeBtn = document.getElementById('largeBtn');
+                                const gdriveFullscreenBtn = document.getElementById('fullscreenBtn');
+
+                                normalBtn.addEventListener('click', function() {
+                                    gdriveVideo.width = 640;
+                                    gdriveVideo.height = 360;
+                                });
+                                        largeBtn.addEventListener('click', function() {
+                                            gdriveVideo.width = 1280;
+                                            gdriveVideo.height = 720;
+                                        });
+                                gdriveFullscreenBtn.addEventListener('click', function() {
+                                    const wrapper = document.getElementById('videoWrapper');
+                                    if (wrapper.requestFullscreen) {
+                                        wrapper.requestFullscreen();
+                                    } else if (wrapper.webkitRequestFullscreen) {
+                                        wrapper.webkitRequestFullscreen();
+                                    } else if (wrapper.mozRequestFullScreen) {
+                                        wrapper.mozRequestFullScreen();
+                                    } else if (wrapper.msRequestFullscreen) {
+                                        wrapper.msRequestFullscreen();
+                                    }
+                                });
+                        </script>
+    </div>
+
+    <script>
+        // Get all control elements
+        const playBtn = document.getElementById('playBtn');
+        const skipBackBtn = document.getElementById('skipBackBtn');
+        const skipForwardBtn = document.getElementById('skipForwardBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const progressSlider = document.getElementById('progressSlider');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const videoContainer = document.querySelector('.video-container');
+        const video = document.getElementById('videoPlayer');
+
+        // Video player state
+        let isPlaying = false;
+        let volume = 50;
+        let isProgressSeeking = false;
+
+        // Set initial volume
+        video.volume = volume / 100;
+
+        // Play/Pause functionality
+        playBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+
+        // Update play button when video state changes
+        video.addEventListener('play', () => {
+            isPlaying = true;
+            playBtn.innerHTML = '⏸️';
+            playBtn.title = 'Pause';
+        });
+
+        video.addEventListener('pause', () => {
+            isPlaying = false;
+            playBtn.innerHTML = '▶️';
+            playBtn.title = 'Play';
+        });
+
+        // Skip back 10 seconds
+        skipBackBtn.addEventListener('click', () => {
+            video.currentTime = Math.max(0, video.currentTime - 10);
+        });
+
+        // Skip forward 10 seconds
+        skipForwardBtn.addEventListener('click', () => {
+            video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+        });
+
+        // Restart video
+        restartBtn.addEventListener('click', () => {
+            video.currentTime = 0;
+            if (video.paused) {
+                video.play();
+            }
+        });
+
+        // Fullscreen toggle
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.mozRequestFullScreen) {
+                    video.mozRequestFullScreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        });
+
+        // Progress slider control
+        progressSlider.addEventListener('input', (e) => {
+            if (video.duration) {
+                const seekTime = (e.target.value / 100) * video.duration;
+                video.currentTime = seekTime;
+            }
+        });
+
+        progressSlider.addEventListener('mousedown', () => {
+            isProgressSeeking = true;
+        });
+
+        progressSlider.addEventListener('mouseup', () => {
+            isProgressSeeking = false;
+        });
+
+        // Volume control
+        volumeSlider.addEventListener('input', (e) => {
+            volume = e.target.value;
+            video.volume = volume / 100;
+            volumeValue.textContent = volume + '%';
+            
+            // Update volume icon based on level
+            const volumeIcon = document.querySelector('.volume-icon');
+            if (volume == 0) {
+                volumeIcon.textContent = '🔇';
+            } else if (volume < 30) {
+                volumeIcon.textContent = '🔈';
+            } else if (volume < 70) {
+                volumeIcon.textContent = '🔉';
+            } else {
+                volumeIcon.textContent = '🔊';
+            }
+        });
+
+        // Update time display and progress slider
+        function updateTimeDisplay() {
+            const formatTime = (seconds) => {
+                if (isNaN(seconds)) return '00:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+            
+            const current = video.currentTime || 0;
+            const duration = video.duration || 0;
+            timeDisplay.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+            
+            // Update progress slider only if user is not currently seeking
+            if (!isProgressSeeking && duration > 0) {
+                const progress = (current / duration) * 100;
+                progressSlider.value = progress;
+            }
+        }
+
+        // Update time display as video plays
+        video.addEventListener('timeupdate', updateTimeDisplay);
+        video.addEventListener('loadedmetadata', updateTimeDisplay);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Only handle shortcuts when not typing in an input
+            if (e.target.tagName === 'INPUT') return;
+            
+            switch(e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    playBtn.click();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    skipBackBtn.click();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    skipForwardBtn.click();
+                    break;
+                case 'KeyR':
+                    e.preventDefault();
+                    restartBtn.click();
+                    break;
+                case 'KeyF':
+                    e.preventDefault();
+                    fullscreenBtn.click();
+                    break;
+            }
+        });
+
+        // Initialize display
+        updateTimeDisplay();
+
+        // Handle video loading errors
+        function handleVideoError() {
+            console.log('Video loading error');
+            timeDisplay.textContent = 'Video loading failed - try refreshing or check connection';
+            
+            // Show fallback message
+            const videoWrapper = document.querySelector('.video-wrapper');
+            videoWrapper.innerHTML = `
+                <div class="video-placeholder">
+                    ⚠️ Video could not load<br>
+                    <small style="font-size: 14px; margin-top: 10px; display: block;">
+                        The Dropbox link may need to be made public or the file may be unavailable
+                    </small>
+                </div>
+            `;
+        }
+
+        video.addEventListener('error', handleVideoError);
+        
+        // Also handle source errors
+        video.addEventListener('loadstart', () => {
+            timeDisplay.textContent = 'Loading video...';
+        });
+        
+        video.addEventListener('canplay', () => {
+            timeDisplay.textContent = 'Video ready to play';
+            updateTimeDisplay();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9814e69a2309a9a8',t:'MTc1ODI0MTA1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

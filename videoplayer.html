@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player with Navigation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .video-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+
+        .video-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placeholder-content {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .play-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .placeholder-content h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .placeholder-content p {
+            font-size: 16px;
+            color: #cccccc;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .limitation-note {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            color: #ffc107;
+            font-size: 14px;
+        }
+
+        .open-video-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .open-video-btn:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(66, 133, 244, 0.3);
+        }
+
+        .controls-section {
+            padding: 30px;
+            background: white;
+        }
+
+        .video-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .navigation-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+
+        .nav-button.secondary {
+            background: linear-gradient(135deg, #4fd1c7 0%, #06b6d4 100%);
+        }
+
+        .nav-button.secondary:hover {
+            box-shadow: 0 10px 20px rgba(79, 209, 199, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            max-width: 200px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .demo-note {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .demo-note h4 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .demo-note p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .navigation-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-button {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .controls-section {
+                padding: 20px;
+            }
+
+            .video-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <div class="video-wrapper">
+            <video 
+                class="video-frame"
+                controls
+                preload="metadata">
+                <source src="https://www.dropbox.com/scl/fi/c89slzd5dv0wl4m4j40kf/4-Tutorial-ImageJ.mp4?rlkey=lrivjafvia2dft869gzxpo7v1&st=uitc4g96&dl=1" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="controls-section">
+            <h2 class="video-title">ImageJ Tutorial</h2>
+            
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">5:00</span>
+            </div>
+            
+            <div class="progress-bar" onclick="seekVideo(event)">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="navigation-controls">
+                <button class="nav-button" onclick="skipBackward()">
+                    ⏪ Skip Back
+                </button>
+                
+                <button class="nav-button" onclick="togglePlayPause()" id="playPauseBtn">
+                    ▶️ Play
+                </button>
+                
+                <button class="nav-button" onclick="skipForward()">
+                    Skip Forward ⏩
+                </button>
+                
+                <button class="nav-button secondary" onclick="restartVideo()">
+                    🔄 Restart
+                </button>
+                
+                <button class="nav-button secondary" onclick="toggleFullscreen()">
+                    🔳 Fullscreen
+                </button>
+            </div>
+            
+            <div class="volume-control">
+                <span>🔊</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <span id="volumeDisplay">70%</span>
+            </div>
+            
+            <div class="demo-note">
+                <h4>Additional Controls</h4>
+                <p>The video above is fully functional! These additional controls below demonstrate extra features that could be added to enhance the viewing experience.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.querySelector('video');
+        let progressInterval;
+
+        function togglePlayPause() {
+            const btn = document.getElementById('playPauseBtn');
+            
+            if (video.paused) {
+                video.play();
+                btn.innerHTML = '⏸️ Pause';
+            } else {
+                video.pause();
+                btn.innerHTML = '▶️ Play';
+            }
+        }
+
+        function skipBackward() {
+            video.currentTime = Math.max(0, video.currentTime - 10);
+        }
+
+        function skipForward() {
+            video.currentTime = Math.min(video.duration, video.currentTime + 10);
+        }
+
+        function restartVideo() {
+            video.currentTime = 0;
+            video.pause();
+            document.getElementById('playPauseBtn').innerHTML = '▶️ Play';
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                video.requestFullscreen().catch(err => {
+                    console.log('Fullscreen not supported');
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function seekVideo(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const width = rect.width;
+            const percentage = clickX / width;
+            video.currentTime = percentage * video.duration;
+        }
+
+        function updateTimeDisplay() {
+            const current = Math.floor(video.currentTime);
+            const duration = Math.floor(video.duration) || 0;
+            
+            document.getElementById('currentTime').textContent = formatTime(current);
+            document.getElementById('duration').textContent = formatTime(duration);
+            
+            // Update progress bar
+            if (video.duration) {
+                const progress = (video.currentTime / video.duration) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Video event listeners
+        video.addEventListener('loadedmetadata', updateTimeDisplay);
+        video.addEventListener('timeupdate', updateTimeDisplay);
+        video.addEventListener('play', () => {
+            document.getElementById('playPauseBtn').innerHTML = '⏸️ Pause';
+        });
+        video.addEventListener('pause', () => {
+            document.getElementById('playPauseBtn').innerHTML = '▶️ Play';
+        });
+
+        // Volume control
+        document.getElementById('volumeSlider').addEventListener('input', function() {
+            const volume = this.value / 100;
+            video.volume = volume;
+            document.getElementById('volumeDisplay').textContent = this.value + '%';
+        });
+
+        // Open video functions
+        function openGoogleDriveVideo() {
+            window.open('https://drive.google.com/file/d/1R9y1sJUIO1Rgh-lVd381SgTu1HVoxaac/view', '_blank');
+        }
+
+        function openDirectVideo() {
+            window.open('https://drive.google.com/uc?export=download&id=1R9y1sJUIO1Rgh-lVd381SgTu1HVoxaac', '_blank');
+        }
+
+        // Initialize display
+        updateTimeDisplay();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96f7b7b08512a9a8',t:'MTc1NTI1MDY5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

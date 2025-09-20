@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PAPSI</title>
+    <title>PAPSI Membership Portal</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         body {
@@ -13,17 +13,14 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
         .portal-container {
-            width: 100%;
-            max-width: 540px;
-            margin: 48px auto;
+            max-width: 400px;
+            margin: 48px auto 0 auto;
             background: #fff;
             border-radius: 16px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            padding: 36px 32px 28px 32px;
+            padding: 32px 24px 24px 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,44 +31,47 @@
             margin-bottom: 16px;
         }
         .main-label {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: #166938;
             margin-bottom: 32px;
             text-align: center;
         }
-        form {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
         .form-label {
             font-size: 1rem;
             color: #222;
-            margin-bottom: 4px;
-            margin-top: 8px;
+            margin-bottom: 6px;
             align-self: flex-start;
         }
         .input-box {
             width: 100%;
-            box-sizing: border-box;
             padding: 10px 12px;
             border: 1.5px solid #166938;
             border-radius: 6px;
             font-size: 1rem;
-            margin-bottom: 0;
+            margin-bottom: 18px;
             outline: none;
             transition: border 0.2s;
         }
         .input-box:focus {
             border-color: #166938;
         }
-        .subtle {
-            font-size: 0.92rem;
+        .debug-label {
+            font-size: 0.98rem;
+            color: #444;
+            margin-bottom: 6px;
+            align-self: flex-start;
+        }
+        .debug-box {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #f2f2f2;
             color: #888;
-            margin-top: 2px;
-            margin-bottom: 8px;
+            margin-bottom: 24px;
+            resize: none;
         }
         .verify-btn {
             width: 100%;
@@ -84,8 +84,7 @@
             padding: 12px 0;
             cursor: pointer;
             transition: background 0.2s;
-            margin-top: 18px;
-            margin-bottom: 8px;
+            margin-bottom: 18px;
         }
         .verify-btn:hover {
             background: #145c31;
@@ -96,96 +95,90 @@
             margin-top: 8px;
             text-align: center;
         }
-        @media (max-width: 700px) {
-            .portal-container {
-                max-width: 98vw;
-                padding: 18px 4vw 18px 4vw;
-            }
-        }
     </style>
 </head>
 <body>
-    <div id="debug-toast" style="display:none;position:fixed;top:24px;right:24px;z-index:9999;background:#fff;border:1.5px solid #166938;padding:18px 22px 14px 22px;border-radius:10px;box-shadow:0 2px 12px rgba(22,105,56,0.08);color:#222;min-width:260px;max-width:90vw;word-break:break-all;font-size:0.98rem;line-height:1.4;">
-        <b>Debug Reply:</b><br>
-        <span id="debug-toast-msg"></span>
-    </div>
     <div class="portal-container">
         <img src="files/Logo/papsilogo1.png" alt="PAPSI Logo" class="papsi-logo">
-        <div class="main-label">Login</div>
-        <form id="login-form" autocomplete="off" style="width:100%">
-            <label class="form-label">Email</label>
-            <input type="email" class="input-box" id="email" name="email" readonly>
-            <label class="form-label">Password</label>
-            <input type="password" class="input-box" id="password" name="password" required>
-            <div id="password-length-feedback" class="subtle" style="min-height:18px;"></div>
-            <button type="submit" class="verify-btn">Login</button>
+        <div class="main-label">PAPSI Membership Verification</div>
+        <form id="verify-form" autocomplete="off" style="width:100%">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" name="email" class="input-box" placeholder="Enter your email address" required>
+            <div id="email-feedback" style="width:100%;font-size:0.97rem;color:#b45309;margin-bottom:10px;min-height:18px;"></div>
+
+            <button type="submit" class="verify-btn">Verify</button>
         </form>
         <div class="privacy-label">privacy policy</div>
     </div>
     <script>
-    // Set email from query param
-    const params = new URLSearchParams(window.location.search);
-    document.getElementById('email').value = params.get('email') || '';
-
-    // Password length feedback
-    const passwordInput = document.getElementById('password');
-    const passwordFeedback = document.getElementById('password-length-feedback');
-    function checkPasswordLength() {
-        if (!passwordInput.value) {
-            passwordFeedback.textContent = '';
-        } else if (passwordInput.value.length >= 8) {
-            passwordFeedback.textContent = 'Password is valid.';
-            passwordFeedback.style.color = '#166938';
+    // Live feedback for email typing
+    const emailInput = document.getElementById('email');
+    const emailFeedback = document.getElementById('email-feedback');
+    emailInput.addEventListener('input', function() {
+        const value = emailInput.value;
+        if (!value) {
+            emailFeedback.textContent = '';
+        } else if (!value.includes('@')) {
+            emailFeedback.textContent = 'Include the symbol "@" in your email address.';
         } else {
-            passwordFeedback.textContent = 'Password must be at least 8 characters.';
-            passwordFeedback.style.color = '#b45309';
+            const parts = value.split('@');
+            if (parts.length === 2 && parts[1].length === 0) {
+                emailFeedback.textContent = 'Add a domain after "@" (e.g., gmail.com)';
+            } else if (parts.length === 2 && !/\./.test(parts[1])) {
+                emailFeedback.textContent = 'Add a domain extension (e.g., .com, .org)';
+            } else {
+                emailFeedback.textContent = '';
+            }
         }
-    }
-    passwordInput.addEventListener('input', checkPasswordLength);
-    checkPasswordLength();
+    });
 
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
+    // Membership verification with Google Apps Script (no debug reply)
+    document.getElementById('verify-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        // Validation
-        let valid = true;
-        document.getElementById('password').style.borderColor = '#166938';
-        if (!password || password.length < 8) {
-            document.getElementById('password').style.borderColor = '#e53e3e';
-            valid = false;
-        }
-        if (!valid) {
-            showDebugToast('Please enter a valid password (at least 8 characters).');
+        const verifyBtn = document.querySelector('.verify-btn');
+        if (!email) {
+            alert('Please enter an email address.');
             return;
         }
-        // Construct URL
+        verifyBtn.disabled = true;
+        const originalText = verifyBtn.textContent;
+        verifyBtn.textContent = 'Verifying...';
         const baseURL = 'https://script.google.com/macros/s/AKfycbynKzgZqw_HTGSmbc4jtswUoM1XqK0yQgXKeh46ls7tic8v3YNAkB5TXH7H0ix9YOk/exec';
         const params = new URLSearchParams({
             ID: '1EbNzQXqPWgdII7DEoLQ7CsZJewdpPMmx8xoyXghCF5o',
             SH: 'Sheet1',
-            func: 'login',
-            email: email,
-            password: password
+            func: 'verify',
+            email: email
         });
         const url = `${baseURL}?${params.toString()}`;
-        showDebugToast('Submitting...<br>' + url);
         try {
             const response = await fetch(url);
-            const text = await response.text();
-            showDebugToast(url + '<br><b>Raw Response:</b><br>' + text);
+            if (!response.ok) {
+                alert('Error: Unable to reach verification service.');
+                verifyBtn.textContent = originalText;
+                verifyBtn.disabled = false;
+                return;
+            }
+            const text = (await response.text()).trim();
+            // Routing based on reply
+            if (text === "doesn't exist") {
+                window.location.href = `new-member.html?email=${encodeURIComponent(email)}`;
+            } else if (text === 'with password') {
+                window.location.href = `login.html?email=${encodeURIComponent(email)}`;
+            } else if (text === 'empty password') {
+                window.location.href = `register.html?email=${encodeURIComponent(email)}`;
+            } else {
+                alert(text);
+                verifyBtn.textContent = originalText;
+                verifyBtn.disabled = false;
+            }
         } catch (err) {
-            showDebugToast(url + '<br><b>Raw Response:</b><br>Network error.');
+            alert('Network error. Please try again.');
+            verifyBtn.textContent = originalText;
+            verifyBtn.disabled = false;
         }
     });
-
-    function showDebugToast(msg) {
-        const toast = document.getElementById('debug-toast');
-        const toastMsg = document.getElementById('debug-toast-msg');
-        toastMsg.innerHTML = msg;
-        toast.style.display = '';
-        setTimeout(() => { toast.style.display = 'none'; }, 9000);
-    }
     </script>
 </body>
 </html>

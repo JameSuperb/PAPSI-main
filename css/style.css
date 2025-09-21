@@ -1,3 +1,7 @@
+/* Utility class to hide elements */
+.hidden {
+  display: none !important;
+}
 /**
  * WEBSITE: https://themefisher.com
  * TWITTER: https://twitter.com/themefisher

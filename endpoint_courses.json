@@ -1,0 +1,25 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : [{"title":"Molecules of Life: Mastering Carbs Proteins Lipids Nucleic Acids and 
+                    Enzymes","date":"2025-08-29T16:00:00.000Z","hours":2,"speaker":"Dr. Chona Camille 
+                    Abeledo","poster":142,"category":"http...
+RawContent        : HTTP/1.1 200 OK
+                    X-Content-Type-Options: nosniff
+                    Access-Control-Allow-Origin: *
+                    Pragma: no-cache
+                    X-Frame-Options: SAMEORIGIN
+                    Content-Security-Policy: frame-ancestors 'self'
+                    X-XSS-Protection: 1; m...
+Forms             : {}
+Headers           : {[X-Content-Type-Options, nosniff], [Access-Control-Allow-Origin, *], [Pragma, no-cache], 
+                    [X-Frame-Options, SAMEORIGIN]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 6708
+
+
+

@@ -6,6 +6,69 @@
     <title>PAPSI Membership Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+    // --- DYNAMIC ANNOUNCEMENTS ---
+    async function loadAnnouncements() {
+        const url = "https://script.google.com/macros/s/AKfycbzHpSnUaiBzU-GC0YhkZVzXHfQkEN6i0N6a_Kp1XfUIr_GsgBTBpsj887zVeNr38ArNVQ/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=announcement&func=announcement";
+        const container = document.getElementById('announcementsContainer');
+        container.innerHTML = '<div class="text-center text-gray-500 py-8">Loading announcements...</div>';
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-8">No announcements found.</div>';
+                return;
+            }
+            container.innerHTML = data.map(item => {
+                const postedAgo = timeAgo(item.dateposted);
+                return `
+                <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch">
+                    <div class="w-full mb-4">
+                        <img src="${item.photo}" alt="${item.title}" class="w-full h-auto max-h-[400px] object-contain rounded-md border border-gray-200" style="display:block;margin:0 auto;">
+                    </div>
+                    <div class="flex-1 flex flex-col">
+                        <h4 class="text-lg font-bold text-papsi-dark mb-1">${item.title}</h4>
+                        <p class="text-gray-700 mb-2">${item.subtitle}</p>
+                        <div class="flex items-center text-xs text-gray-500 mb-2">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            Posted ${postedAgo}
+                        </div>
+                        <a href="${item.link}" target="_blank" rel="noopener" class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start">See more</a>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        } catch (e) {
+            container.innerHTML = '<div class="text-center text-red-500 py-8">Failed to load announcements.</div>';
+        }
+    }
+
+    // Helper: format posted-ago
+    function timeAgo(dateString) {
+        const now = new Date();
+        const posted = new Date(dateString);
+        const diffMs = now - posted;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays < 1) {
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            if (diffHours < 1) {
+                const diffMins = Math.floor(diffMs / (1000 * 60));
+                return diffMins <= 1 ? 'just now' : `${diffMins} minutes ago`;
+            }
+            return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
+        } else if (diffDays < 7) {
+            return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
+        } else if (diffDays < 30) {
+            const weeks = Math.floor(diffDays / 7);
+            return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+        } else if (diffDays < 365) {
+            const months = Math.floor(diffDays / 30);
+            return months === 1 ? '1 month ago' : `${months} months ago`;
+        } else {
+            const years = Math.floor(diffDays / 365);
+            return years === 1 ? '1 year ago' : `${years} years ago`;
+        }
+    }
+    // --- END DYNAMIC ANNOUNCEMENTS ---
         tailwind.config = {
             theme: {
                 extend: {
@@ -202,61 +265,8 @@
             <!-- Announcements -->
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <h3 class="text-xl font-bold text-papsi-dark mb-4">📢 PAPSI Announcements</h3>
-                <div class="space-y-6">
-                    <div class="border-l-4 border-papsi-green bg-green-50 rounded-r overflow-hidden">
-                        <div class="w-full">
-                            <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sep2025masteryinscience-header_orig.png" 
-                                 alt="September 2025 Mastery in Science" 
-                                 class="w-full h-auto"
-                                 onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        </div>
-                        <div class="pl-4 py-4">
-                            <h4 class="font-semibold text-papsi-dark text-lg">New Advanced Leadership Training Available</h4>
-                            <p class="text-gray-600 text-sm mt-2">Join our comprehensive leadership development program starting next month.</p>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="text-xs text-gray-500">Posted 2 days ago</span>
-                                <button class="bg-papsi-green text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition-colors">
-                                    See More
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border-l-4 border-papsi-gold bg-yellow-50 rounded-r overflow-hidden">
-                        <div class="w-full">
-                            <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/header-august-2025-mastery-in-science-poster_orig.png" 
-                                 alt="August 2025 Mastery in Science" 
-                                 class="w-full h-auto"
-                                 onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        </div>
-                        <div class="pl-4 py-4">
-                            <h4 class="font-semibold text-papsi-dark text-lg">Member Appreciation Event - December 15</h4>
-                            <p class="text-gray-600 text-sm mt-2">Celebrate achievements and network with fellow members at our annual event.</p>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="text-xs text-gray-500">Posted 1 week ago</span>
-                                <button class="bg-papsi-green text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition-colors">
-                                    See More
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border-l-4 border-papsi-red bg-red-50 rounded-r overflow-hidden">
-                        <div class="w-full">
-                            <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/header-no-code-simulation-poster_orig.png" 
-                                 alt="No Code Simulation Training" 
-                                 class="w-full h-auto"
-                                 onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        </div>
-                        <div class="pl-4 py-4">
-                            <h4 class="font-semibold text-papsi-dark text-lg">System Maintenance Notice</h4>
-                            <p class="text-gray-600 text-sm mt-2">Portal will be temporarily unavailable on Sunday, 2-4 AM for updates.</p>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="text-xs text-gray-500">Posted 3 days ago</span>
-                                <button class="bg-papsi-green text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition-colors">
-                                    See More
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div id="announcementsContainer" class="space-y-6">
+                    <!-- Announcements will be dynamically populated here -->
                 </div>
             </div>
         </div>
@@ -270,310 +280,137 @@
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-papsi-green">35</div>
-                            <div class="text-sm text-gray-600">Total Trainings</div>
+                            <div class="text-2xl font-bold text-papsi-green">6</div>
+                            <div class="text-sm text-gray-600">Total</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-xl font-semibold text-blue-600">15</div>
-                            <div class="text-sm text-gray-600">Webinars</div>
+                            <div class="text-xl font-semibold text-blue-600">2</div>
+                            <div class="text-sm text-gray-600">Physics</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-xl font-semibold text-orange-600">12</div>
-                            <div class="text-sm text-gray-600">Seminars</div>
+                            <div class="text-xl font-semibold text-orange-600">2</div>
+                            <div class="text-sm text-gray-600">Biology</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-xl font-semibold text-purple-600">8</div>
-                            <div class="text-sm text-gray-600">Conferences</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Subtle background bar graph -->
-                    <div class="absolute inset-0 -z-10 opacity-5">
-                        <div class="flex items-end justify-around h-full p-4">
-                            <div class="bg-papsi-green w-8 h-3/4"></div>
-                            <div class="bg-blue-600 w-8 h-1/2"></div>
-                            <div class="bg-orange-600 w-8 h-2/3"></div>
-                            <div class="bg-purple-600 w-8 h-1/3"></div>
+                            <div class="text-xl font-semibold text-purple-600">2</div>
+                            <div class="text-sm text-gray-600">Other</div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <h3 class="text-xl font-bold text-papsi-dark mb-6">Current Courses</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-32 bg-gradient-to-r from-papsi-green to-green-600"></div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Project Management Fundamentals</h3>
-                        <p class="text-gray-600 text-sm mb-3">Master the basics of effective project management</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
-                            <span class="text-xs text-gray-500">8 hours</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
-                            <div class="bg-green-500 h-2 rounded-full w-full"></div>
-                        </div>
+
+            <!-- Search and Filter Controls -->
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <!-- Search Bar -->
+                    <div class="flex-1 relative">
+                        <input type="text" id="learningSearchInput" placeholder="Search your courses, speakers, or topics..." 
+                               class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                        </svg>
+                        <button id="clearLearningSearch" class="absolute right-3 top-2.5 w-5 h-5 text-gray-400 hover:text-gray-600 hidden">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
                     </div>
+                    
+                    <!-- Category Filter -->
+                    <select id="learningCategoryFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <option value="all">All Categories</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="ICT">ICT</option>
+                    </select>
+                    
+                    <!-- Speaker Filter -->
+                    <select id="learningSpeakerFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <option value="all">All Speakers</option>
+                        <option value="Dr. Chona Camille Abeledo">Dr. Chona Camille Abeledo</option>
+                        <option value="Dr. James Salveo Olarve">Dr. James Salveo Olarve</option>
+                        <option value="Dr. David Penaloza Jr">Dr. David Penaloza Jr</option>
+                    </select>
+                    
+                    <!-- Date Sort -->
+                    <select id="learningDateSort" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
                 </div>
                 
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-32 bg-gradient-to-r from-papsi-gold to-yellow-600"></div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Digital Marketing Strategy</h3>
-                        <p class="text-gray-600 text-sm mb-3">Learn modern digital marketing techniques</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">In Progress</span>
-                            <span class="text-xs text-gray-500">12 hours</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
-                            <div class="bg-papsi-green h-2 rounded-full w-3/4"></div>
-                        </div>
+                <!-- Results Counter -->
+                <div class="mt-4 text-sm text-gray-600">
+                    <div id="learningResultsCounter" class="font-medium">
+                        Showing 6 of 6 courses
                     </div>
                 </div>
+            </div>
+            
 
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-32 bg-gradient-to-r from-papsi-red to-red-600"></div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Leadership Excellence</h3>
-                        <p class="text-gray-600 text-sm mb-3">Develop advanced leadership skills</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">Not Started</span>
-                            <span class="text-xs text-gray-500">16 hours</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
-                            <div class="bg-gray-300 h-2 rounded-full w-0"></div>
-                        </div>
-                    </div>
-                </div>
+            <div id="learningCoursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- My learning courses will be dynamically populated here -->
             </div>
         </div>
 
         <!-- Hub Page -->
         <div id="hub-page" class="page-content hidden">
             <h2 class="text-2xl font-bold text-papsi-dark mb-6">Center for Teacher Excellence</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/ms-aug30-2_orig.png" 
-                             alt="Molecules of Life Training" 
-                             class="w-full h-full object-cover training-image"
-                             onclick="openImageViewer(this.src, this.alt)"
-                             onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">Biology</span>
-                        </div>
-                        <div class="absolute top-2 right-2 flex space-x-1">
-                            <button onclick="showAbout('molecules-life')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <button onclick="playAudio('molecules-life')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Molecules of Life: Mastering Carbs Proteins Lipids Nucleic Acids and Enzymes</h3>
-                        <p class="text-gray-600 text-sm mb-3">Dr. Chona Camille Abeledo</p>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-papsi-gold font-semibold">₱300</span>
-                            <span class="text-xs text-gray-500">2 hours</span>
-                        </div>
-                        <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
-                            Register Now
+            
+            <!-- Search and Filter Controls -->
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <!-- Search Bar -->
+                    <div class="flex-1 relative">
+                        <input type="text" id="searchInput" placeholder="Search courses, speakers, or topics..." 
+                               class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                        </svg>
+                        <button id="clearSearch" class="absolute right-3 top-2.5 w-5 h-5 text-gray-400 hover:text-gray-600 hidden">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
                         </button>
                     </div>
+                    
+                    <!-- Category Filter -->
+                    <select id="categoryFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <option value="all">All Categories</option>
+                    </select>
+                    
+                    <!-- Speaker Filter -->
+                    <select id="speakerFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <option value="all">All Speakers</option>
+                    </select>
+                    
+                    <!-- Date Sort -->
+                    <select id="dateSort" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
                 </div>
-
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/ms-aug30-3_orig.png" 
-                             alt="Gamified Motion Training" 
-                             class="w-full h-full object-cover training-image"
-                             onclick="openImageViewer(this.src, this.alt)"
-                             onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">Physics</span>
-                        </div>
-                        <div class="absolute top-2 right-2 flex space-x-1">
-                            <button onclick="showAbout('gamified-motion')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <button onclick="playAudio('gamified-motion')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Gamified Motion: Graphical and Computational Analysis of Kinematics & Projectile</h3>
-                        <p class="text-gray-600 text-sm mb-3">Dr. James Salveo Olarve</p>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-papsi-gold font-semibold">₱300</span>
-                            <span class="text-xs text-gray-500">2 hours</span>
-                        </div>
-                        <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
-                            Register Now
-                        </button>
+                
+                <!-- Results Counter -->
+                <div class="mt-4 text-sm text-gray-600">
+                    <div id="resultsCounter" class="font-medium">
+                        Showing 6 of 6 courses
                     </div>
                 </div>
-
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/ms-aug30-4_orig.png" 
-                             alt="Quantum Clarity Training" 
-                             class="w-full h-full object-cover training-image"
-                             onclick="openImageViewer(this.src, this.alt)"
-                             onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">Chemistry</span>
-                        </div>
-                        <div class="absolute top-2 right-2 flex space-x-1">
-                            <button onclick="showAbout('quantum-clarity')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <button onclick="playAudio('quantum-clarity')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.20l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Quantum Clarity: Mastering Orbital Diagrams and the Rules that Govern Them</h3>
-                        <p class="text-gray-600 text-sm mb-3">Dr. David Penaloza Jr</p>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-papsi-gold font-semibold">₱300</span>
-                            <span class="text-xs text-gray-500">2 hours</span>
-                        </div>
-                        <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
-                            Register Now
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/no-code-simulation-poster_orig.png" 
-                             alt="No-Code Interactive Simulations Training" 
-                             class="w-full h-full object-cover training-image"
-                             onclick="openImageViewer(this.src, this.alt)"
-                             onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">ICT</span>
-                        </div>
-                        <div class="absolute top-2 right-2 flex space-x-1">
-                            <button onclick="showAbout('no-code-simulation')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <button onclick="playAudio('no-code-simulation')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.20l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Create No-Code Interactive Simulations for Your Classroom with Canva AI</h3>
-                        <p class="text-gray-600 text-sm mb-3">Dr. James Salveo Olarve</p>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-papsi-gold font-semibold">₱400</span>
-                            <span class="text-xs text-gray-500">2 hours</span>
-                        </div>
-                        <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
-                            Register Now
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/masteryinsciencejuly2025-1_orig.png" 
-                             alt="Twist and Turn Training" 
-                             class="w-full h-full object-cover training-image"
-                             onclick="openImageViewer(this.src, this.alt)"
-                             onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">Physics</span>
-                        </div>
-                        <div class="absolute top-2 right-2 flex space-x-1">
-                            <button onclick="showAbout('twist-turn')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <button onclick="playAudio('twist-turn')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.20l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Twist and Turn: Exploring the Laws Behind Rotational Systems</h3>
-                        <p class="text-gray-600 text-sm mb-3">Dr. James Salveo Olarve</p>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-papsi-gold font-semibold">₱300</span>
-                            <span class="text-xs text-gray-500">2 hours</span>
-                        </div>
-                        <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
-                            Register Now
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/masteryinsciencejuly2025-2_orig.png" 
-                             alt="Metabolic Mystery Training" 
-                             class="w-full h-full object-cover training-image"
-                             onclick="openImageViewer(this.src, this.alt)"
-                             onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
-                        <div class="absolute top-2 left-2">
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">Biology</span>
-                        </div>
-                        <div class="absolute top-2 right-2 flex space-x-1">
-                            <button onclick="showAbout('metabolic-mystery')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <button onclick="playAudio('metabolic-mystery')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
-                                <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.20l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-papsi-dark mb-2">Metabolic Mystery: Teaching Cell Metabolism with Clarity and Context</h3>
-                        <p class="text-gray-600 text-sm mb-3">Dr. Chona Camille Abeledo</p>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-papsi-gold font-semibold">₱300</span>
-                            <span class="text-xs text-gray-500">2 hours</span>
-                        </div>
-                        <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
-                            Register Now
-                        </button>
-                    </div>
-                </div>
+            </div>
+            
+            <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Training center courses will be dynamically populated here -->
+            </div>
+            <div id="coursesPagination" class="flex justify-center items-center mt-6 space-x-4"></div>
             </div>
         </div>
 
         <!-- Extras Page -->
         <div id="extras-page" class="page-content hidden">
             <h2 class="text-2xl font-bold text-papsi-dark mb-6">Extras</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="learningCoursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="bg-white rounded-lg shadow-sm p-6 card-hover">
                     <div class="flex items-center mb-4">
                         <div class="w-12 h-12 bg-green-400 rounded-lg flex items-center justify-center mr-4">
@@ -958,33 +795,7 @@
                     </button>
                 </div>
                 <div id="audioContent">
-                    <div class="audio-player">
-                        <div class="audio-controls">
-                            <button id="playPauseBtn" class="play-btn" onclick="toggleAudio()">
-                                <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-                                </svg>
-                                <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <div class="flex-1">
-                                <div class="flex justify-between text-sm text-gray-600 mb-1">
-                                    <span id="currentTime">0:00</span>
-                                    <span id="duration">2:30</span>
-                                </div>
-                                <div class="audio-progress" onclick="seekAudio(event)">
-                                    <div id="progressBar" class="audio-progress-bar"></div>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.20H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.20l4.146-3.317a1 1 0 011.617.797z" clip-rule="evenodd"/>
-                                </svg>
-                                <input type="range" min="0" max="100" value="50" class="w-20" onchange="setVolume(this.value)">
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Dynamic audio player will be injected here by playAudio() -->
                     <div class="mt-4">
                         <p class="text-gray-600 text-sm" id="audioDescription">
                             Listen to a preview.
@@ -1011,57 +822,405 @@
         let audioProgress = 0;
         let audioInterval;
 
-        // Course data with accurate information
-        const courseData = {
-            'molecules-life': {
-                title: 'Molecules of Life: Mastering Carbs Proteins Lipids Nucleic Acids and Enzymes',
-                instructor: 'Dr. Chona Camille Abeledo',
-                duration: '2 hours',
-                price: '₱300',
-                category: 'Biology',
-                description: 'This webinar delves into the foundations of quantum mechanics by exploring orbital diagrams and the quantum rules that shape them. Participants will gain a clear understanding of how electrons are arranged within atoms, emphasizing the principles behind orbital representations. The session highlights the application of the Pauli Exclusion Principle and Hund\'s Rule in constructing accurate electron configurations, providing learners with both conceptual clarity and practical skills. In addition, the training connects these configurations to broader periodic trends and elemental properties, allowing participants to see the direct relationship between atomic structure and chemical behavior. Through structured explanations and guided examples, this session equips educators and learners alike with the tools to simplify complex quantum ideas and apply them effectively in teaching and learning contexts.'
-            },
-            'gamified-motion': {
-                title: 'Gamified Motion: Graphical and Computational Analysis of Kinematics & Projectile',
-                instructor: 'Dr. James Salveo Olarve',
-                duration: '2 hours',
-                price: '₱300',
-                category: 'Physics',
-                description: 'This webinar focuses on gamified motion, graphical, and computational analysis of kinematics and projectile motion. Participants are introduced to core physics concepts, including distance, displacement, speed, velocity, and acceleration, with particular emphasis on addressing common student misconceptions and effective teaching strategies, such as incorporating the idea of force to explain positive and negative acceleration. A significant portion of the session is dedicated to demonstrating how Canva AI can be used to create interactive simulations and gamified quizzes for educational purposes, highlighting its potential to transform lesson preparation and student engagement. The session also covers detailed graphical analysis of motion and an in-depth exploration of projectile motion, breaking it down into its x and y components and discussing various scenarios, all while emphasizing the practical application of these concepts through visual aids and interactive tools.'
-            },
-            'quantum-clarity': {
-                title: 'Quantum Clarity: Mastering Orbital Diagrams and the Rules that Govern Them',
-                instructor: 'Dr. David Penaloza Jr',
-                duration: '2 hours',
-                price: '₱300',
-                category: 'Chemistry',
-                description: 'This webinar focuses on the essential biomolecules that sustain life—carbohydrates, proteins, lipids, nucleic acids, and enzymes. Participants will explore the unique structures and functions of these molecules, gaining a deeper understanding of their vital roles in energy storage and release, genetic information transfer, and critical cellular processes. The session also emphasizes practical strategies for effectively teaching biomolecules, enabling educators to simplify complex concepts and foster student engagement. By bridging scientific knowledge with classroom application, this training equips participants with the clarity and confidence to highlight the importance of biomolecules in the study of life.'
-            },
-            'no-code-simulation': {
-                title: 'Create No-Code Interactive Simulations for Your Classroom with Canva AI',
-                instructor: 'Dr. James Salveo Olarve',
-                duration: '2 hours',
-                price: '₱400',
-                category: 'ICT',
-                description: 'This webinar introduces participants to the power of Canva\'s No-Code AI for creating interactive simulations, games, and quizzes tailored for classroom use. The session highlights practical prompts and design principles that make digital materials more engaging and effective for learners. Participants will also be guided through the process of building their own interactive content, culminating in opportunities to showcase their outputs. By blending creativity with accessible AI tools, this training empowers educators to transform their lessons into dynamic, student-centered experiences without the need for coding expertise.'
-            },
-            'twist-turn': {
-                title: 'Twist and Turn: Exploring the Laws Behind Rotational Systems',
-                instructor: 'Dr. James Salveo Olarve',
-                duration: '2 hours',
-                price: '₱300',
-                category: 'Physics',
-                description: 'This webinar explores the fundamental laws that govern rotational systems, bridging key physics concepts with practical teaching approaches. Participants will begin by comparing translational and rotational motion, setting the stage for understanding how force leads to torque in rotating objects. The session then covers uniform circular motion, the role of moment of inertia in rotational dynamics, and the principles of angular momentum and its conservation. Through clear explanations and relatable examples, this training equips educators with the tools to confidently teach rotational motion and help students connect theory with real-world applications.'
-            },
-            'metabolic-mystery': {
-                title: 'Metabolic Mystery: Teaching Cell Metabolism with Clarity and Context',
-                instructor: 'Dr. Chona Camille Abeledo',
-                duration: '2 hours',
-                price: '₱300',
-                category: 'Biology',
-                description: 'This webinar unravels the complexity of cell metabolism, providing educators with clear and contextual approaches to teaching life\'s essential energy processes. Participants will gain an overview of metabolism and the central role of ATP and enzymes, followed by a guided exploration of glycolysis, fermentation, the Krebs cycle, and the electron transport chain. The session also highlights where these processes occur within the cell and compares their energy outputs to strengthen conceptual understanding. Designed with clarity in mind, this training equips participants with both scientific insight and practical teaching strategies to make the topic of metabolism more engaging and accessible for learners.'
+
+        // Dynamic data containers for courses
+        let allCourses = [];
+        let filteredCourses = [];
+        let filteredLearningCourses = [];
+
+    // Pagination state for training center
+    let currentPage = 1;
+    const coursesPerPage = 8;
+
+        // Fetch courses from endpoint and populate allCourses
+        async function loadTrainingCourses() {
+            const url = "https://script.google.com/macros/s/AKfycbzHpSnUaiBzU-GC0YhkZVzXHfQkEN6i0N6a_Kp1XfUIr_GsgBTBpsj887zVeNr38ArNVQ/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=training&func=training";
+            const grid = document.getElementById('coursesGrid');
+            const counter = document.getElementById('resultsCounter');
+            grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">Loading courses...</div>`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                allCourses = Array.isArray(data) ? data.map((item, idx) => ({
+                    id: `course-${idx}`,
+                    title: item.title,
+                    date: new Date(item.date),
+                    hours: item.hours,
+                    instructor: item.speaker,
+                    image: (typeof item.poster === 'string' && item.poster.startsWith('http')) ? item.poster : '',
+                    category: item.category,
+                    price: item.promo_fee ? `₱${item.promo_fee}` : '',
+                    originalPrice: item.regular_fee ? `₱${item.regular_fee}` : '',
+                    description: item.about,
+                    audio: item.audio,
+                    duration: item.hours + ' hours'
+                })) : [];
+
+                // Populate category and speaker filters dynamically
+                populateCourseFilters();
+                filteredCourses = [...allCourses];
+                renderCourses();
+                updateCounters();
+
+        // Populate category and speaker filter dropdowns dynamically
+        function populateCourseFilters() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const speakerFilter = document.getElementById('speakerFilter');
+            if (!categoryFilter || !speakerFilter) return;
+
+            // Get unique categories and speakers from allCourses
+            const categories = Array.from(new Set(allCourses.map(c => c.category).filter(Boolean))).sort();
+            const speakers = Array.from(new Set(allCourses.map(c => c.instructor).filter(Boolean))).sort();
+
+            // Save current selections
+            const selectedCategory = categoryFilter.value;
+            const selectedSpeaker = speakerFilter.value;
+
+            // Populate categories
+            categoryFilter.innerHTML = '<option value="all">All Categories</option>' +
+                categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            // Restore selection if possible
+            if (categories.includes(selectedCategory)) categoryFilter.value = selectedCategory;
+
+            // Populate speakers
+            speakerFilter.innerHTML = '<option value="all">All Speakers</option>' +
+                speakers.map(spk => `<option value="${spk}">${spk}</option>`).join('');
+            // Restore selection if possible
+            if (speakers.includes(selectedSpeaker)) speakerFilter.value = selectedSpeaker;
+        }
+            } catch (e) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-red-500">Failed to load courses.</div>`;
+                counter.textContent = "Showing 0 of 0 courses";
+                allCourses = [];
+                filteredCourses = [];
             }
-        };
+        }
+
+        // Search and filter functionality for Training Center
+        function filterCourses() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const speakerFilter = document.getElementById('speakerFilter').value;
+            const dateSort = document.getElementById('dateSort').value;
+
+            // Filter courses
+            filteredCourses = allCourses.filter(course => {
+                const matchesSearch = !searchTerm || 
+                    course.title.toLowerCase().includes(searchTerm) ||
+                    course.instructor.toLowerCase().includes(searchTerm) ||
+                    course.description.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
+                const matchesSpeaker = speakerFilter === 'all' || course.instructor === speakerFilter;
+
+                return matchesSearch && matchesCategory && matchesSpeaker;
+            });
+
+            // Sort courses
+            filteredCourses.sort((a, b) => {
+                if (dateSort === 'newest') {
+                    return b.date - a.date;
+                } else {
+                    return a.date - b.date;
+                }
+            });
+
+            renderCourses();
+            updateCounters();
+        }
+
+        function renderCourses() {
+            const grid = document.getElementById('coursesGrid');
+            const pagination = document.getElementById('coursesPagination');
+
+            if (filteredCourses.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.562M15 6.306a7.962 7.962 0 00-6 0m6 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v1.306m8 0V7a2 2 0 012 2v6.414l.293.293a1 1 0 001.414-1.414L16 12.586V11a2 2 0 00-2-2H8a2 2 0 00-2 2v1.586l-2.707 2.707a1 1 0 001.414 1.414L7 14.414V13a2 2 0 012-2h6a2 2 0 012 2z"/>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
+                        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                    </div>
+                `;
+                pagination.innerHTML = '';
+                return;
+            }
+
+            // Pagination logic
+            const totalCourses = filteredCourses.length;
+            const totalPages = Math.ceil(totalCourses / coursesPerPage);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+            const startIdx = (currentPage - 1) * coursesPerPage;
+            const endIdx = startIdx + coursesPerPage;
+            const coursesToShow = filteredCourses.slice(startIdx, endIdx);
+
+            grid.innerHTML = coursesToShow.map(course => {
+                const categoryColors = {
+                    'Biology': 'bg-green-100 text-green-800',
+                    'Physics': 'bg-blue-100 text-blue-800',
+                    'Chemistry': 'bg-purple-100 text-purple-800',
+                    'ICT': 'bg-orange-100 text-orange-800'
+                };
+
+                // Calculate discount dynamically
+                let discount = 0;
+                let regular = 0, promo = 0;
+                if (course.originalPrice && course.price) {
+                    // Remove non-numeric chars (like ₱)
+                    regular = parseFloat(course.originalPrice.replace(/[^\d.]/g, ''));
+                    promo = parseFloat(course.price.replace(/[^\d.]/g, ''));
+                    discount = regular - promo;
+                }
+
+                return `
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
+                        <div class="h-48 overflow-hidden relative">
+                            <img src="${course.image}" 
+                                 alt="${course.title}" 
+                                 class="w-full h-full object-cover training-image"
+                                 onclick="openImageViewer(this.src, this.alt)"
+                                 onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
+                            <div class="absolute top-2 left-2">
+                                <span class="${categoryColors[course.category]} px-2 py-1 rounded text-xs font-medium">${course.category}</span>
+                            </div>
+                            <div class="absolute top-2 right-2 flex space-x-1">
+                                <button onclick="showAbout('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
+                                    <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                                <button onclick="playAudio('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
+                                    <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-papsi-dark mb-2">${course.title}</h3>
+                            <p class="text-gray-600 text-sm mb-3">${course.instructor}</p>
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-papsi-gold font-semibold">${course.price}</span>
+                                    ${course.originalPrice ? `<span class="text-gray-400 line-through text-sm">${course.originalPrice}</span>` : ''}
+                                    ${(discount > 0) ? `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">₱${discount} OFF</span>` : ''}
+                                </div>
+                                <span class="text-xs text-gray-500">${course.duration}</span>
+                            </div>
+                            <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
+                                Register Now
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Pagination controls
+            let paginationHTML = '';
+            if (totalPages > 1) {
+                paginationHTML += `<button onclick="changeCoursesPage(-1)" class="px-4 py-2 rounded border ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+                paginationHTML += `<span class="mx-2 text-sm">Page ${currentPage} of ${totalPages}</span>`;
+                paginationHTML += `<button onclick="changeCoursesPage(1)" class="px-4 py-2 rounded border ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+            }
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changeCoursesPage(delta) {
+            const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+            currentPage += delta;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            renderCourses();
+        }
+
+        function updateCounters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const speakerFilter = document.getElementById('speakerFilter').value;
+            
+            // Calculate total available courses for current filters (including search)
+            let totalAvailable = allCourses.filter(course => {
+                const matchesSearch = !searchTerm || 
+                    course.title.toLowerCase().includes(searchTerm) ||
+                    course.instructor.toLowerCase().includes(searchTerm) ||
+                    course.description.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
+                const matchesSpeaker = speakerFilter === 'all' || course.instructor === speakerFilter;
+
+                return matchesSearch && matchesCategory && matchesSpeaker;
+            }).length;
+            
+            const shownCourses = filteredCourses.length;
+            
+            // Update results counter
+            document.getElementById('resultsCounter').textContent = `Showing ${shownCourses} of ${totalAvailable} courses`;
+        }
+
+        // Search and filter functionality for My Learning page
+        function filterLearningCourses() {
+            const searchTerm = document.getElementById('learningSearchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('learningCategoryFilter').value;
+            const speakerFilter = document.getElementById('learningSpeakerFilter').value;
+            const dateSort = document.getElementById('learningDateSort').value;
+
+            // Filter courses
+            filteredLearningCourses = allCourses.filter(course => {
+                const matchesSearch = !searchTerm || 
+                    course.title.toLowerCase().includes(searchTerm) ||
+                    course.instructor.toLowerCase().includes(searchTerm) ||
+                    course.description.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
+                const matchesSpeaker = speakerFilter === 'all' || course.instructor === speakerFilter;
+
+                return matchesSearch && matchesCategory && matchesSpeaker;
+            });
+
+            // Sort courses
+            filteredLearningCourses.sort((a, b) => {
+                if (dateSort === 'newest') {
+                    return b.date - a.date;
+                } else {
+                    return a.date - b.date;
+                }
+            });
+
+            renderLearningCourses();
+            updateLearningCounters();
+        }
+
+        function renderLearningCourses() {
+            const grid = document.getElementById('learningCoursesGrid');
+            
+            if (filteredLearningCourses.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.562M15 6.306a7.962 7.962 0 00-6 0m6 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v1.306m8 0V7a2 2 0 012 2v6.414l.293.293a1 1 0 001.414-1.414L16 12.586V11a2 2 0 00-2-2H8a2 2 0 00-2 2v1.586l-2.707 2.707a1 1 0 001.414 1.414L7 14.414V13a2 2 0 012-2h6a2 2 0 012 2z"/>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
+                        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredLearningCourses.map(course => {
+                const categoryColors = {
+                    'Biology': 'bg-green-100 text-green-800',
+                    'Physics': 'bg-blue-100 text-blue-800',
+                    'Chemistry': 'bg-purple-100 text-purple-800',
+                    'ICT': 'bg-orange-100 text-orange-800'
+                };
+
+                return `
+                    <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
+                        <div class="h-48 overflow-hidden relative">
+                            <img src="${course.image}" 
+                                 alt="${course.title}" 
+                                 class="w-full h-full object-cover training-image"
+                                 onclick="openImageViewer(this.src, this.alt)"
+                                 onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
+                            <div class="absolute top-2 left-2">
+                                <span class="${categoryColors[course.category]} px-2 py-1 rounded text-xs font-medium">${course.category}</span>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-papsi-dark mb-2">${course.title}</h3>
+                            <p class="text-gray-600 text-sm mb-3">${course.instructor}</p>
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-xs text-gray-500">${course.duration}</span>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="openCourseContent('video', '${course.title}')" class="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors flex items-center justify-center space-x-1">
+                                    <span>📹</span>
+                                    <span>Video</span>
+                                </button>
+                                <button onclick="openCourseContent('module', '${course.title}')" class="flex-1 bg-orange-600 text-white py-2 px-3 rounded text-sm hover:bg-orange-700 transition-colors flex items-center justify-center space-x-1">
+                                    <span>📚</span>
+                                    <span>Module</span>
+                                </button>
+                                <button onclick="openCourseContent('presentation', '${course.title}')" class="flex-1 bg-purple-600 text-white py-2 px-3 rounded text-sm hover:bg-purple-700 transition-colors flex items-center justify-center space-x-1">
+                                    <span>📊</span>
+                                    <span>Slides</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateLearningCounters() {
+            const searchTerm = document.getElementById('learningSearchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('learningCategoryFilter').value;
+            const speakerFilter = document.getElementById('learningSpeakerFilter').value;
+            
+            // Calculate total available courses for current filters (including search)
+            let totalAvailable = allCourses.filter(course => {
+                const matchesSearch = !searchTerm || 
+                    course.title.toLowerCase().includes(searchTerm) ||
+                    course.instructor.toLowerCase().includes(searchTerm) ||
+                    course.description.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
+                const matchesSpeaker = speakerFilter === 'all' || course.instructor === speakerFilter;
+
+                return matchesSearch && matchesCategory && matchesSpeaker;
+            }).length;
+            
+            const shownCourses = filteredLearningCourses.length;
+            
+            // Update results counter
+            document.getElementById('learningResultsCounter').textContent = `Showing ${shownCourses} of ${totalAvailable} courses`;
+        }
+
+        function clearLearningSearch() {
+            document.getElementById('learningSearchInput').value = '';
+            document.getElementById('clearLearningSearch').classList.add('hidden');
+            filterLearningCourses();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
+            filterCourses();
+        }
+
+        // Event listeners for search and filters
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const clearBtn = document.getElementById('clearSearch');
+            if (e.target.value) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            filterCourses();
+        });
+
+        document.getElementById('categoryFilter').addEventListener('change', filterCourses);
+        document.getElementById('speakerFilter').addEventListener('change', filterCourses);
+        document.getElementById('dateSort').addEventListener('change', filterCourses);
+        document.getElementById('clearSearch').addEventListener('click', clearSearch);
+
+        // Event listeners for My Learning page search and filters
+        document.getElementById('learningSearchInput').addEventListener('input', function(e) {
+            const clearBtn = document.getElementById('clearLearningSearch');
+            if (e.target.value) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            filterLearningCourses();
+        });
+
+        document.getElementById('learningCategoryFilter').addEventListener('change', filterLearningCourses);
+        document.getElementById('learningSpeakerFilter').addEventListener('change', filterLearningCourses);
+        document.getElementById('learningDateSort').addEventListener('change', filterLearningCourses);
+        document.getElementById('clearLearningSearch').addEventListener('click', clearLearningSearch);
 
         function showPage(page) {
             // Hide all pages
@@ -1080,6 +1239,18 @@
             const activeBtn = document.getElementById(page + '-btn');
             activeBtn.classList.add('active-tab');
             activeBtn.classList.remove('text-gray-500');
+
+            // Initialize courses grid if hub page is shown
+            if (page === 'hub') {
+                renderCourses();
+                updateCounters();
+            }
+
+            // Initialize learning courses grid if learning page is shown
+            if (page === 'learning') {
+                renderLearningCourses();
+                updateLearningCounters();
+            }
         }
 
         function openImageViewer(src, alt) {
@@ -1112,37 +1283,36 @@
             const modal = document.getElementById('aboutModal');
             const title = document.getElementById('aboutTitle');
             const content = document.getElementById('aboutContent');
-            
-            const course = courseData[courseId];
+            // Find course by id in allCourses or filteredCourses
+            const course = allCourses.find(c => c.id === courseId) || filteredCourses.find(c => c.id === courseId);
             if (!course) return;
-            
             title.textContent = course.title;
-            
             content.innerHTML = `
                 <div class="space-y-4">
                     <div>
                         <h4 class="font-semibold text-papsi-dark mb-2">Speaker</h4>
-                        <p class="text-gray-600">${course.instructor}</p>
+                        <p class="text-gray-600">${course.instructor || course.speaker || ''}</p>
                     </div>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="font-semibold text-papsi-dark mb-2">Duration</h4>
-                            <p class="text-gray-600">${course.duration}</p>
+                            <p class="text-gray-600">${course.duration || (course.hours ? course.hours + ' hours' : '')}</p>
                         </div>
                         <div>
                             <h4 class="font-semibold text-papsi-dark mb-2">Price</h4>
-                            <p class="text-papsi-gold font-bold text-lg">${course.price}</p>
+                            <div class="flex items-center space-x-2">
+                                <p class="text-papsi-gold font-bold text-lg">${course.price || ''}</p>
+                                ${course.originalPrice ? `<span class=\"text-gray-400 line-through text-sm\">${course.originalPrice}</span>` : ''}
+                                ${(course.originalPrice && course.originalPrice !== course.price) ? `<span class=\"bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium\">Discount</span>` : ''}
+                            </div>
                         </div>
                     </div>
-                    
                     <div>
                         <h4 class="font-semibold text-papsi-dark mb-2">About</h4>
-                        <p class="text-gray-600">${course.description}</p>
+                        <p class="text-gray-600">${course.description || course.about || ''}</p>
                     </div>
                 </div>
             `;
-            
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -1157,17 +1327,24 @@
             const modal = document.getElementById('audioModal');
             const title = document.getElementById('audioTitle');
             const description = document.getElementById('audioDescription');
-            
-            const course = courseData[courseId];
+            // Find course by id in allCourses or filteredCourses
+            const course = allCourses.find(c => c.id === courseId) || filteredCourses.find(c => c.id === courseId);
             if (!course) return;
-            
             title.textContent = `${course.title} - Audio Preview`;
-            description.textContent = `Listen to a preview.`;
-            
+            // Add a working audio player if course.audio is a valid URL
+            let audioPlayerHtml = '';
+            if (course.audio && typeof course.audio === 'string' && course.audio.startsWith('http')) {
+                audioPlayerHtml = `<audio id="courseAudioPlayer" controls style="width:100%;margin-top:1rem;">
+                    <source src="${course.audio}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>`;
+            } else {
+                audioPlayerHtml = `<div class='text-red-500 mt-2'>No audio preview available.</div>`;
+            }
+            description.innerHTML = `Listen to a preview.${audioPlayerHtml}`;
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            
-            // Reset audio state
+            // Reset audio state (legacy UI, not used with native player)
             audioPlaying = false;
             audioProgress = 0;
             updateAudioUI();
@@ -1383,14 +1560,32 @@
             alert('Profile updated successfully!');
         });
 
+        // Handle course content access
+        function openCourseContent(contentType, courseName) {
+            const contentTypeNames = {
+                'video': 'Video Lecture',
+                'module': 'Course Module',
+                'presentation': 'Presentation Materials'
+            };
+            
+            alert(`Opening ${contentTypeNames[contentType]} for "${courseName}". This would normally open the ${contentType} content in a new window or embedded player.`);
+        }
+
         // Handle enrollment buttons
-        document.querySelectorAll('button').forEach(btn => {
-            if (btn.textContent === 'Register Now') {
-                btn.addEventListener('click', function() {
-                    alert('Registration process initiated! You will be redirected to payment.');
-                });
+        document.addEventListener('click', function(e) {
+            if (e.target.textContent === 'Register Now') {
+                alert('Registration process initiated! You will be redirected to payment.');
             }
         });
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnnouncements();
+            loadAnnouncements();
+            loadTrainingCourses();
+            renderLearningCourses();
+            updateLearningCounters();
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9821950176900f58',t:'MTc1ODM3NDAyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98288178e4bb6e8c',t:'MTc1ODQ0NjYyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

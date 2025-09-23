@@ -8,7 +8,7 @@
     <script>
     // --- DYNAMIC ANNOUNCEMENTS ---
     async function loadAnnouncements() {
-        const url = "https://script.google.com/macros/s/AKfycbzHpSnUaiBzU-GC0YhkZVzXHfQkEN6i0N6a_Kp1XfUIr_GsgBTBpsj887zVeNr38ArNVQ/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=announcement&func=announcement";
+        const url = "https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=announcement&func=announcement";
         const container = document.getElementById('announcementsContainer');
         container.innerHTML = '<div class="text-center text-gray-500 py-8">Loading announcements...</div>';
         try {
@@ -222,9 +222,694 @@
             width: 0%;
             transition: width 0.1s;
         }
+        /* Video player modal styles */
+        .video-modal-content { max-width: 36rem; }
+        .video-size-normal { max-width: 36rem; }
+        .video-size-large { max-width: 64rem; }
+        .video-size-full  { width: 100%; max-width: 100%; height: 100vh; border-radius: 0; }
+        .vp-aspect { position: relative; padding-top: 56.25%; }
+        .vp-aspect > * { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+        /* Slides (PDF) modal styles */
+        .slides-modal-content { max-width: 64rem; }
+        .slides-size-normal { max-width: 64rem; }
+        .slides-size-large  { max-width: 96rem; }
+        .slides-size-full   { width: 100%; max-width: 100%; height: 100vh; border-radius: 0; }
+        .sp-body { height: 80vh; }
+        .sp-frame { width: 100%; height: 100%; border: 0; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
+    <!-- Auth Overlay (Phase 1: UI only; hidden until wired) -->
+    <div id="authOverlay" class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[2000] overflow-auto hidden">
+        <div class="min-h-screen flex items-center justify-center p-6">
+            <div class="w-full max-w-md">
+                <!-- Validate Page -->
+                <section id="auth-validate" class="bg-white rounded-lg shadow p-6 space-y-5">
+                    <div class="flex flex-col items-center text-center space-y-3">
+                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/papsilogo_1.png" alt="PAPSI" class="h-14 w-auto">
+                        <h2 class="text-xl font-bold text-papsi-dark">Validation Process</h2>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-papsi-dark mb-1">Email Address</label>
+                        <input id="authValidateEmail" type="email" placeholder="Enter your email address here" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-describedby="authValidateStatus">
+                    </div>
+                    <div id="authValidateStatus" class="text-sm" role="status" aria-live="polite"></div>
+                    <button id="authValidateBtn" class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">Validate</button>
+                </section>
+
+                <!-- Registration Page (hidden by default) -->
+                <section id="auth-register" class="bg-white rounded-lg shadow p-6 space-y-5 hidden mt-6">
+                    <div class="flex flex-col items-center text-center space-y-3">
+                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/papsilogo_1.png" alt="PAPSI" class="h-14 w-auto">
+                        <h2 class="text-xl font-bold text-papsi-dark">Registration</h2>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-papsi-dark mb-1">Email Address</label>
+                        <input id="authRegisterEmail" type="email" placeholder="Enter your email address here" class="w-full border rounded px-3 py-2 bg-gray-100" readonly aria-describedby="authRegisterStatus">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-papsi-dark mb-1">PAPSI ID</label>
+                        <input id="authRegisterId" type="text" placeholder="Enter your PAPSI ID here" class="w-full border rounded px-3 py-2" aria-describedby="authRegisterStatus">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-papsi-dark mb-1">Password (min 8 characters)</label>
+                        <input id="authRegisterPassword" type="password" placeholder="Enter your password here" class="w-full border rounded px-3 py-2" aria-describedby="authRegisterStatus">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-papsi-dark mb-1">Confirm Password</label>
+                        <input id="authRegisterConfirm" type="password" placeholder="Reenter your password here" class="w-full border rounded px-3 py-2" aria-describedby="authRegisterStatus">
+                    </div>
+                    <div id="authRegisterStatus" class="text-sm" role="status" aria-live="polite"></div>
+                    <div class="flex gap-2">
+                        <button id="authRegisterBtn" class="flex-1 bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">Register</button>
+                        <button id="authRegisterBackBtn" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition-colors">Back</button>
+                    </div>
+                </section>
+
+                <!-- Login Page (hidden by default) -->
+                <section id="auth-login" class="bg-white rounded-lg shadow p-6 space-y-5 hidden mt-6">
+                    <div class="flex flex-col items-center text-center space-y-3">
+                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/papsilogo_1.png" alt="PAPSI" class="h-14 w-auto">
+                        <h2 class="text-xl font-bold text-papsi-dark">Login</h2>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-papsi-dark mb-1">Email Address</label>
+                        <input id="authLoginEmail" type="email" placeholder="Enter your email address here" class="w-full border rounded px-3 py-2" aria-describedby="authLoginStatus">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-papsi-dark mb-1">Password (min 8 characters)</label>
+                        <input id="authLoginPassword" type="password" placeholder="Enter your password here" class="w-full border rounded px-3 py-2" aria-describedby="authLoginStatus">
+                    </div>
+                    <div id="authLoginStatus" class="text-sm" role="status" aria-live="polite"></div>
+                    <div class="flex gap-2">
+                        <button id="authLoginBtn" class="flex-1 bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">Login</button>
+                        <button id="authLoginBackBtn" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition-colors">Back</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script>
+    // ===== Auth Overlay Navigation (Phase 2) =====
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+    }
+    function showAuthPage(which) {
+        const panes = ['validate', 'register', 'login'];
+        panes.forEach(p => {
+            const el = document.getElementById('auth-' + p);
+            if (el) el.classList.toggle('hidden', p !== which);
+        });
+        // Phase 7: clear statuses when switching panes
+        try { clearAuthStatuses(); } catch {}
+        // Focus first input of the shown pane
+        setTimeout(() => {
+            const shown = document.getElementById('auth-' + which);
+            if (!shown) return;
+            const input = shown.querySelector('input');
+            if (input) { try { input.focus(); } catch (e) {} }
+        }, 0);
+    }
+    // Wire Back buttons to return to Validate
+    document.addEventListener('DOMContentLoaded', function() {
+        var regBack = document.getElementById('authRegisterBackBtn');
+        if (regBack) regBack.addEventListener('click', function(){ showAuthPage('validate'); });
+        var loginBack = document.getElementById('authLoginBackBtn');
+        if (loginBack) loginBack.addEventListener('click', function(){ showAuthPage('validate'); });
+        // Optional UX: Escape returns to Validate when on Register or Login
+        document.addEventListener('keydown', function(e){
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('authOverlay');
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                const onRegister = !document.getElementById('auth-register')?.classList.contains('hidden');
+                const onLogin = !document.getElementById('auth-login')?.classList.contains('hidden');
+                if (onRegister || onLogin) {
+                    e.preventDefault();
+                    showAuthPage('validate');
+                }
+            }
+        });
+    });
+    // ===== End Phase 2 =====
+    </script>
+    <script>
+    // ===== Auth Validate Handler (Phase 3) =====
+    const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbydRAAaO83lKJpCpu7a48YlncAX9R5N1KvRx5LqMofd6Dd-O1S_Mnp9tGysVGFV7q6dZQ/exec';
+    const AUTH_ID = '1y_WaSDuORzYQzoXdxP7uDrWQaz4qYCRk8Ys25UkySFg';
+    const AUTH_SH = 'Sheet1';
+
+    function buildAuthUrl(func, query = {}) {
+        const params = new URLSearchParams({ ID: AUTH_ID, SH: AUTH_SH, func });
+        Object.entries(query).forEach(([k, v]) => {
+            if (v !== undefined && v !== null) params.append(k, String(v));
+        });
+        return `${AUTH_BASE}?${params.toString()}`;
+    }
+
+    async function handleAuthValidate() {
+        const emailInput = document.getElementById('authValidateEmail');
+        const statusEl = document.getElementById('authValidateStatus');
+        const btn = document.getElementById('authValidateBtn');
+        const email = String(emailInput?.value || '').trim();
+
+    // Reset status
+    setAuthStatus(statusEl, '');
+
+        if (!isValidEmail(email)) {
+            setAuthStatus(statusEl, 'Please enter a valid email address.', 'error');
+            emailInput?.focus();
+            return;
+        }
+
+        // Minimal UX lock (full polish in Phase 7)
+    const prevText = btn?.textContent;
+    setPending(btn, true, 'Validating…');
+    setAuthStatus(statusEl, 'Validating, please wait…', 'info');
+
+        try {
+            const url = buildAuthUrl('validate', { email });
+            const res = await fetch(url, { method: 'GET' });
+            const text = await res.text();
+
+            // Try JSON first (in case backend returns structured error/info)
+            try {
+                const data = JSON.parse(text);
+                // If backend responds with a redirect hint in JSON (optional)
+                const next = (data?.next || data?.action || '').toString().toLowerCase();
+                if (next === 'register' || next === 'login') {
+                    routeAfterValidation(next, email);
+                    return;
+                }
+                // Otherwise show message or fallback to text parsing
+                if (data?.message) { setAuthStatus(statusEl, String(data.message), 'error'); return; }
+            } catch (_) {
+                // Not JSON; proceed to plain-text handling
+            }
+
+            const normalized = text.trim().toLowerCase();
+            if (normalized === 'register' || normalized === 'login') {
+                routeAfterValidation(normalized, email);
+                return;
+            }
+
+            // Unexpected response
+            setAuthStatus(statusEl, text || 'Unexpected response. Please try again later.', 'error');
+        } catch (err) {
+            setAuthStatus(statusEl, err?.message || 'Unable to validate right now.', 'error');
+        } finally {
+            setPending(btn, false, prevText || 'Validate');
+        }
+    }
+
+    function routeAfterValidation(next, email) {
+        if (next === 'register') {
+            const regEmail = document.getElementById('authRegisterEmail');
+            if (regEmail) regEmail.value = email;
+            showAuthPage('register');
+        } else {
+            const loginEmail = document.getElementById('authLoginEmail');
+            if (loginEmail) loginEmail.value = email;
+            showAuthPage('login');
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // Deterministic category color mapping
+    const CATEGORY_PALETTE = [
+        { badge: 'bg-emerald-100 text-emerald-800', stats: 'text-emerald-600' },
+        { badge: 'bg-blue-100 text-blue-800', stats: 'text-blue-600' },
+        { badge: 'bg-purple-100 text-purple-800', stats: 'text-purple-600' },
+        { badge: 'bg-orange-100 text-orange-800', stats: 'text-orange-600' },
+        { badge: 'bg-rose-100 text-rose-800', stats: 'text-rose-600' },
+        { badge: 'bg-sky-100 text-sky-800', stats: 'text-sky-600' },
+        { badge: 'bg-teal-100 text-teal-800', stats: 'text-teal-600' },
+        { badge: 'bg-amber-100 text-amber-800', stats: 'text-amber-600' },
+        { badge: 'bg-indigo-100 text-indigo-800', stats: 'text-indigo-600' },
+        { badge: 'bg-lime-100 text-lime-800', stats: 'text-lime-600' },
+        { badge: 'bg-fuchsia-100 text-fuchsia-800', stats: 'text-fuchsia-600' },
+        { badge: 'bg-cyan-100 text-cyan-800', stats: 'text-cyan-600' },
+        { badge: 'bg-violet-100 text-violet-800', stats: 'text-violet-600' },
+        { badge: 'bg-pink-100 text-pink-800', stats: 'text-pink-600' },
+        { badge: 'bg-slate-100 text-slate-800', stats: 'text-slate-600' },
+        { badge: 'bg-stone-100 text-stone-800', stats: 'text-stone-600' }
+    ];
+
+    function hashStringToInt(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) {
+            h = (h << 5) - h + str.charCodeAt(i);
+            h |= 0; // Convert to 32bit integer
+        }
+        return Math.abs(h);
+    }
+
+    function getCategoryPalette(category) {
+        const key = (category || 'Other').toString().trim().toLowerCase();
+        const idx = hashStringToInt(key) % CATEGORY_PALETTE.length;
+        return CATEGORY_PALETTE[idx];
+    }
+
+    function categoryBadgeClasses(category) {
+        return getCategoryPalette(category).badge;
+    }
+
+    function categoryStatsText(category) {
+        return getCategoryPalette(category).stats;
+    }
+
+    // Normalize server profile keys to UI expectations
+    function normalizeServerProfile(p){
+        if (!p || typeof p !== 'object') return p;
+        const out = { ...p };
+        // publication -> publications
+        if (out.publication && !out.publications) out.publications = out.publication;
+        // attended -> Attended (optional, for My Learning rendering)
+        if (out.attended && !out.Attended) out.Attended = out.attended;
+        // Optional category normalization
+        if (Array.isArray(out.Attended)) {
+            out.Attended = out.Attended.map(item => {
+                const copy = { ...item };
+                if (copy.category === 'I.C.T.') copy.category = 'ICT';
+                return copy;
+            });
+        }
+        return out;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('authValidateBtn')?.addEventListener('click', handleAuthValidate);
+        // Optional: Enter key submits on Validate page
+        const vInput = document.getElementById('authValidateEmail');
+        if (vInput) vInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); handleAuthValidate(); } });
+    });
+    // ===== End Phase 3 =====
+    </script>
+    <script>
+    // ===== Auth Registration Handler (Phase 4) =====
+    async function handleAuthRegister() {
+        const emailEl = document.getElementById('authRegisterEmail');
+        const idEl = document.getElementById('authRegisterId');
+        const passEl = document.getElementById('authRegisterPassword');
+        const confirmEl = document.getElementById('authRegisterConfirm');
+        const statusEl = document.getElementById('authRegisterStatus');
+        const btn = document.getElementById('authRegisterBtn');
+
+        const email = String(emailEl?.value || '').trim();
+        const idVal = String(idEl?.value || '').trim();
+        const password = String(passEl?.value || '');
+        const confirm = String(confirmEl?.value || '');
+
+    setAuthStatus(statusEl, '');
+
+        // Basic client validations
+        if (!isValidEmail(email)) {
+            setAuthStatus(statusEl, 'Please provide a valid email.', 'error');
+            emailEl?.focus();
+            return;
+        }
+        if (!idVal) {
+            setAuthStatus(statusEl, 'Please enter your PAPSI ID.', 'error');
+            idEl?.focus();
+            return;
+        }
+        if (!password || password.length < 8) {
+            setAuthStatus(statusEl, 'Password must be at least 8 characters.', 'error');
+            passEl?.focus();
+            return;
+        }
+        if (password !== confirm) {
+            setAuthStatus(statusEl, 'Passwords do not match.', 'error');
+            confirmEl?.focus();
+            return;
+        }
+
+        // Minimal UX lock
+    const prevText = btn?.textContent;
+    setPending(btn, true, 'Registering…');
+    setAuthStatus(statusEl, 'Submitting, please wait…', 'info');
+
+        try {
+            const url = buildAuthUrl('register', { email, id: idVal, password });
+            const res = await fetch(url, { method: 'GET' });
+            const text = await res.text();
+
+            // Try JSON first
+            try {
+                const data = JSON.parse(text);
+                const rawProfile = data?.profile || data || null;
+                // Heuristic: server may return a profile object without success/status flags
+                const looksLikeProfile = rawProfile && typeof rawProfile === 'object' && (
+                    rawProfile.email || rawProfile.id || rawProfile.firstname || rawProfile.lastname || Array.isArray(rawProfile.attended)
+                );
+                const flaggedSuccess = data?.success === true || String(data?.status || '').toLowerCase() === 'ok' || /success/i.test(String(data?.message || ''));
+                if (looksLikeProfile) {
+                    // Immediate login path on registration success with profile payload
+                    const profile = normalizeServerProfile(rawProfile);
+                    try { localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile)); } catch {}
+                    try { window.PAPSI_PROFILE = profile; } catch {}
+                    try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
+                    const overlay = document.getElementById('authOverlay');
+                    if (overlay) overlay.classList.add('hidden');
+                    // Clear sensitive fields
+                    try { document.getElementById('authRegisterPassword').value = ''; } catch {}
+                    try { document.getElementById('authRegisterConfirm').value = ''; } catch {}
+                    setAuthStatus(statusEl, '');
+                    // Reveal logout button
+                    try { document.getElementById('logoutBtn')?.classList.remove('hidden'); } catch {}
+                    return;
+                }
+                if (flaggedSuccess) {
+                    // No profile payload, keep existing UX: go to Login with success message
+                    afterRegisterSuccess(email, statusEl);
+                    return;
+                }
+                // JSON but not ok and not a profile
+                const msg = data?.message || 'Registration failed.';
+                setAuthStatus(statusEl, String(msg), 'error');
+                return;
+            } catch (_) {
+                // Plain text handling
+                const normalized = text.trim().toLowerCase();
+                if (['ok', 'success', 'registered', 'login'].includes(normalized)) {
+                    afterRegisterSuccess(email, statusEl);
+                    return;
+                }
+                setAuthStatus(statusEl, text || 'Registration failed.', 'error');
+                return;
+            }
+        } catch (err) {
+            setAuthStatus(statusEl, err?.message || 'Unable to register right now.', 'error');
+        } finally {
+            setPending(btn, false, prevText || 'Register');
+        }
+    }
+
+    function afterRegisterSuccess(email, regStatusEl) {
+        // Clear sensitive fields
+        const passEl = document.getElementById('authRegisterPassword');
+        const confirmEl = document.getElementById('authRegisterConfirm');
+        if (passEl) passEl.value = '';
+        if (confirmEl) confirmEl.value = '';
+
+        // Route to login and show success message there
+        const loginEmail = document.getElementById('authLoginEmail');
+        const loginStatus = document.getElementById('authLoginStatus');
+        if (loginEmail) loginEmail.value = email;
+        if (loginStatus) setAuthStatus(loginStatus, 'Registration successful. Please log in.', 'success');
+        showAuthPage('login');
+        if (regStatusEl) setAuthStatus(regStatusEl, '');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('authRegisterBtn')?.addEventListener('click', handleAuthRegister);
+        const confirmEl = document.getElementById('authRegisterConfirm');
+        if (confirmEl) confirmEl.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); handleAuthRegister(); } });
+    });
+    // ===== End Phase 4 =====
+    </script>
+    <script>
+    // ===== Auth Login Handler (Phase 5) =====
+    async function handleAuthLogin() {
+        const emailEl = document.getElementById('authLoginEmail');
+        const passEl = document.getElementById('authLoginPassword');
+        const statusEl = document.getElementById('authLoginStatus');
+        const btn = document.getElementById('authLoginBtn');
+
+        const email = String(emailEl?.value || '').trim();
+        const password = String(passEl?.value || '');
+
+    setAuthStatus(statusEl, '');
+
+        if (!isValidEmail(email)) {
+            setAuthStatus(statusEl, 'Please enter a valid email.', 'error');
+            emailEl?.focus();
+            return;
+        }
+        if (!password || password.length < 8) {
+            setAuthStatus(statusEl, 'Password must be at least 8 characters.', 'error');
+            passEl?.focus();
+            return;
+        }
+
+        // Minimal UX lock
+    const prevText = btn?.textContent;
+    setPending(btn, true, 'Logging in…');
+    setAuthStatus(statusEl, 'Checking your credentials…', 'info');
+
+        try {
+            const url = buildAuthUrl('login', { email, password });
+            const res = await fetch(url, { method: 'GET' });
+            const text = await res.text();
+
+            // Expect JSON profile on success
+            let profile = null;
+            try {
+                const data = JSON.parse(text);
+                profile = normalizeServerProfile(data?.profile || data || null);
+            } catch (_) { setAuthStatus(statusEl, text || 'Invalid credentials.', 'error'); return; }
+
+            if (!profile || typeof profile !== 'object') {
+                setAuthStatus(statusEl, 'Login failed. Please try again.', 'error');
+                return;
+            }
+
+            // Persist session and hydrate
+            try {
+                localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile));
+            } catch {}
+            // Expose and hydrate profile UI if available
+            try { window.PAPSI_PROFILE = profile; } catch {}
+            try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
+
+            // Close overlay and clear sensitive inputs
+            const overlay = document.getElementById('authOverlay');
+            if (overlay) overlay.classList.add('hidden');
+            if (passEl) passEl.value = '';
+            setAuthStatus(statusEl, '');
+        } catch (err) {
+            setAuthStatus(statusEl, err?.message || 'Unable to login right now.', 'error');
+        } finally {
+            setPending(btn, false, prevText || 'Login');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('authLoginBtn')?.addEventListener('click', handleAuthLogin);
+        const passEl = document.getElementById('authLoginPassword');
+        if (passEl) passEl.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); handleAuthLogin(); } });
+    });
+    // ===== End Phase 5 =====
+    </script>
+    <script>
+    // ===== Header Refresh (re-fetch profile via login endpoint) =====
+    async function handleRefreshProfile() {
+        const btn = document.getElementById('refreshBtn');
+        let saved = null;
+        try { saved = JSON.parse(localStorage.getItem('PAPSI_PROFILE') || 'null'); } catch {}
+        const email = saved?.email ? String(saved.email).trim() : '';
+        const password = saved?.password ? String(saved.password) : '';
+
+        if (!email || !isValidEmail(email) || !password || password.length < 8) {
+            // Cannot refresh silently: route to Login
+            const overlay = document.getElementById('authOverlay');
+            if (overlay) overlay.classList.remove('hidden');
+            showAuthPage('login');
+            const le = document.getElementById('authLoginEmail');
+            if (le) le.value = email || '';
+            try { showToast('Please log in to refresh your profile.', 'info'); } catch {}
+            return;
+        }
+
+        const prevText = btn?.textContent;
+        setPending(btn, true, 'Refreshing…');
+        try {
+            const url = buildAuthUrl('login', { email, password });
+            const res = await fetch(url, { method: 'GET' });
+            const text = await res.text();
+            let profile = null;
+            try {
+                const data = JSON.parse(text);
+                profile = normalizeServerProfile(data?.profile || data || null);
+            } catch {
+                throw new Error(text || 'Failed to refresh profile.');
+            }
+            if (!profile || typeof profile !== 'object') throw new Error('Invalid profile data.');
+            try { localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile)); } catch {}
+            try { window.PAPSI_PROFILE = profile; } catch {}
+            try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
+            // show logout if hidden
+            try { document.getElementById('logoutBtn')?.classList.remove('hidden'); } catch {}
+            try { showToast('Profile refreshed.', 'success'); } catch {}
+        } catch (err) {
+            try { showToast(err?.message || 'Unable to refresh profile. Please log in again.', 'error'); } catch {}
+        } finally {
+            setPending(btn, false, prevText || 'Refresh');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+        document.getElementById('refreshBtn')?.addEventListener('click', handleRefreshProfile);
+    });
+    // ===== End Header Refresh =====
+    </script>
+    <script>
+    // ===== Toast Notifications =====
+    function ensureToastContainer() {
+        let c = document.getElementById('toastContainer');
+        if (!c) {
+            c = document.createElement('div');
+            c.id = 'toastContainer';
+            c.className = 'fixed top-4 right-4 z-[3000] space-y-2';
+            document.body.appendChild(c);
+        }
+        return c;
+    }
+    function showToast(message, type = 'info', durationMs = 3000) {
+        const container = ensureToastContainer();
+        const colors = {
+            success: 'bg-green-600',
+            error: 'bg-red-600',
+            info: 'bg-gray-800'
+        };
+        const color = colors[type] || colors.info;
+        const toast = document.createElement('div');
+        toast.setAttribute('role', 'alert');
+        toast.className = `${color} text-white px-4 py-3 rounded shadow-lg flex items-center gap-2 transition ease-out duration-300 opacity-0 translate-y-2`;
+        toast.innerHTML = `
+            <span class="inline-block">${escapeHtml(String(message))}</span>
+            <button aria-label="Close" class="ml-2 text-white/80 hover:text-white">&times;</button>
+        `;
+        const closeBtn = toast.querySelector('button');
+        closeBtn.addEventListener('click', () => dismiss());
+        container.appendChild(toast);
+        // animate in
+        requestAnimationFrame(() => {
+            toast.classList.remove('opacity-0','translate-y-2');
+            toast.classList.add('opacity-100','translate-y-0');
+        });
+        let hideTimer = setTimeout(dismiss, Math.max(1500, durationMs));
+        function dismiss() {
+            clearTimeout(hideTimer);
+            toast.classList.remove('opacity-100','translate-y-0');
+            toast.classList.add('opacity-0','translate-y-2');
+            setTimeout(() => { toast.remove(); }, 200);
+        }
+    }
+    // ===== End Toast Notifications =====
+    </script>
+    <script>
+    // ===== Gate on Load (Phase 6) =====
+    function showAuthOverlayAtValidate() {
+        const overlay = document.getElementById('authOverlay');
+        if (overlay) overlay.classList.remove('hidden');
+        showAuthPage('validate');
+        setTimeout(() => {
+            const input = document.getElementById('authValidateEmail');
+            if (input) { try { input.focus(); } catch {} }
+        }, 0);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const saved = localStorage.getItem('PAPSI_PROFILE');
+            if (saved) {
+                try {
+                    const profile = JSON.parse(saved);
+                    if (profile && typeof profile === 'object') {
+                        window.PAPSI_PROFILE = profile;
+                        if (typeof setProfile === 'function') setProfile(profile);
+                        const overlay = document.getElementById('authOverlay');
+                        if (overlay) overlay.classList.add('hidden');
+                        // Show logout button on successful session
+                        try { document.getElementById('logoutBtn')?.classList.remove('hidden'); } catch {}
+                        return; // already gated in
+                    }
+                } catch { /* ignore parse error and fall through to show overlay */ }
+            }
+        } catch { /* localStorage inaccessible; show overlay */ }
+        // No valid session found
+        showAuthOverlayAtValidate();
+        try { document.getElementById('logoutBtn')?.classList.add('hidden'); } catch {}
+    });
+    // ===== End Phase 6 =====
+    </script>
+    <script>
+    // ===== Shared Auth UX Helpers (Phase 7) =====
+    function setAuthStatus(el, message, type) {
+        if (!el) return;
+        el.classList.remove('text-red-600','text-green-700','text-gray-600');
+        if (!message) { el.innerHTML = ''; return; }
+        const color = type === 'error' ? 'text-red-600' : (type === 'success' ? 'text-green-700' : 'text-gray-600');
+        el.classList.add(color);
+        el.innerHTML = escapeHtml(String(message));
+    }
+    function setPending(btn, isPending, text) {
+        if (!btn) return;
+        if (isPending) {
+            btn.dataset.prevText = btn.textContent || '';
+            const label = text || btn.textContent || '';
+            btn.innerHTML = `<span class="inline-block w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin align-[-2px]"></span>${escapeHtml(label)}`;
+            btn.disabled = true;
+            btn.classList.add('opacity-70','cursor-not-allowed');
+        } else {
+            btn.textContent = text || btn.dataset.prevText || btn.textContent || '';
+            btn.disabled = false;
+            btn.classList.remove('opacity-70','cursor-not-allowed');
+            delete btn.dataset.prevText;
+        }
+    }
+    function clearAuthStatuses() {
+        ['authValidateStatus','authRegisterStatus','authLoginStatus'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        });
+    }
+    // Clear inline errors when user edits inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        const pairs = [
+            ['authValidateEmail','authValidateStatus'],
+            ['authRegisterEmail','authRegisterStatus'],
+            ['authRegisterId','authRegisterStatus'],
+            ['authRegisterPassword','authRegisterStatus'],
+            ['authRegisterConfirm','authRegisterStatus'],
+            ['authLoginEmail','authLoginStatus'],
+            ['authLoginPassword','authLoginStatus']
+        ];
+        pairs.forEach(([inputId, statusId]) => {
+            const input = document.getElementById(inputId);
+            const status = document.getElementById(statusId);
+            if (input && status) input.addEventListener('input', () => setAuthStatus(status, ''));
+        });
+        // Phase 8: Logout handling
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) logoutBtn.addEventListener('click', function(){
+            try { localStorage.removeItem('PAPSI_PROFILE'); } catch {}
+            try { window.PAPSI_PROFILE = null; } catch {}
+            try { if (typeof setProfile === 'function') setProfile(null); } catch {}
+            // Clear My Learning state and UI
+            try { myLearning = []; filteredLearningCourses = []; learningCurrentPage = 1; } catch {}
+            try { renderLearningCourses(); updateLearningCounters(); renderLearningStats(); } catch {}
+            const overlay = document.getElementById('authOverlay');
+            if (overlay) overlay.classList.remove('hidden');
+            showAuthPage('validate');
+            setTimeout(() => {
+                const input = document.getElementById('authValidateEmail');
+                if (input) { try { input.focus(); } catch {} }
+            }, 0);
+            logoutBtn.classList.add('hidden');
+        });
+    });
+    // ===== End Phase 7 =====
+    </script>
     <!-- Header -->
     <header class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -237,8 +922,10 @@
                     <h1 class="text-xl font-bold text-papsi-dark">Member Portal</h1>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <button id="refreshBtn" class="px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm">Refresh</button>
+                    <button id="logoutBtn" class="hidden px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm">Logout</button>
                     <div class="w-8 h-8 bg-papsi-green rounded-full flex items-center justify-center">
-                        <span class="text-white text-sm font-medium">JD</span>
+                        <span id="headerInitials" class="text-white text-sm font-medium">MM</span>
                     </div>
                 </div>
             </div>
@@ -253,10 +940,10 @@
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div class="flex items-center space-x-4 mb-4">
                     <div class="w-16 h-16 bg-papsi-green rounded-full flex items-center justify-center">
-                        <span class="text-white text-xl font-medium">JD</span>
+                        <span id="homeWelcomeInitials" class="text-white text-xl font-medium">MM</span>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-papsi-dark">Welcome, John Doe</h2>
+                        <h2 id="homeWelcomeName" class="text-2xl font-bold text-papsi-dark">Welcome, Member</h2>
                         <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mt-2">
                             Active Member
                         </span>
@@ -278,26 +965,11 @@
             <!-- Learning Statistics Header -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div class="relative overflow-hidden">
-                    <h2 class="text-2xl font-bold text-papsi-dark mb-4">My Learning</h2>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-papsi-green">6</div>
-                            <div class="text-sm text-gray-600">Total</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-xl font-semibold text-blue-600">2</div>
-                            <div class="text-sm text-gray-600">Physics</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-xl font-semibold text-orange-600">2</div>
-                            <div class="text-sm text-gray-600">Biology</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-xl font-semibold text-purple-600">2</div>
-                            <div class="text-sm text-gray-600">Other</div>
-                        </div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold text-papsi-dark">My Learning</h2>
+                        <button id="learningStatsToggle" class="text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" aria-controls="learningStatsGrid" aria-expanded="true">Hide Stats</button>
                     </div>
+                    <div id="learningStatsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
                 </div>
             </div>
 
@@ -353,6 +1025,66 @@
 
             <div id="learningCoursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- My learning courses will be dynamically populated here -->
+            </div>
+            
+            <!-- Video Player Modal -->
+            <div id="videoPlayerModal" class="modal hidden z-50">
+                <div id="videoModalContent" class="modal-content video-modal-content video-size-normal mx-auto p-0">
+                    <div class="flex items-center justify-between px-4 py-3 border-b rounded-t-lg bg-white">
+                        <h3 id="videoPlayerTitle" class="text-lg font-bold text-papsi-dark">Video</h3>
+                        <div class="flex items-center gap-2">
+                            <button id="vpSizeNormal" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Normal</button>
+                            <button id="vpSizeLarge" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Large</button>
+                            <button id="vpSizeFull" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Full Screen</button>
+                            <button onclick="closeVideoPlayer()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close video player" type="button">&times;</button>
+                        </div>
+                    </div>
+                    <div class="bg-white">
+                        <div class="vp-aspect bg-black rounded-b-lg overflow-hidden relative">
+                            <div id="videoEmbedContainer"></div>
+                            <div id="videoLoading" class="absolute inset-0 flex items-center justify-center">
+                                <span class="inline-block w-10 h-10 border-4 border-white/70 border-t-transparent rounded-full animate-spin"></span>
+                            </div>
+                            <div id="videoFallback" class="hidden absolute inset-0 flex items-center justify-center">
+                                <div class="bg-white/95 rounded p-4 text-center max-w-md">
+                                    <div class="font-semibold text-papsi-dark mb-1">Unable to embed this video</div>
+                                    <div class="text-sm text-gray-600 mb-3">The source may block embedding. You can open it in a new tab:</div>
+                                    <a id="videoOpenExternal" target="_blank" rel="noopener" class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700">Open Video</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slides (PDF) Modal -->
+            <div id="slidesModal" class="modal hidden z-50">
+                <div id="slidesModalContent" class="modal-content slides-modal-content slides-size-normal mx-auto p-0">
+                    <div class="flex items-center justify-between px-4 py-3 border-b rounded-t-lg bg-white">
+                        <h3 id="slidesTitle" class="text-lg font-bold text-papsi-dark">Slides</h3>
+                        <div class="flex items-center gap-2">
+                            <button id="spSizeNormal" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Normal</button>
+                            <button id="spSizeLarge" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Large</button>
+                            <button id="spSizeFull" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Full Screen</button>
+                            <button onclick="closeSlidesViewer()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close slides" type="button">&times;</button>
+                        </div>
+                    </div>
+                    <div class="bg-white">
+                        <div class="sp-body rounded-b-lg overflow-hidden relative">
+                            <iframe id="slidesFrame" class="sp-frame" title="Slides"></iframe>
+                            <div id="slidesLoading" class="absolute inset-0 flex items-center justify-center bg-white/60">
+                                <span class="inline-block w-10 h-10 border-4 border-gray-300 border-t-transparent rounded-full animate-spin"></span>
+                            </div>
+                            <div id="slidesFallback" class="hidden absolute inset-0 flex items-center justify-center">
+                                <div class="bg-white/95 rounded p-4 text-center max-w-md">
+                                    <div class="font-semibold text-papsi-dark mb-1">Unable to embed this PDF</div>
+                                    <div class="text-sm text-gray-600 mb-3">The source may block embedding. You can open it in a new tab:</div>
+                                    <a id="slidesOpenExternal" target="_blank" rel="noopener" class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700">Open PDF</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -413,6 +1145,7 @@
             <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Training center courses will be dynamically populated here -->
                 </div>
+                <div id="coursesPagination" class="w-full flex justify-center mt-6"></div>
                 <!-- Cart Modal -->
                 <div id="cartModal" class="modal hidden z-50">
                     <div class="modal-content mx-auto">
@@ -429,10 +1162,15 @@
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div class="flex-1">
                                     <label for="voucherInput" class="block text-sm font-medium text-gray-700 mb-1">Voucher Code</label>
-                                    <input id="voucherInput" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Enter voucher code for discount">
+                                    <div class="flex gap-2">
+                                        <input id="voucherInput" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Enter voucher code for discount">
+                                        <button id="validateVoucherBtn" onclick="validateVoucher()" class="bg-papsi-dark text-white px-3 py-2 rounded hover:bg-gray-800 transition-colors shrink-0">Validate</button>
+                                    </div>
+                                    <div id="voucherStatus" class="mt-1 text-sm"></div>
                                 </div>
                                 <div class="flex-1 text-right mt-2 md:mt-0">
                                     <div class="text-sm text-gray-600">Subtotal: <span id="cartSubtotal" class="font-semibold text-papsi-dark">₱0.00</span></div>
+                                    <div id="cartDiscountRow" class="text-sm text-gray-600 hidden">Discount: <span id="cartDiscount" class="font-semibold text-papsi-green">-₱0.00</span></div>
                                     <div class="text-base font-bold text-papsi-green">Total: <span id="cartTotal">₱0.00</span></div>
                                 </div>
                             </div>
@@ -450,7 +1188,7 @@
         <!-- Extras Page -->
         <div id="extras-page" class="page-content hidden">
             <h2 class="text-2xl font-bold text-papsi-dark mb-6">Extras</h2>
-            <div id="learningCoursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="extrasGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Calendar Modal -->
         <div id="calendarModal" class="modal hidden z-50">
             <div class="modal-content max-w-3xl mx-auto p-6">
@@ -564,98 +1302,9 @@ function renderCalendar() {
                             <p class="text-gray-600 text-sm">Verify certificates (enter code, check if valid)</p>
                         </div>
                     </div>
-                    <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
+                    <button onclick="openVerifyModal()" class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
                         Verify Certificate
                     </button>
-                    <!-- Verification Modal (refactored for consistent centering) -->
-                    <div id="verifyModal" class="modal hidden z-50">
-                        <div class="modal-content max-w-xs mx-auto p-6 relative flex flex-col items-center justify-center">
-                            <button onclick="closeVerifyModal()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></button>
-                            <h3 class="text-lg font-bold mb-4 text-papsi-dark">Certificate Verification</h3>
-                            <input id="verifyCodeInput" type="text" placeholder="Enter certificate code" class="w-full border border-gray-300 rounded px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-papsi-green">
-                            <div id="verifyResult" class="text-sm mb-3"></div>
-                            <div class="flex justify-end space-x-2 w-full">
-                                <button onclick="closeVerifyModal()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded">Cancel</button>
-                                <button onclick="verifyCertificate()" class="bg-papsi-green text-white px-3 py-1 rounded">Verify</button>
-                            </div>
-                        </div>
-                    </div>
-                    <script>
-                    // Verification modal logic (unchanged, just moved)
-                    (function() {
-                        // Attach handler to the correct Verify Certificate button
-                        const verifyBtn = document.querySelectorAll('button');
-                        verifyBtn.forEach(btn => {
-                            if (btn.textContent.trim() === 'Verify Certificate') {
-                                btn.onclick = openVerifyModal;
-                            }
-                        });
-                    })();
-                    function openVerifyModal() {
-                        document.getElementById('verifyModal').classList.remove('hidden');
-                        document.body.style.overflow = 'hidden';
-                        document.getElementById('verifyCodeInput').value = '';
-                        document.getElementById('verifyResult').textContent = '';
-                    }
-                    function closeVerifyModal() {
-                        document.getElementById('verifyModal').classList.add('hidden');
-                        document.body.style.overflow = 'auto';
-                    }
-                    async function verifyCertificate() {
-                        const code = document.getElementById('verifyCodeInput').value.trim();
-                        const resultDiv = document.getElementById('verifyResult');
-                        if (!code) {
-                            resultDiv.textContent = 'Please enter the certificate code.';
-                            resultDiv.className = 'text-red-600 mb-3';
-                            return;
-                        }
-                        resultDiv.textContent = 'Verifying...';
-                        resultDiv.className = 'text-gray-600 mb-3';
-                        try {
-                            const url = `https://script.google.com/macros/s/AKfycbxSvBt7qG2fz4w_y9P2CoV7RfJq0kvThANuCWsVRjJz5NaiqqidhgmHQJZneydAt2Yk/exec?ID=1ECREzocUMLr9HY9AoLSzNAJDRhtuBi3peuu8IDx2Daw&SH=Sheet1&func=verify&code=${encodeURIComponent(code)}`;
-                            const res = await fetch(url, { method: 'POST' });
-                            let text = await res.text();
-                            let data = null;
-                            try {
-                                data = JSON.parse(text);
-                            } catch (err) {
-                                // Not JSON, treat as plain text error
-                                if (text.trim() === 'Error: Invalid code') {
-                                    resultDiv.textContent = 'Error: Invalid code';
-                                    resultDiv.className = 'text-red-600 mb-3';
-                                    return;
-                                } else if (text.trim() === 'Error: Contact PAPSI Admin') {
-                                    resultDiv.textContent = 'Error: Contact PAPSI Admin';
-                                    resultDiv.className = 'text-red-600 mb-3';
-                                    return;
-                                } else {
-                                    resultDiv.textContent = text;
-                                    resultDiv.className = 'text-red-600 mb-3';
-                                    return;
-                                }
-                            }
-                            if (data && data.code && data.name && data.training) {
-                                resultDiv.innerHTML = `<span class='text-green-700 font-semibold'>Code: </span>${data.code}<br><span class='text-green-700 font-semibold'>Name: </span>${data.name}<br><span class='text-green-700 font-semibold'>Training: </span>${data.training}`;
-                                resultDiv.className = 'text-green-700 mb-3';
-                            } else if (data && data.error) {
-                                if (data.error.includes('Contact PAPSI Admin')) {
-                                    resultDiv.textContent = 'Error: Contact PAPSI Admin';
-                                } else if (data.error.includes('Invalid code')) {
-                                    resultDiv.textContent = 'Error: Invalid code';
-                                } else {
-                                    resultDiv.textContent = data.error;
-                                }
-                                resultDiv.className = 'text-red-600 mb-3';
-                            } else {
-                                resultDiv.textContent = 'Unknown error.';
-                                resultDiv.className = 'text-red-600 mb-3';
-                            }
-                        } catch (e) {
-                            resultDiv.textContent = 'Network error. Please try again.';
-                            resultDiv.className = 'text-red-600 mb-3';
-                        }
-                    }
-                    </script>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-sm p-6 card-hover">
@@ -724,6 +1373,19 @@ function renderCalendar() {
                     <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
                         Join Facebook Group
                     </button>
+                    <script>
+                    // Make the Community button open the Facebook group in a new tab
+                    (function() {
+                        const communityBtns = document.querySelectorAll('button');
+                        communityBtns.forEach(btn => {
+                            if (btn.textContent.trim() === 'Join Facebook Group') {
+                                btn.onclick = function() {
+                                    window.open('https://www.facebook.com/groups/papsifbgroup', '_blank');
+                                };
+                            }
+                        });
+                    })();
+                    </script>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-sm p-6 card-hover">
@@ -741,6 +1403,19 @@ function renderCalendar() {
                     <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
                         Visit Facebook Page
                     </button>
+                    <script>
+                    // Make the Facebook Page button open the official page in a new tab
+                    (function() {
+                        const fbPageBtns = document.querySelectorAll('button');
+                        fbPageBtns.forEach(btn => {
+                            if (btn.textContent.trim() === 'Visit Facebook Page') {
+                                btn.onclick = function() {
+                                    window.open('https://www.facebook.com/papsifbpage', '_blank');
+                                };
+                            }
+                        });
+                    })();
+                    </script>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-sm p-6 card-hover">
@@ -755,7 +1430,7 @@ function renderCalendar() {
                             <p class="text-gray-600 text-sm">Get assistance and contact support</p>
                         </div>
                     </div>
-                    <button class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
+                    <button onclick="openSupportModal()" class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">
                         Contact Support
                     </button>
                 </div>
@@ -768,19 +1443,19 @@ function renderCalendar() {
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center space-x-6 mb-8">
                     <div class="w-24 h-24 bg-papsi-green rounded-full flex items-center justify-center">
-                        <span class="text-white text-2xl font-medium">JD</span>
+                        <span id="avatarInitials" class="text-white text-2xl font-medium">JD</span>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-papsi-dark">John A Doe</h3>
+                        <h3 id="profileName" class="text-xl font-bold text-papsi-dark">John A Doe</h3>
                         <div class="flex items-center space-x-4 mt-1">
                             <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                                 Active
                             </span>
-                            <span class="text-gray-600 text-sm">PAPSI ID: 2025001</span>
+                            <span id="profileValidity" class="text-gray-500 text-sm">until Dec 12, 2025</span>
                         </div>
-                        <button class="mt-3 text-papsi-green hover:text-green-700 text-sm font-medium">
-                            Change Profile Picture
-                        </button>
+                        <div class="mt-1">
+                            <span id="profileId" class="text-gray-600 text-sm">PAPSI ID: 2025001</span>
+                        </div>
                     </div>
                 </div>
 
@@ -791,11 +1466,13 @@ function renderCalendar() {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Email</label>
-                                <input type="email" value="john.doe@email.com" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="emailInput" type="email" aria-readonly="true" readonly
+                                       value="john.doe@email.com"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Password</label>
-                                <input type="password" value="********" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="passwordInput" type="password" value="********" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                         </div>
                     </div>
@@ -806,39 +1483,41 @@ function renderCalendar() {
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Title</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <select id="profileTitle" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-controls="profileTitleOther" aria-expanded="false">
                                     <option>Mr.</option>
                                     <option>Ms.</option>
                                     <option>Mrs.</option>
                                     <option>Dr.</option>
-                                    <option>Prof.</option>
+                                    <option>Mx.</option>
+                                    <option>Other</option>
                                 </select>
+                                <input id="profileTitleOther" type="text" placeholder="Enter your title" class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green hidden">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">First Name</label>
-                                <input type="text" value="John" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="firstNameInput" type="text" aria-readonly="true" readonly value="John" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Middle Initial</label>
-                                <input type="text" value="A" maxlength="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="middleInitialInput" type="text" aria-readonly="true" readonly value="A" maxlength="1" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Last Name</label>
-                                <input type="text" value="Doe" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="lastNameInput" type="text" aria-readonly="true" readonly value="Doe" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Suffix</label>
-                                <input type="text" value="" placeholder="Jr., Sr., III, etc." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="suffixInput" type="text" aria-readonly="true" readonly value="" placeholder="Jr., Sr., III, etc." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Birth Date</label>
-                                <input type="date" value="1985-06-15" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="birthDateInput" type="date" value="1985-06-15" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Mobile Number</label>
-                                <input type="tel" value="+63 912 345 6789" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="mobileInput" type="tel" value="+63 912 345 6789" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                         </div>
                     </div>
@@ -849,11 +1528,11 @@ function renderCalendar() {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Name of School/Organization</label>
-                                <input type="text" value="University of the Philippines" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <input id="schoolInput" type="text" value="University of the Philippines" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Type</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <select id="typeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
                                     <option>Public</option>
                                     <option>Private</option>
                                 </select>
@@ -861,16 +1540,62 @@ function renderCalendar() {
                         </div>
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-papsi-dark mb-2">Address of School/Organization</label>
-                            <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Complete address of your school or organization">Diliman, Quezon City, Metro Manila 1101</textarea>
+                            <textarea id="addressTextarea" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Complete address of your school or organization">Diliman, Quezon City, Metro Manila 1101</textarea>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Position</label>
-                                <input type="text" value="Associate Professor" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <select id="positionSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-controls="positionOther" aria-expanded="false">
+                                    <option value="">Select position…</option>
+                                    <option>Student</option>
+                                    <option>Teacher</option>
+                                    <option>Subject Teacher</option>
+                                    <option>Class Adviser</option>
+                                    <option>Homeroom Teacher</option>
+                                    <option>Master Teacher</option>
+                                    <option>Lead Teacher</option>
+                                    <option>Head Teacher</option>
+                                    <option>Assistant Principal/ Vice Principal</option>
+                                    <option>Principal</option>
+                                    <option>Instructor</option>
+                                    <option>Lecturer</option>
+                                    <option>Adjunct Instructor/ Adjunct Faculty</option>
+                                    <option>Teaching Assistant</option>
+                                    <option>Graduate Assistant</option>
+                                    <option>Assistant Professor</option>
+                                    <option>Associate Professor</option>
+                                    <option>Professor</option>
+                                    <option>Visiting Professor/ Visiting Lecturer</option>
+                                    <option>Clinical Instructor/ Clinical Professor</option>
+                                    <option>Research Professor</option>
+                                    <option>Extension Professor</option>
+                                    <option>Distinguished Professor</option>
+                                    <option>Endowed Chair/ Chair Professor</option>
+                                    <option>Professor Emeritus/ Emerita</option>
+                                    <option>Tutor</option>
+                                    <option>Trainer</option>
+                                    <option>Mentor Teacher</option>
+                                    <option>Subject Matter Expert</option>
+                                    <option>Faculty Specialist</option>
+                                    <option>Other</option>
+                                </select>
+                                <input id="positionOther" type="text" placeholder="Enter your position" class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green hidden">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Specialization</label>
-                                <input type="text" value="Educational Psychology" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
+                                <select id="specializationSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-controls="specializationOther" aria-expanded="false">
+                                    <option value="">Select specialization…</option>
+                                    <option>Physics</option>
+                                    <option>Biology</option>
+                                    <option>Chemistry</option>
+                                    <option>Natural Science</option>
+                                    <option>Physical Science</option>
+                                    <option>General Science</option>
+                                    <option>Earth Science</option>
+                                    <option>Mathematics</option>
+                                    <option>Other</option>
+                                </select>
+                                <input id="specializationOther" type="text" placeholder="Enter your specialization" class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green hidden">
                             </div>
                         </div>
                     </div>
@@ -881,17 +1606,15 @@ function renderCalendar() {
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">About</label>
-                                <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Brief professional background and experience">Experienced educational psychologist with 10+ years in research and practice. Specializes in cognitive development and learning assessment methodologies.</textarea>
+                                <textarea id="aboutTextarea" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Brief professional background and experience">Experienced educational psychologist with 10+ years in research and practice. Specializes in cognitive development and learning assessment methodologies.</textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Research Interests</label>
-                                <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Areas of research interest">Cognitive development, learning disabilities, educational assessment, psychological testing, child psychology</textarea>
+                                <textarea id="researchTextarea" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Areas of research interest">Cognitive development, learning disabilities, educational assessment, psychological testing, child psychology</textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-papsi-dark mb-2">Publications</label>
-                                <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="List your publications, research papers, books, etc.">1. "Cognitive Assessment in Filipino Children" - Philippine Journal of Psychology (2022)
-2. "Learning Disabilities: A Comprehensive Guide" - PAPSI Publications (2021)
-3. "Educational Psychology in the Digital Age" - International Psychology Review (2020)</textarea>
+                                <textarea id="publicationsTextarea" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="List your publications, research papers, books, etc."></textarea>
                             </div>
                         </div>
                     </div>
@@ -1038,6 +1761,31 @@ function renderCalendar() {
         </div>
     </div>
 
+    <!-- Verification Modal -->
+    <div id="verifyModal" class="modal hidden z-50">
+        <div class="modal-content max-w-xl mx-auto p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-papsi-dark">Certificate Verification</h3>
+                <button onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600" aria-label="Close verification modal">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="verifyCodeInput" class="block text-sm font-medium text-gray-700 mb-1">Enter verification code</label>
+                    <input id="verifyCodeInput" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Enter the certificate code here.">
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button onclick="verifyCertificate()" class="bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors">Verify</button>
+                    <button onclick="closeVerifyModal()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors">Cancel</button>
+                </div>
+                <div id="verifyResult" class="text-sm"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentZoom = 1;
         let isDragging = false;
@@ -1050,10 +1798,194 @@ function renderCalendar() {
         // Dynamic data containers for courses
         let allCourses = [];
         let filteredCourses = [];
-        let filteredLearningCourses = [];
+
+        // --- Audio URL helpers ---
+        function getFirstUrlFromText(text) {
+            if (!text || typeof text !== 'string') return '';
+            // Extract the first http/https URL
+            const match = text.match(/https?:\/\/[^\s)]+/i);
+            return match ? match[0] : '';
+        }
+
+        function normalizeDriveUrl(url) {
+            if (!url) return '';
+            try {
+                const u = new URL(url);
+                if (u.hostname.includes('drive.google.com')) {
+                    // Patterns: /file/d/ID/view | /file/d/ID/preview | open?id=ID | uc?id=ID
+                    let id = '';
+                    const fileMatch = u.pathname.match(/\/file\/d\/([^/]+)/);
+                    if (fileMatch && fileMatch[1]) id = fileMatch[1];
+                    if (!id && (u.searchParams.get('id') || u.searchParams.get('file_id'))) {
+                        id = u.searchParams.get('id') || u.searchParams.get('file_id');
+                    }
+                    if (id) {
+                        return `https://drive.google.com/uc?export=download&id=${id}`;
+                    }
+                }
+            } catch {}
+            return url;
+        }
+
+        function normalizeDropboxUrl(url) {
+            if (!url) return '';
+            try {
+                const u = new URL(url);
+                if (u.hostname.includes('dropbox.com')) {
+                    // Ensure direct download for streaming
+                    u.searchParams.set('dl', '1');
+                    return u.toString();
+                }
+            } catch {}
+            return url;
+        }
+
+        function normalizeAudioUrl(raw) {
+            if (!raw || typeof raw !== 'string') return '';
+            let url = getFirstUrlFromText(raw.trim());
+            if (!/^https?:\/\//i.test(url)) return '';
+            // Normalize known hosts
+            url = normalizeDriveUrl(url);
+            url = normalizeDropboxUrl(url);
+            return url;
+        }
+
+        function resolveAudioFromItem(item) {
+            if (!item || typeof item !== 'object') return '';
+            // Prefer obvious fields first
+            const preferredKeys = [
+                'audio', 'Audio', 'audio_link', 'Audio Link', 'audioLink', 'AudioLink', 'audiourl', 'audio_url', 'Audio URL', 'audiourl'
+            ];
+            for (const key of preferredKeys) {
+                if (key in item && typeof item[key] === 'string') {
+                    const n = normalizeAudioUrl(item[key]);
+                    if (n) return n;
+                }
+            }
+            // Fallback: scan any field with "audio" in the key name
+            for (const k of Object.keys(item)) {
+                if (/audio/i.test(k) && typeof item[k] === 'string') {
+                    const n = normalizeAudioUrl(item[k]);
+                    if (n) return n;
+                }
+            }
+            return '';
+        }
+    // My Learning state (attended items per logged-in user)
+    let myLearning = [];
+    let filteredLearningCourses = [];
+    // Pagination for My Learning
+    let learningCurrentPage = 1;
+    const learningPerPage = 8;
+
+        // Robust date parsing for varying formats
+        function parseFlexDate(val) {
+            if (!val) return new Date(0);
+            // If already a Date
+            if (val instanceof Date) return isNaN(val) ? new Date(0) : val;
+            const s = String(val).trim();
+            // Try native first
+            let d = new Date(s);
+            if (!isNaN(d)) return d;
+            // Try DD/MM/YYYY or D/M/YYYY
+            const dmY = s.match(/^([0-3]?\d)[\/\-]([0-1]?\d)[\/\-](\d{4})$/);
+            if (dmY) {
+                const day = parseInt(dmY[1], 10);
+                const mon = parseInt(dmY[2], 10) - 1;
+                const yr = parseInt(dmY[3], 10);
+                d = new Date(yr, mon, day);
+                return isNaN(d) ? new Date(0) : d;
+            }
+            // Try YYYY/MM/DD
+            const yMd = s.match(/^(\d{4})[\/\-]([0-1]?\d)[\/\-]([0-3]?\d)$/);
+            if (yMd) {
+                const yr = parseInt(yMd[1], 10);
+                const mon = parseInt(yMd[2], 10) - 1;
+                const day = parseInt(yMd[3], 10);
+                d = new Date(yr, mon, day);
+                return isNaN(d) ? new Date(0) : d;
+            }
+            // Try DD-MMM-YYYY (e.g., 05-Feb-2024)
+            const dMonY = s.match(/^([0-3]?\d)[\-\s]([A-Za-z]{3,})[\-\s](\d{4})$/);
+            if (dMonY) {
+                const map = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+                const day = parseInt(dMonY[1], 10);
+                const mon = map[dMonY[2].slice(0,3).toLowerCase()];
+                const yr = parseInt(dMonY[3], 10);
+                if (typeof mon === 'number') {
+                    d = new Date(yr, mon, day);
+                    return isNaN(d) ? new Date(0) : d;
+                }
+            }
+            return new Date(0);
+        }
+
+        // Normalize a single attended item from server to UI course shape
+        function normalizeAttendedItem(it, idx) {
+            const d = parseFlexDate(it?.date);
+            const hoursRaw = (typeof it?.hours === 'number') ? it.hours : (it?.hours ? parseFloat(String(it.hours).replace(/[^0-9.]/g, '')) : 0);
+            const hoursNum = isNaN(hoursRaw) ? 0 : hoursRaw;
+            return {
+                id: `learn-${idx}`,
+                title: String(it?.title || ''),
+                instructor: String(it?.speaker || ''),
+                image: typeof it?.poster === 'string' ? it.poster : '',
+                category: it?.category === 'I.C.T.' ? 'ICT' : String(it?.category || ''),
+                date: d,
+                duration: hoursNum ? `${hoursNum} hours` : (it?.hours ? `${it.hours} hours` : ''),
+                hoursNum: hoursNum,
+                video: String(it?.video || ''),
+                module: String(it?.module || ''),
+                presentation: String(it?.presentation || ''),
+                description: ''
+            };
+        }
+
+        // Accept attended array and hydrate My Learning state + UI
+        function setMyLearning(attendedArr) {
+            if (!Array.isArray(attendedArr)) {
+                myLearning = [];
+                filteredLearningCourses = [];
+                learningCurrentPage = 1;
+                renderLearningCourses();
+                updateLearningCounters();
+                return;
+            }
+            myLearning = attendedArr.map((it, i) => normalizeAttendedItem(it, i));
+            filteredLearningCourses = [...myLearning];
+            learningCurrentPage = 1;
+            populateLearningFilters();
+            renderLearningCourses();
+            updateLearningCounters();
+            renderLearningStats();
+        }
+
+        // Populate My Learning filters from current myLearning data
+        function populateLearningFilters() {
+            const categoryEl = document.getElementById('learningCategoryFilter');
+            const speakerEl = document.getElementById('learningSpeakerFilter');
+            if (!categoryEl || !speakerEl) return;
+
+            const prevCat = categoryEl.value;
+            const prevSpk = speakerEl.value;
+
+            const categories = Array.from(new Set(myLearning.map(x => x.category).filter(Boolean))).sort();
+            const speakers = Array.from(new Set(myLearning.map(x => x.instructor).filter(Boolean))).sort();
+
+            categoryEl.innerHTML = '<option value="all">All Categories</option>' +
+                categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            speakerEl.innerHTML = '<option value="all">All Speakers</option>' +
+                speakers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+
+            // Try to preserve previous selections if still valid
+            if (prevCat && (prevCat === 'all' || categories.includes(prevCat))) categoryEl.value = prevCat;
+            if (prevSpk && (prevSpk === 'all' || speakers.includes(prevSpk))) speakerEl.value = prevSpk;
+        }
 
     // Cart state
     let cartCourses = [];
+    // Voucher state
+    let appliedVoucher = null; // { code: string, percentage: number, date?: string }
 
     // Pagination state for training center
     let currentPage = 1;
@@ -1061,7 +1993,7 @@ function renderCalendar() {
 
         // Fetch courses from endpoint and populate allCourses
         async function loadTrainingCourses() {
-            const url = "https://script.google.com/macros/s/AKfycbzHpSnUaiBzU-GC0YhkZVzXHfQkEN6i0N6a_Kp1XfUIr_GsgBTBpsj887zVeNr38ArNVQ/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=training&func=training";
+            const url = "https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=training&func=training";
             const grid = document.getElementById('coursesGrid');
             const counter = document.getElementById('resultsCounter');
             grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">Loading courses...</div>`;
@@ -1079,7 +2011,7 @@ function renderCalendar() {
                     price: item.promo_fee ? `₱${item.promo_fee}` : '',
                     originalPrice: item.regular_fee ? `₱${item.regular_fee}` : '',
                     description: item.about,
-                    audio: item.audio,
+                    audio: resolveAudioFromItem(item),
                     duration: item.hours + ' hours'
                 })) : [];
 
@@ -1152,12 +2084,16 @@ function renderCalendar() {
                 }
             });
 
+            // Reset to first page on new filter/search
+            currentPage = 1;
+
             renderCourses();
             updateCounters();
         }
 
         function renderCourses() {
             const grid = document.getElementById('coursesGrid');
+            const pag = document.getElementById('coursesPagination');
 
             // Helper to check if course is in cart
             function isInCart(courseId) {
@@ -1174,7 +2110,8 @@ function renderCalendar() {
                         <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
                     </div>
                 `;
-                // No pagination if no courses
+                // Clear pagination when no courses
+                if (pag) pag.innerHTML = '';
                 return;
             }
 
@@ -1189,13 +2126,6 @@ function renderCalendar() {
 
             // Render courses
             grid.innerHTML = coursesToShow.map(course => {
-                // Use function-scoped variables to avoid redeclaration errors
-                var catColors = {
-                    'Biology': 'bg-green-100 text-green-800',
-                    'Physics': 'bg-blue-100 text-blue-800',
-                    'Chemistry': 'bg-purple-100 text-purple-800',
-                    'ICT': 'bg-orange-100 text-orange-800'
-                };
 
                 var discountVal = 0;
                 var regVal = 0, promoVal = 0;
@@ -1207,51 +2137,50 @@ function renderCalendar() {
 
                 return `
                     <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                        <div class="h-48 overflow-hidden relative">
+                        <div class="relative bg-white overflow-hidden">
                             <img src="${course.image}" 
                                  alt="${course.title}" 
-                                 class="w-full h-full object-cover training-image"
+                                 class="block w-full h-auto object-contain training-image"
+                                 loading="lazy" decoding="async"
                                  onclick="openImageViewer(this.src, this.alt)"
                                  onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
                             <div class="absolute top-2 left-2">
-                                <span class="${catColors[course.category]} px-2 py-1 rounded text-xs font-medium">${course.category}</span>
+                                <span class="${categoryBadgeClasses(course.category)} px-2 py-1 rounded text-xs font-medium">${course.category || 'Other'}</span>
                             </div>
                             <div class="absolute top-2 right-2 flex space-x-1">
-                                <button onclick="showAbout('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
+                                <button onclick="showAbout('${course.id}')" class="bg-white rounded-full p-2 shadow-sm hover:shadow transition-all" aria-label="About">
                                     <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
-                                <button onclick="playAudio('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
+                                <button onclick="playAudio('${course.id}')" class="bg-white rounded-full p-2 shadow-sm hover:shadow transition-all ${!course.audio ? 'opacity-50 cursor-not-allowed' : ''}" ${!course.audio ? 'disabled' : ''} aria-label="Audio Preview">
                                     <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
                             </div>
+                            <!-- Bottom overlays -->
+                            <div class="absolute left-2 right-2 bottom-2 bg-white rounded-md shadow px-3 py-2">
+                                <div class="text-papsi-dark font-semibold text-sm">${course.title}</div>
+                                <div class="text-gray-600 text-xs mt-0.5">${course.instructor}</div>
+                            </div>
+                            <div class="absolute bottom-2 right-2 flex items-center gap-2">
+                                <div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">
+                                    <span class="text-papsi-gold font-semibold">${course.price || ''}</span>
+                                    ${course.originalPrice ? `<span class=\"text-gray-400 line-through ml-1\">${course.originalPrice}</span>` : ''}
+                                </div>
+                                ${(discountVal > 0) ? `<div class=\"bg-white rounded px-2 py-1 shadow text-xs font-medium\">₱${discountVal} OFF</div>` : ''}
+                                <div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">${course.duration || ''}</div>
+                            </div>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-semibold text-papsi-dark mb-2">${course.title}</h3>
-                            <p class="text-gray-600 text-sm mb-3">${course.instructor}</p>
-                            <div class="flex justify-between items-center mb-3">
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-papsi-gold font-semibold">${course.price}</span>
-                                    ${course.originalPrice ? `<span class="text-gray-400 line-through text-sm">${course.originalPrice}</span>` : ''}
-                                    ${(discountVal > 0) ? `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">₱${discountVal} OFF</span>` : ''}
-                                </div>
-                                <span class="text-xs text-gray-500">${course.duration}</span>
-                            </div>
                             <button class="w-full py-2 rounded transition-colors ${isInCart(course.id) ? 'bg-gray-400 cursor-not-allowed' : 'bg-papsi-green hover:bg-green-700 text-white'}" onclick="addToCart('${course.id}'); event.stopPropagation();" ${isInCart(course.id) ? 'disabled' : ''}>
                                 ${isInCart(course.id) ? 'Added to Cart' : 'Register Now'}
                             </button>
                         </div>
                     </div>
                 `;
-                const categoryColors = {
-                    'Biology': 'bg-green-100 text-green-800',
-                    'Physics': 'bg-blue-100 text-blue-800',
-                    'Chemistry': 'bg-purple-100 text-purple-800',
-                    'ICT': 'bg-orange-100 text-orange-800'
-                };
+                // Category colors now determined by helper
 
                 // Calculate discount dynamically
                 let discount = 0;
@@ -1272,15 +2201,15 @@ function renderCalendar() {
                                  onclick="openImageViewer(this.src, this.alt)"
                                  onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
                             <div class="absolute top-2 left-2">
-                                <span class="${categoryColors[course.category]} px-2 py-1 rounded text-xs font-medium">${course.category}</span>
+                                <span class="${categoryBadgeClasses(course.category)} px-2 py-1 rounded text-xs font-medium">${course.category}</span>
                             </div>
                             <div class="absolute top-2 right-2 flex space-x-1">
-                                <button onclick="showAbout('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
+                                <button onclick="showAbout('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all" aria-label="About">
                                     <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
-                                <button onclick="playAudio('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all">
+                                <button onclick="playAudio('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all ${!course.audio ? 'opacity-50 cursor-not-allowed' : ''}" ${!course.audio ? 'disabled' : ''} aria-label="Audio Preview">
                                     <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                     </svg>
@@ -1306,18 +2235,19 @@ function renderCalendar() {
                 `;
             }).join('');
 
-            // Pagination controls (dynamically render below courses)
-            if (totalPages > 1) {
-                const paginationHTML = `
-                    <div class="w-full flex justify-center mt-6">
+            // Pagination controls in external container to match My Learning
+            if (pag) {
+                if (totalPages > 1) {
+                    pag.innerHTML = `
                         <div class="flex items-center space-x-4">
                             <button onclick="changeCoursesPage(-1)" class="px-4 py-2 rounded border ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>
                             <span class="mx-2 text-sm">Page ${currentPage} of ${totalPages}</span>
                             <button onclick="changeCoursesPage(1)" class="px-4 py-2 rounded border ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>
                         </div>
-                    </div>
-                `;
-                grid.innerHTML += paginationHTML;
+                    `;
+                } else {
+                    pag.innerHTML = '';
+                }
             }
         }
 
@@ -1327,7 +2257,7 @@ function renderCalendar() {
             if (currentPage < 1) currentPage = 1;
             if (currentPage > totalPages) currentPage = totalPages;
             renderCourses();
-            updateCartCount();
+            updateCounters(); // also updates cart count
         }
 
         function updateCounters() {
@@ -1348,7 +2278,8 @@ function renderCalendar() {
                 return matchesSearch && matchesCategory && matchesSpeaker;
             }).length;
             
-            const shownCourses = filteredCourses.length;
+            const startIdx = (currentPage - 1) * coursesPerPage;
+            const shownCourses = Math.max(0, Math.min(coursesPerPage, filteredCourses.length - startIdx));
             
             // Update results counter
             document.getElementById('resultsCounter').textContent = `Showing ${shownCourses} of ${totalAvailable} courses`;
@@ -1370,7 +2301,7 @@ function renderCalendar() {
             cartCount.textContent = cartCourses.length;
         }
 
-        function openCart() {
+    function openCart() {
             // Hide other modals
             closeAbout();
             closeAudio();
@@ -1422,21 +2353,41 @@ function renderCalendar() {
                     }
                 }, 0);
             }
-            // Voucher logic (simple: 10% off for code 'PAPSI10')
-            const voucherInput = document.getElementById('voucherInput');
-            let voucher = voucherInput ? voucherInput.value.trim().toUpperCase() : '';
-            if (voucher === 'PAPSI10') {
-                voucherDiscount = subtotal * 0.10;
+            // Voucher logic: apply validated voucher percentage if present
+            if (appliedVoucher && typeof appliedVoucher.percentage === 'number' && appliedVoucher.percentage > 0) {
+                voucherDiscount = subtotal * (appliedVoucher.percentage / 100);
             }
             total = subtotal - voucherDiscount;
             // Update subtotal and total
             document.getElementById('cartSubtotal').textContent = `₱${subtotal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            const discountRow = document.getElementById('cartDiscountRow');
+            const discountEl = document.getElementById('cartDiscount');
+            if (discountRow && discountEl) {
+                if (voucherDiscount > 0) {
+                    discountRow.classList.remove('hidden');
+                    discountEl.textContent = `-₱${voucherDiscount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                } else {
+                    discountRow.classList.add('hidden');
+                    discountEl.textContent = '-₱0.00';
+                }
+            }
             document.getElementById('cartTotal').textContent = `₱${total.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             // Listen for voucher input changes
             setTimeout(() => {
                 const voucherInput = document.getElementById('voucherInput');
                 if (voucherInput) {
-                    voucherInput.oninput = openCart;
+                    voucherInput.oninput = () => {
+                        // If the user edits the input after validation, clear voucher state and status
+                        const val = voucherInput.value.trim().toUpperCase();
+                        if (!appliedVoucher || val !== (appliedVoucher.code || '')) {
+                            appliedVoucher = null;
+                            const vs = document.getElementById('voucherStatus');
+                            if (vs) vs.innerHTML = '';
+                            const discountRow = document.getElementById('cartDiscountRow');
+                            if (discountRow) discountRow.classList.add('hidden');
+                        }
+                        openCart();
+                    };
                 }
             }, 0);
             document.getElementById('cartModal').classList.remove('hidden');
@@ -1457,6 +2408,68 @@ function renderCalendar() {
 
         function closeCart() {
             document.getElementById('cartModal').classList.add('hidden');
+            // Reset voucher state when closing cart
+            appliedVoucher = null;
+            const vs = document.getElementById('voucherStatus');
+            if (vs) vs.innerHTML = '';
+            const discountRow = document.getElementById('cartDiscountRow');
+            if (discountRow) discountRow.classList.add('hidden');
+        }
+
+        // Validate voucher via Apps Script endpoint and apply discount
+        async function validateVoucher() {
+            const input = document.getElementById('voucherInput');
+            const status = document.getElementById('voucherStatus');
+            const code = (input?.value || '').trim().toUpperCase();
+            if (!status) return;
+            if (!code) {
+                status.innerHTML = '<span class="text-red-600">Please enter a voucher code.</span>';
+                appliedVoucher = null;
+                openCart();
+                return;
+            }
+            status.innerHTML = '<span class="text-gray-600">Validating voucher…</span>';
+
+            // Build endpoint URL
+            const base = 'https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec';
+            const params = new URLSearchParams({
+                ID: '1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg',
+                SH: 'voucher',
+                func: 'voucher',
+                code: code
+            });
+            const url = `${base}?${params.toString()}`;
+
+            try {
+                const res = await fetch(url, { method: 'GET' });
+                const text = await res.text();
+                try {
+                    const data = JSON.parse(text);
+                    // Expecting { code, percentage, date }
+                    const pct = Number(data.percentage);
+                    if (isNaN(pct) || pct <= 0) throw new Error('Invalid voucher percentage.');
+                    appliedVoucher = { code: data.code || code, percentage: pct, date: data.date };
+                    status.innerHTML = `<span class="text-green-700">Voucher applied: ${appliedVoucher.percentage}% off</span>`;
+                    openCart();
+                } catch (e) {
+                    // Non-JSON: plain text responses like "Voucher Expired" or "Error: Invalid code"
+                    const msg = (text || '').trim();
+                    if (/expired/i.test(msg)) {
+                        status.innerHTML = '<span class="text-red-600">Voucher expired.</span>';
+                    } else if (/invalid/i.test(msg)) {
+                        status.innerHTML = '<span class="text-red-600">Error: Invalid code.</span>';
+                    } else {
+                        status.innerHTML = `<span class=\"text-red-600\">${msg || 'Unable to validate voucher.'}</span>`;
+                    }
+                    appliedVoucher = null;
+                    openCart();
+                }
+            } catch (err) {
+                console.error('Voucher validation error:', err);
+                status.innerHTML = `<span class=\"text-red-600\">${err.message || 'Network error validating voucher.'}</span>`;
+                appliedVoucher = null;
+                openCart();
+            }
         }
 
         // Search and filter functionality for My Learning page
@@ -1466,8 +2479,8 @@ function renderCalendar() {
             const speakerFilter = document.getElementById('learningSpeakerFilter').value;
             const dateSort = document.getElementById('learningDateSort').value;
 
-            // Filter courses
-            filteredLearningCourses = allCourses.filter(course => {
+            // Filter courses from the user's learning list
+            filteredLearningCourses = myLearning.filter(course => {
                 const matchesSearch = !searchTerm || 
                     course.title.toLowerCase().includes(searchTerm) ||
                     course.instructor.toLowerCase().includes(searchTerm) ||
@@ -1488,8 +2501,10 @@ function renderCalendar() {
                 }
             });
 
+            learningCurrentPage = 1; // reset to first page on new filter
             renderLearningCourses();
             updateLearningCounters();
+            renderLearningStats();
         }
 
         function renderLearningCourses() {
@@ -1508,42 +2523,53 @@ function renderCalendar() {
                 return;
             }
 
-            grid.innerHTML = filteredLearningCourses.map(course => {
-                const categoryColors = {
-                    'Biology': 'bg-green-100 text-green-800',
-                    'Physics': 'bg-blue-100 text-blue-800',
-                    'Chemistry': 'bg-purple-100 text-purple-800',
-                    'ICT': 'bg-orange-100 text-orange-800'
-                };
+            // Pagination slice
+            const total = filteredLearningCourses.length;
+            const totalPages = Math.ceil(total / learningPerPage) || 1;
+            if (learningCurrentPage > totalPages) learningCurrentPage = totalPages;
+            if (learningCurrentPage < 1) learningCurrentPage = 1;
+            const start = (learningCurrentPage - 1) * learningPerPage;
+            const end = start + learningPerPage;
+            const pageItems = filteredLearningCourses.slice(start, end);
+
+            grid.innerHTML = pageItems.map(course => {
+
+                const hasVideo = !!(course.video && /https?:\/\//i.test(course.video));
+                const hasModule = !!(course.module && /https?:\/\//i.test(course.module));
+                const hasSlides = !!(course.presentation && /https?:\/\//i.test(course.presentation));
+                const disCls = 'opacity-60 cursor-not-allowed';
 
                 return `
                     <div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">
-                        <div class="h-48 overflow-hidden relative">
+                        <div class="relative bg-white overflow-hidden">
                             <img src="${course.image}" 
                                  alt="${course.title}" 
-                                 class="w-full h-full object-cover training-image"
+                                 class="block w-full h-auto object-contain training-image"
+                                 loading="lazy" decoding="async"
                                  onclick="openImageViewer(this.src, this.alt)"
                                  onerror="this.src=''; this.alt='Image failed to load'; this.style.display='none';">
                             <div class="absolute top-2 left-2">
-                                <span class="${categoryColors[course.category]} px-2 py-1 rounded text-xs font-medium">${course.category}</span>
+                                <span class="${categoryBadgeClasses(course.category)} px-2 py-1 rounded text-xs font-medium">${course.category || 'Other'}</span>
+                            </div>
+                            <div class="absolute left-2 right-2 bottom-2 bg-white rounded-md shadow px-3 py-2">
+                                <div class="text-papsi-dark font-semibold text-sm">${course.title}</div>
+                                <div class="text-gray-600 text-xs mt-0.5">${course.instructor}</div>
+                            </div>
+                            <div class="absolute bottom-2 right-2">
+                                <div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">${course.duration || ''}</div>
                             </div>
                         </div>
                         <div class="p-4">
-                            <h3 class="font-semibold text-papsi-dark mb-2">${course.title}</h3>
-                            <p class="text-gray-600 text-sm mb-3">${course.instructor}</p>
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-xs text-gray-500">${course.duration}</span>
-                            </div>
                             <div class="flex space-x-2">
-                                <button onclick="openCourseContent('video', '${course.title}')" class="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors flex items-center justify-center space-x-1">
+                                <button onclick="openCourseContent('video', '${course.id}')" class="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors flex items-center justify-center space-x-1 ${hasVideo ? '' : disCls}" ${hasVideo ? '' : 'disabled aria-disabled="true"'}>
                                     <span>📹</span>
                                     <span>Video</span>
                                 </button>
-                                <button onclick="openCourseContent('module', '${course.title}')" class="flex-1 bg-orange-600 text-white py-2 px-3 rounded text-sm hover:bg-orange-700 transition-colors flex items-center justify-center space-x-1">
+                                <button onclick="openCourseContent('module', '${course.id}')" class="flex-1 bg-orange-600 text-white py-2 px-3 rounded text-sm hover:bg-orange-700 transition-colors flex items-center justify-center space-x-1 ${hasModule ? '' : disCls}" ${hasModule ? '' : 'disabled aria-disabled="true"'}>
                                     <span>📚</span>
                                     <span>Module</span>
                                 </button>
-                                <button onclick="openCourseContent('presentation', '${course.title}')" class="flex-1 bg-purple-600 text-white py-2 px-3 rounded text-sm hover:bg-purple-700 transition-colors flex items-center justify-center space-x-1">
+                                <button onclick="openCourseContent('presentation', '${course.id}')" class="flex-1 bg-purple-600 text-white py-2 px-3 rounded text-sm hover:bg-purple-700 transition-colors flex items-center justify-center space-x-1 ${hasSlides ? '' : disCls}" ${hasSlides ? '' : 'disabled aria-disabled="true"'}>
                                     <span>📊</span>
                                     <span>Slides</span>
                                 </button>
@@ -1552,6 +2578,28 @@ function renderCalendar() {
                     </div>
                 `;
             }).join('');
+
+            // Pagination controls
+            if (totalPages > 1) {
+                grid.insertAdjacentHTML('beforeend', `
+                    <div class="col-span-full w-full flex justify-center mt-6">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="changeLearningPage(-1)" class="px-4 py-2 rounded border ${learningCurrentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}" ${learningCurrentPage === 1 ? 'disabled' : ''}>Previous</button>
+                            <span class="mx-2 text-sm">Page ${learningCurrentPage} of ${totalPages}</span>
+                            <button onclick="changeLearningPage(1)" class="px-4 py-2 rounded border ${learningCurrentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}" ${learningCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
+                        </div>
+                    </div>
+                `);
+            }
+        }
+
+        function changeLearningPage(delta) {
+            const totalPages = Math.ceil(filteredLearningCourses.length / learningPerPage) || 1;
+            learningCurrentPage += delta;
+            if (learningCurrentPage < 1) learningCurrentPage = 1;
+            if (learningCurrentPage > totalPages) learningCurrentPage = totalPages;
+            renderLearningCourses();
+            updateLearningCounters();
         }
 
         function updateLearningCounters() {
@@ -1560,7 +2608,7 @@ function renderCalendar() {
             const speakerFilter = document.getElementById('learningSpeakerFilter').value;
             
             // Calculate total available courses for current filters (including search)
-            let totalAvailable = allCourses.filter(course => {
+            let totalAvailable = myLearning.filter(course => {
                 const matchesSearch = !searchTerm || 
                     course.title.toLowerCase().includes(searchTerm) ||
                     course.instructor.toLowerCase().includes(searchTerm) ||
@@ -1571,16 +2619,76 @@ function renderCalendar() {
 
                 return matchesSearch && matchesCategory && matchesSpeaker;
             }).length;
-            
-            const shownCourses = filteredLearningCourses.length;
+            // Number shown on current page
+            const start = (learningCurrentPage - 1) * learningPerPage;
+            const end = Math.min(start + learningPerPage, filteredLearningCourses.length);
+            const shownCourses = Math.max(0, end - start);
             
             // Update results counter
             document.getElementById('learningResultsCounter').textContent = `Showing ${shownCourses} of ${totalAvailable} courses`;
         }
 
+        // Render dynamic statistics header for My Learning
+        function renderLearningStats() {
+            const el = document.getElementById('learningStatsGrid');
+            if (!el) return;
+            const total = myLearning.length;
+            const categories = myLearning.reduce((acc, c) => {
+                const key = c.category || 'Other';
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+            const totalHours = myLearning.reduce((sum, c) => sum + (c.hoursNum || 0), 0);
+
+            const parts = [
+                `<div class="text-center"><div class="text-2xl font-bold text-papsi-green">${total}</div><div class="text-sm text-gray-600">Total Sessions</div></div>`,
+                `<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">${totalHours}</div><div class="text-sm text-gray-600">Total Hours</div></div>`
+            ];
+            Object.entries(categories)
+                .sort((a,b)=> a[0].localeCompare(b[0]))
+                .forEach(([cat, count]) => {
+                    const color = categoryStatsText(cat);
+                    parts.push(`<div class="text-center"><div class="text-xl font-semibold ${color}">${count}</div><div class="text-sm text-gray-600">${escapeHtml(cat)}</div></div>`);
+                });
+
+            el.innerHTML = parts.join('');
+        }
+
+        // --- Learning Stats Visibility Toggle ---
+        const LEARNING_STATS_VISIBLE_KEY = 'PAPSI_LEARNING_STATS_VISIBLE';
+
+        function applyLearningStatsVisibility() {
+            const statsGrid = document.getElementById('learningStatsGrid');
+            const toggleBtn = document.getElementById('learningStatsToggle');
+            if (!statsGrid || !toggleBtn) return;
+            const visible = (localStorage.getItem(LEARNING_STATS_VISIBLE_KEY) ?? 'true') === 'true';
+            statsGrid.classList.toggle('hidden', !visible);
+            toggleBtn.setAttribute('aria-expanded', String(visible));
+            toggleBtn.textContent = visible ? 'Hide Stats' : 'Show Stats';
+        }
+
+        function toggleLearningStats() {
+            const current = (localStorage.getItem(LEARNING_STATS_VISIBLE_KEY) ?? 'true') === 'true';
+            localStorage.setItem(LEARNING_STATS_VISIBLE_KEY, String(!current));
+            applyLearningStatsVisibility();
+        }
+
+        function initLearningStatsVisibility() {
+            const toggleBtn = document.getElementById('learningStatsToggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleLearningStats);
+            }
+            applyLearningStatsVisibility();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initLearningStatsVisibility();
+        });
+
         function clearLearningSearch() {
             document.getElementById('learningSearchInput').value = '';
             document.getElementById('clearLearningSearch').classList.add('hidden');
+            learningCurrentPage = 1;
             filterLearningCourses();
         }
 
@@ -1650,6 +2758,9 @@ function renderCalendar() {
             if (page === 'learning') {
                 renderLearningCourses();
                 updateLearningCounters();
+                renderLearningStats();
+                // Ensure stats visibility preference is applied when entering the page
+                try { applyLearningStatsVisibility(); } catch {}
             }
         }
 
@@ -1748,44 +2859,46 @@ function renderCalendar() {
             const modal = document.getElementById('audioModal');
             const title = document.getElementById('audioTitle');
             const description = document.getElementById('audioDescription');
+            const audioContent = document.getElementById('audioContent');
             // Find course by id in allCourses or filteredCourses
             const course = allCourses.find(c => c.id === courseId) || filteredCourses.find(c => c.id === courseId);
             if (!course) return;
             title.textContent = `${course.title} - Audio Preview`;
-            // Add a working audio player if course.audio is a valid URL
-            let audioPlayerHtml = '';
-            if (course.audio && typeof course.audio === 'string' && course.audio.startsWith('http')) {
-                audioPlayerHtml = `<audio id="courseAudioPlayer" controls style="width:100%;margin-top:1rem;">
-                    <source src="${course.audio}" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>`;
+
+            // Clear previous content
+            audioContent.innerHTML = '';
+
+            const p = document.createElement('p');
+            p.className = 'text-gray-600 text-sm';
+            p.textContent = 'Listen to a preview.';
+            audioContent.appendChild(p);
+
+            if (course.audio && typeof course.audio === 'string' && /^https?:\/\//i.test(course.audio)) {
+                const audio = document.createElement('audio');
+                audio.id = 'courseAudioPlayer';
+                audio.controls = true;
+                audio.style.width = '100%';
+                audio.style.marginTop = '1rem';
+                audio.src = course.audio;
+                audio.preload = 'none';
+                audio.addEventListener('error', () => {
+                    const err = document.createElement('div');
+                    err.className = 'text-red-500 mt-2';
+                    err.textContent = 'Failed to load audio preview.';
+                    audio.replaceWith(err);
+                });
+                audioContent.appendChild(audio);
+                // Try autoplay; some browsers block it, so ignore errors
+                setTimeout(() => { try { audio.play(); } catch(_) {} }, 250);
             } else {
-                audioPlayerHtml = `<div class='text-red-500 mt-2'>No audio preview available.</div>`;
+                const warn = document.createElement('div');
+                warn.className = 'text-red-500 mt-2';
+                warn.textContent = 'No audio preview available.';
+                audioContent.appendChild(warn);
             }
-            description.innerHTML = `Listen to a preview.${audioPlayerHtml}`;
-            // Update Register Now button state
-            setTimeout(() => {
-                const btn = document.getElementById('audioRegisterBtn');
-                if (btn) {
-                    if (isInCart(courseId)) {
-                        btn.textContent = 'Added to Cart';
-                        btn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                        btn.classList.remove('bg-papsi-green', 'hover:bg-green-700');
-                        btn.disabled = true;
-                    } else {
-                        btn.textContent = 'Register Now';
-                        btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                        btn.classList.add('bg-papsi-green', 'hover:bg-green-700');
-                        btn.disabled = false;
-                    }
-                }
-            }, 0);
+
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            // Reset audio state (legacy UI, not used with native player)
-            audioPlaying = false;
-            audioProgress = 0;
-            updateAudioUI();
         }
 
 // Move these out of the modal functions so they are global
@@ -1807,10 +2920,10 @@ function audioRegisterNow() {
             const modal = document.getElementById('audioModal');
             modal.classList.add('hidden');
             document.body.style.overflow = 'auto';
-            
-            // Stop audio if playing
-            if (audioPlaying) {
-                toggleAudio();
+            // Stop audio element if present
+            const el = document.getElementById('courseAudioPlayer');
+            if (el && !el.paused) {
+                try { el.pause(); el.currentTime = 0; } catch {}
             }
         }
 
@@ -1971,11 +3084,20 @@ function audioRegisterNow() {
             }
         });
 
+        // Close Calendar when clicking on overlay
+        document.getElementById('calendarModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCalendarModal();
+            }
+        });
+
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             const imageViewer = document.getElementById('imageViewer');
             const aboutModal = document.getElementById('aboutModal');
             const audioModal = document.getElementById('audioModal');
+            const calendarModal = document.getElementById('calendarModal');
+            const verifyModal = document.getElementById('verifyModal');
             
             if (!imageViewer.classList.contains('hidden')) {
                 switch(e.key) {
@@ -2001,27 +3123,164 @@ function audioRegisterNow() {
                 if (e.key === 'Escape') {
                     closeAudio();
                 } else if (e.key === ' ') {
-                    e.preventDefault();
-                    toggleAudio();
+                    // Space toggles the real audio element if present
+                    const el = document.getElementById('courseAudioPlayer');
+                    if (el) {
+                        e.preventDefault();
+                        try { el.paused ? el.play() : el.pause(); } catch {}
+                    }
+                }
+            } else if (!calendarModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    closeCalendarModal();
+                }
+            } else if (!verifyModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    closeVerifyModal();
+                } else if (e.key === 'Enter') {
+                    // Trigger verification on Enter for convenience
+                    verifyCertificate();
                 }
             }
         });
 
-        // Handle form submission
-        document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Profile updated successfully!');
+        // Wire toggles for select-with-Other on Profile page and handle form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            // Helper: format YYYY-MM-DD -> MM/DD/YYYY for update endpoint
+            function formatDateForUpdate(dateVal) {
+                if (!dateVal) return '';
+                try {
+                    const s = String(dateVal);
+                    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                    if (m) return `${m[2]}/${m[3]}/${m[1]}`;
+                    const d = new Date(s);
+                    if (!isNaN(d)) {
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        const yy = d.getFullYear();
+                        return `${mm}/${dd}/${yy}`;
+                    }
+                } catch {}
+                return String(dateVal);
+            }
+            const pairs = [
+                ['profileTitle','profileTitleOther'],
+                ['positionSelect','positionOther'],
+                ['specializationSelect','specializationOther']
+            ];
+            pairs.forEach(([selId, otherId]) => {
+                const sel = document.getElementById(selId);
+                const other = document.getElementById(otherId);
+                if (!sel || !other) return;
+                sel.addEventListener('change', function() {
+                    if (sel.value === 'Other') {
+                        other.classList.remove('hidden');
+                        sel.setAttribute('aria-expanded', 'true');
+                        setTimeout(() => { try { other.focus(); } catch {} }, 0);
+                    } else {
+                        other.classList.add('hidden');
+                        other.value = '';
+                        sel.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
+
+            const formEl = document.querySelector('#profile-page form');
+            if (formEl) {
+                formEl.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    // Pull saved profile for id/email/password fallbacks
+                    let saved = null;
+                    try { saved = JSON.parse(localStorage.getItem('PAPSI_PROFILE') || 'null'); } catch {}
+
+                    const email = (document.getElementById('emailInput')?.value || saved?.email || '').trim();
+                    const pwdInput = (document.getElementById('passwordInput')?.value || '').trim();
+                    const password = (pwdInput && pwdInput !== '********') ? pwdInput : (saved?.password || '');
+                    const idVal = (saved?.id || '').toString().trim();
+
+                    const payload = {
+                        email,
+                        password,
+                        id: idVal,
+                        title: getSelectWithOtherValue('profileTitle','profileTitleOther'),
+                        birthdate: formatDateForUpdate(document.getElementById('birthDateInput')?.value || saved?.birthdate || ''),
+                        mobile: (document.getElementById('mobileInput')?.value || '').trim(),
+                        school: (document.getElementById('schoolInput')?.value || '').trim(),
+                        type: (document.getElementById('typeSelect')?.value || '').trim(),
+                        address: (document.getElementById('addressTextarea')?.value || '').trim(),
+                        position: getSelectWithOtherValue('positionSelect','positionOther'),
+                        specialization: getSelectWithOtherValue('specializationSelect','specializationOther'),
+                        about: (document.getElementById('aboutTextarea')?.value || '').trim(),
+                        researchinterests: (document.getElementById('researchTextarea')?.value || '').trim(),
+                        publications: (document.getElementById('publicationsTextarea')?.value || '').trim()
+                    };
+
+                    if (!email) { try { showToast('Email is required', 'error'); } catch {} return; }
+                    if (!idVal) { try { showToast('PAPSI ID is missing in profile', 'error'); } catch {} return; }
+
+                    const url = buildAuthUrl('update', payload);
+
+                    const submitBtn = e.submitter || formEl.querySelector('button[type="submit"]');
+                    const prevBtnText = submitBtn?.textContent || 'Save Changes';
+                    setPending(submitBtn, true, 'Saving…');
+
+                    try {
+                        const res = await fetch(url, { method: 'GET' });
+                        const text = await res.text();
+
+                        if (text.trim() === 'Error: Update Unsuccessful') {
+                            try { showToast('Error: Update Unsuccessful', 'error'); } catch {}
+                            return;
+                        }
+
+                        let profile = null;
+                        try {
+                            const data = JSON.parse(text);
+                            profile = normalizeServerProfile(data?.profile || data || null);
+                        } catch {
+                            try { showToast(text || 'Update failed.', 'error'); } catch {}
+                            return;
+                        }
+
+                        if (!profile || typeof profile !== 'object') {
+                            try { showToast('Update failed: invalid response.', 'error'); } catch {}
+                            return;
+                        }
+
+                        try { localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile)); } catch {}
+                        try { window.PAPSI_PROFILE = profile; } catch {}
+                        try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
+                        try { showToast('Update Successful', 'success'); } catch {}
+                    } catch (err) {
+                        try { showToast(err?.message || 'Unable to update profile.', 'error'); } catch {}
+                    } finally {
+                        setPending(submitBtn, false, prevBtnText);
+                    }
+                });
+            }
         });
 
-        // Handle course content access
-        function openCourseContent(contentType, courseName) {
-            const contentTypeNames = {
-                'video': 'Video Lecture',
-                'module': 'Course Module',
-                'presentation': 'Presentation Materials'
-            };
-            
-            alert(`Opening ${contentTypeNames[contentType]} for "${courseName}". This would normally open the ${contentType} content in a new window or embedded player.`);
+        // Handle course content access using myLearning links
+        function openCourseContent(contentType, courseId) {
+            const course = myLearning.find(c => c.id === courseId);
+            if (!course) return;
+            let url = '';
+            if (contentType === 'video') url = course.video;
+            else if (contentType === 'module') url = course.module;
+            else if (contentType === 'presentation') url = course.presentation;
+            if (!url || !/^https?:\/\//i.test(url)) {
+                // Graceful fallback: do nothing if disabled, but keep for safety
+                return;
+            }
+            if (contentType === 'video') {
+                openVideoPlayer(url, course.title || 'Video');
+                return;
+            }
+            if (contentType === 'presentation') {
+                openSlidesViewer(url, course.title || 'Slides');
+                return;
+            }
+            try { window.open(url, '_blank', 'noopener'); } catch (_) { location.href = url; }
         }
 
         // Handle enrollment buttons
@@ -2035,17 +3294,558 @@ function audioRegisterNow() {
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('cartButton').addEventListener('click', openCart);
             const cartModal = document.getElementById('cartModal');
-            if (!cartModal.classList.contains('hidden')) {
-                if (e.key === 'Escape') {
-                    closeCart();
-                }
-            }
+            // Note: Escape handling for cart is managed in the keydown listener above
             loadAnnouncements();
             loadAnnouncements();
             loadTrainingCourses();
             renderLearningCourses();
             updateLearningCounters();
+
+            // Wire Enter key on input to submit in verification modal
+            const verifyInput = document.getElementById('verifyCodeInput');
+            if (verifyInput) {
+                verifyInput.addEventListener('keydown', function(ev) {
+                    if (ev.key === 'Enter') {
+                        ev.preventDefault();
+                        verifyCertificate();
+                    }
+                });
+            }
         });
+
+        // Verification modal handlers
+        function openVerifyModal() {
+            const modal = document.getElementById('verifyModal');
+            const input = document.getElementById('verifyCodeInput');
+            const result = document.getElementById('verifyResult');
+            if (result) result.innerHTML = '';
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => input && input.focus(), 0);
+        }
+
+        function closeVerifyModal() {
+            const modal = document.getElementById('verifyModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close verification when clicking on overlay
+        document.getElementById('verifyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVerifyModal();
+            }
+        });
+
+        async function verifyCertificate() {
+            const inputEl = document.getElementById('verifyCodeInput');
+            const resultEl = document.getElementById('verifyResult');
+            const code = (inputEl?.value || '').trim();
+            if (!code) {
+                resultEl.innerHTML = '<div class="text-red-600">Please enter the certificate code.</div>';
+                return;
+            }
+
+            // Show loading state
+            resultEl.innerHTML = '<div class="text-gray-600">Verifying… Please wait.</div>';
+
+            // Build the GET URL with query params
+            const base = 'https://script.google.com/macros/s/AKfycbxSvBt7qG2fz4w_y9P2CoV7RfJq0kvThANuCWsVRjJz5NaiqqidhgmHQJZneydAt2Yk/exec';
+            const params = new URLSearchParams({
+                ID: '1ECREzocUMLr9HY9AoLSzNAJDRhtuBi3peuu8IDx2Daw',
+                SH: 'Sheet1',
+                func: 'verify',
+                code: code
+            });
+            const url = `${base}?${params.toString()}`;
+
+            try {
+                const res = await fetch(url, { method: 'GET' });
+                const text = await res.text();
+
+                // Success case: JSON with { code, name, training }
+                try {
+                    const data = JSON.parse(text);
+                    const vCode = data.code || code;
+                    const vName = data.name || '';
+                    const vTraining = data.training || '';
+                    resultEl.innerHTML = `
+                        <div class="p-3 rounded bg-green-50 border border-green-200 text-green-800">
+                            <div class="font-semibold">Certificate is valid</div>
+                            <div class="mt-1 text-sm">Code: <span class="font-medium">${vCode}</span></div>
+                            <div class="mt-1 text-sm">Name: <span class="font-medium">${vName}</span></div>
+                            <div class="mt-1 text-sm">Training: <span class="font-medium">${vTraining}</span></div>
+                        </div>`;
+                    return;
+                } catch (_) {
+                    // Not JSON: expect a plain-text error like "Error: Invalid code" or "Error: Contact PAPSI Admin"
+                    const errMsg = text?.trim() || 'Verification failed.';
+                    resultEl.innerHTML = `<div class="p-3 rounded bg-red-50 border border-red-200 text-red-700">${errMsg}</div>`;
+                    return;
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                resultEl.innerHTML = `<div class="p-3 rounded bg-red-50 border border-red-200 text-red-700">${error.message || 'Unable to verify at this time.'}</div>`;
+            }
+        }
     </script>
+
+    <script>
+        // Populate Profile page dynamically from a provided JSON object
+        // Expected keys: id, date, email, password, title, firstname, middleinitial, lastname, suffix,
+        // birthdate, mobile, school, type, address, position, specialization, about, researchinterests, publications
+        function setProfile(p) {
+            if (!p || typeof p !== 'object') return;
+            // Header
+            const idEl = document.getElementById('profileId');
+            const validityEl = document.getElementById('profileValidity');
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('avatarInitials');
+            const headerInitEl = document.getElementById('headerInitials');
+            const homeInitEl = document.getElementById('homeWelcomeInitials');
+            const homeNameEl = document.getElementById('homeWelcomeName');
+            if (idEl && p.id) idEl.textContent = `PAPSI ID: ${p.id}`;
+            if (validityEl && p.date) validityEl.textContent = formatValidity(p.date);
+            if (nameEl) nameEl.textContent = buildFullName(p);
+            if (avatarEl) avatarEl.textContent = buildInitials(p);
+            if (headerInitEl) headerInitEl.textContent = buildInitials(p);
+            if (homeInitEl) homeInitEl.textContent = buildInitials(p);
+            if (homeNameEl) homeNameEl.textContent = `Welcome, ${buildFullName(p)}`;
+
+            // Account
+            setValue('emailInput', p.email);
+            setValue('passwordInput', p.password);
+
+            // Personal
+            setSelectWithOther('profileTitle', 'profileTitleOther', p.title);
+            setValue('firstNameInput', p.firstname);
+            setValue('middleInitialInput', p.middleinitial);
+            setValue('lastNameInput', p.lastname);
+            setValue('suffixInput', p.suffix);
+            setValue('birthDateInput', normalizeDateInput(p.birthdate));
+            setValue('mobileInput', p.mobile);
+
+            // Affiliation
+            setValue('schoolInput', p.school);
+            setSelect('typeSelect', p.type);
+            setValue('addressTextarea', p.address);
+            setSelectWithOther('positionSelect', 'positionOther', p.position);
+            setSelectWithOther('specializationSelect', 'specializationOther', p.specialization);
+
+            // Academic & Research
+            setValue('aboutTextarea', p.about);
+            setValue('researchTextarea', p.researchinterests);
+            setValue('publicationsTextarea', p.publications);
+
+            // My Learning: accept either Attended or attended (already normalized by normalizeServerProfile),
+            // or fallback to a global attached object if provided elsewhere
+            try {
+                const attended = Array.isArray(p.Attended) ? p.Attended : (Array.isArray(p.attended) ? p.attended : (Array.isArray(window.PAPSI_ATTENDED) ? window.PAPSI_ATTENDED : null));
+                if (attended) setMyLearning(attended);
+            } catch {}
+        }
+
+        function setValue(id, val) {
+            const el = document.getElementById(id);
+            if (el != null && typeof val !== 'undefined' && val !== null) {
+                el.value = String(val);
+            }
+        }
+        function setSelect(id, val) {
+            const el = document.getElementById(id);
+            if (!el || typeof val === 'undefined' || val === null) return;
+            const v = String(val).trim();
+            for (const opt of el.options) {
+                if (opt.text.replace('.', '').toLowerCase() === v.replace('.', '').toLowerCase()) {
+                    el.value = opt.text;
+                    return;
+                }
+            }
+            // If not found, add as custom option
+            const opt = document.createElement('option');
+            opt.text = v;
+            opt.value = v;
+            el.add(opt);
+            el.value = v;
+        }
+        // Helpers for select + Other pattern
+        function setSelectWithOther(selectId, otherInputId, value) {
+            const sel = document.getElementById(selectId);
+            const other = document.getElementById(otherInputId);
+            if (!sel || !other) return;
+            const v = (value ?? '').toString().trim();
+
+            // If blank: prefer placeholder option (value="") if present
+            if (!v) {
+                const placeholder = Array.from(sel.options).find(o => o.value === '');
+                if (placeholder) sel.value = '';
+                else sel.selectedIndex = 0;
+                other.classList.add('hidden');
+                other.value = '';
+                sel.setAttribute('aria-expanded', 'false');
+                return;
+            }
+
+            const matchOpt = Array.from(sel.options).find(o => o.text.toLowerCase() === v.toLowerCase());
+            if (matchOpt && matchOpt.text.toLowerCase() !== 'other') {
+                sel.value = matchOpt.value || matchOpt.text;
+                other.classList.add('hidden');
+                other.value = '';
+                sel.setAttribute('aria-expanded', 'false');
+            } else {
+                sel.value = 'Other';
+                other.classList.remove('hidden');
+                other.value = v;
+                sel.setAttribute('aria-expanded', 'true');
+            }
+        }
+        function getSelectWithOtherValue(selectId, otherInputId) {
+            const sel = document.getElementById(selectId);
+            const other = document.getElementById(otherInputId);
+            if (!sel) return '';
+            const val = sel.value;
+            if (val === 'Other') return other ? (other.value || '').trim() : '';
+            return val;
+        }
+        function buildFullName(p) {
+            const parts = [];
+            if (p.firstname) parts.push(p.firstname);
+            if (p.middleinitial) parts.push(String(p.middleinitial).charAt(0).toUpperCase() + '.');
+            if (p.lastname) parts.push(p.lastname);
+            if (p.suffix) parts.push(String(p.suffix).trim());
+            return parts.join(' ') || 'Member';
+        }
+        function buildInitials(p) {
+            const a = (p.firstname || '').trim();
+            const b = (p.lastname || '').trim();
+            const inits = `${a.charAt(0)}${b.charAt(0)}`.toUpperCase();
+            return inits || 'MM';
+        }
+        function formatValidity(dateStr) {
+            // Accepts ISO (YYYY-MM-DD), MM/DD/YYYY, or Date string; outputs like "until Dec 12, 2025"
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return String(dateStr);
+                const fmt = d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                return `until ${fmt}`;
+            } catch { return String(dateStr); }
+        }
+        function normalizeDateInput(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const da = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${da}`;
+        }
+
+        // If a global object is present, auto-populate
+        if (window.PAPSI_PROFILE) {
+            try { setProfile(window.PAPSI_PROFILE); } catch (_) { /* no-op */ }
+        }
+    </script>
+
+    <!-- Contact Support Modal -->
+    <div id="supportModal" class="modal hidden z-50">
+        <div class="modal-content max-w-xl mx-auto p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-papsi-dark">Contact Support</h3>
+                <button onclick="closeSupportModal()" class="text-gray-400 hover:text-gray-600" aria-label="Close support modal">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Email Section -->
+                <div>
+                    <h4 class="text-lg font-semibold text-papsi-dark">Email Us</h4>
+                    <p class="text-gray-600 text-sm">We usually respond within a business day.</p>
+                    <div class="mt-3 flex flex-wrap gap-2 items-center">
+                        <span class="text-sm text-papsi-dark font-medium">papsi.seminar@gmail.com</span>
+                        <a class="bg-papsi-green text-white px-3 py-2 rounded hover:bg-green-700 transition-colors"
+                           href="mailto:papsi.seminar@gmail.com?subject=PAPSI%20Support&body=Hello%20PAPSI%20Support%2C%0A%0APlease%20help%20me%20with%20...%0A%0AThank%20you%2C%0A%3CYour%20Name%3E">
+                           Email Us
+                        </a>
+                        <button onclick="copyToClipboard('papsi.seminar@gmail.com')" class="bg-gray-200 text-papsi-dark px-3 py-2 rounded hover:bg-gray-300 transition-colors">Copy Email</button>
+                    </div>
+                </div>
+
+                <!-- Call or SMS Section -->
+                <div>
+                    <h4 class="text-lg font-semibold text-papsi-dark">Call or SMS</h4>
+                    <p class="text-gray-600 text-sm">We’re reachable during business hours (PH Time).</p>
+                    <div class="mt-3 flex flex-wrap gap-2 items-center">
+                        <span class="text-sm text-papsi-dark font-medium">+63 966 165 2084</span>
+                        <a class="bg-papsi-green text-white px-3 py-2 rounded hover:bg-green-700 transition-colors" href="tel:+639661652084">Call</a>
+                        <a class="bg-papsi-dark text-white px-3 py-2 rounded hover:bg-gray-800 transition-colors" href="sms:+639661652084?body=Hello%20PAPSI%20Support%2C">SMS</a>
+                        <button onclick="copyToClipboard('+639661652084')" class="bg-gray-200 text-papsi-dark px-3 py-2 rounded hover:bg-gray-300 transition-colors">Copy Number</button>
+                    </div>
+                </div>
+
+                <div id="supportCopyStatus" class="text-sm"></div>
+                <div class="flex gap-2 justify-end">
+                    <button onclick="closeSupportModal()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openSupportModal() {
+            const modal = document.getElementById('supportModal');
+            const status = document.getElementById('supportCopyStatus');
+            if (status) status.textContent = '';
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSupportModal() {
+            const modal = document.getElementById('supportModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        // Close Support when clicking on overlay
+        document.getElementById('supportModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSupportModal();
+            }
+        });
+        // Clipboard helper
+        async function copyToClipboard(text) {
+            const status = document.getElementById('supportCopyStatus');
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    // Fallback
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                if (status) status.innerHTML = '<span class="text-green-700">Copied to clipboard.</span>';
+            } catch (err) {
+                if (status) status.innerHTML = '<span class="text-red-600">Failed to copy.</span>';
+            }
+        }
+        // Add ESC handling for support modal alongside others
+        document.addEventListener('keydown', function(e) {
+            const supportModal = document.getElementById('supportModal');
+            if (supportModal && !supportModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    closeSupportModal();
+                }
+            }
+        });
+        </script>
+        <script>
+        // ===== Video Player (in-page) =====
+        function normalizeVideoUrl(input) {
+            const url = String(input || '').trim();
+            if (!url) return null;
+            if (/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return { mode: 'video', src: url, raw: url };
+            if (/drive\.google\.com\/file\/d\//i.test(url)) {
+                const id = (url.match(/\/file\/d\/([^/]+)/i) || [])[1];
+                if (id) return { mode: 'iframe', src: `https://drive.google.com/file/d/${id}/preview`, raw: url };
+            }
+            if (/drive\.google\.com\/open\?id=/i.test(url)) {
+                try { const id = new URL(url).searchParams.get('id'); if (id) return { mode: 'iframe', src: `https://drive.google.com/file/d/${id}/preview`, raw: url }; } catch {}
+            }
+            if (/youtube\.com\/watch\?v=/i.test(url)) {
+                try { const id = new URL(url).searchParams.get('v'); if (id) return { mode: 'iframe', src: `https://www.youtube.com/embed/${id}`, raw: url }; } catch {}
+            }
+            if (/youtu\.be\//i.test(url)) {
+                const id = (url.match(/youtu\.be\/([^?&#]+)/i) || [])[1];
+                if (id) return { mode: 'iframe', src: `https://www.youtube.com/embed/${id}`, raw: url };
+            }
+            if (/vimeo\.com\/\d+/i.test(url)) {
+                const id = (url.match(/vimeo\.com\/(\d+)/i) || [])[1];
+                if (id) return { mode: 'iframe', src: `https://player.vimeo.com/video/${id}`, raw: url };
+            }
+            if (/onedrive\.live\.com\/embed/i.test(url)) return { mode: 'iframe', src: url, raw: url };
+            if (/1drv\.ms\//i.test(url)) return { mode: 'iframe', src: url, raw: url };
+            return { mode: 'iframe', src: url, raw: url };
+        }
+
+        const VP_SIZE_KEY = 'PAPSI_VP_SIZE';
+
+        function setVideoSize(size) {
+            const content = document.getElementById('videoModalContent');
+            if (!content) return;
+            content.classList.remove('video-size-normal','video-size-large','video-size-full');
+            if (size === 'large') content.classList.add('video-size-large');
+            else if (size === 'full') content.classList.add('video-size-full');
+            else content.classList.add('video-size-normal');
+            try { localStorage.setItem(VP_SIZE_KEY, size); } catch {}
+        }
+
+        function openVideoPlayer(url, title) {
+            const norm = normalizeVideoUrl(url);
+            const modal = document.getElementById('videoPlayerModal');
+            const content = document.getElementById('videoModalContent');
+            const titleEl = document.getElementById('videoPlayerTitle');
+            const embed = document.getElementById('videoEmbedContainer');
+            const loading = document.getElementById('videoLoading');
+            const fallback = document.getElementById('videoFallback');
+            const openExternal = document.getElementById('videoOpenExternal');
+            if (!modal || !content || !titleEl || !embed || !loading || !fallback) return;
+
+            titleEl.textContent = title || 'Video';
+            embed.innerHTML = '';
+            loading.classList.remove('hidden');
+            fallback.classList.add('hidden');
+            if (openExternal) openExternal.href = (norm && norm.raw) || url;
+
+            setVideoSize(localStorage.getItem(VP_SIZE_KEY) || 'normal');
+
+            if (norm && norm.mode === 'video') {
+                const vid = document.createElement('video');
+                vid.src = norm.src;
+                vid.controls = true;
+                vid.autoplay = true;
+                vid.playsInline = true;
+                vid.style.width = '100%';
+                vid.style.height = '100%';
+                vid.addEventListener('canplay', () => loading.classList.add('hidden'), { once: true });
+                embed.appendChild(vid);
+            } else {
+                const ifr = document.createElement('iframe');
+                ifr.src = norm ? norm.src : url;
+                ifr.title = title || 'Video';
+                ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+                ifr.allowFullscreen = true;
+                ifr.frameBorder = '0';
+                ifr.style.width = '100%';
+                ifr.style.height = '100%';
+                ifr.addEventListener('load', () => loading.classList.add('hidden'), { once: true });
+                embed.appendChild(ifr);
+                setTimeout(() => {
+                    if (!loading.classList.contains('hidden')) {
+                        loading.classList.add('hidden');
+                        fallback.classList.remove('hidden');
+                    }
+                }, 5000);
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoPlayer() {
+            const modal = document.getElementById('videoPlayerModal');
+            const embed = document.getElementById('videoEmbedContainer');
+            if (embed) embed.innerHTML = '';
+            if (modal) modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            if (typeof showPage === 'function') showPage('learning');
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            document.getElementById('vpSizeNormal')?.addEventListener('click', ()=>setVideoSize('normal'));
+            document.getElementById('vpSizeLarge')?.addEventListener('click', ()=>setVideoSize('large'));
+            document.getElementById('vpSizeFull')?.addEventListener('click', ()=>setVideoSize('full'));
+            document.addEventListener('keydown', function(e){
+                const modal = document.getElementById('videoPlayerModal');
+                if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') {
+                    e.preventDefault();
+                    closeVideoPlayer();
+                }
+            });
+            document.getElementById('videoPlayerModal')?.addEventListener('click', function(e){ if (e.target === this) closeVideoPlayer(); });
+        });
+        // ===== End Video Player =====
+
+        // ===== Slides (PDF) Viewer =====
+        function normalizePdfUrl(input) {
+            const url = String(input || '').trim();
+            if (!url) return null;
+            // Google Drive file link → preview
+            if (/drive\.google\.com\/file\/d\//i.test(url)) {
+                const id = (url.match(/\/file\/d\/([^/]+)/i) || [])[1];
+                if (id) return { mode: 'drive', src: `https://drive.google.com/file/d/${id}/preview`, raw: url };
+            }
+            if (/drive\.google\.com\/open\?id=/i.test(url)) {
+                try {
+                    const id = new URL(url).searchParams.get('id');
+                    if (id) return { mode: 'drive', src: `https://drive.google.com/file/d/${id}/preview`, raw: url };
+                } catch {}
+            }
+            // Direct PDF → use PDF.js online viewer
+            if (/\.pdf(\?|#|$)/i.test(url)) {
+                const viewer = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=';
+                return { mode: 'pdfjs', src: viewer + encodeURIComponent(url), raw: url };
+            }
+            // Fallback
+            return { mode: 'iframe', src: url, raw: url };
+        }
+
+        const SP_SIZE_KEY = 'PAPSI_SP_SIZE';
+        function setSlidesSize(size) {
+            const content = document.getElementById('slidesModalContent');
+            if (!content) return;
+            content.classList.remove('slides-size-normal','slides-size-large','slides-size-full');
+            if (size === 'large') content.classList.add('slides-size-large');
+            else if (size === 'full') content.classList.add('slides-size-full');
+            else content.classList.add('slides-size-normal');
+            try { localStorage.setItem(SP_SIZE_KEY, size); } catch {}
+        }
+
+        function openSlidesViewer(url, title) {
+            const norm = normalizePdfUrl(url);
+            const modal = document.getElementById('slidesModal');
+            const frame = document.getElementById('slidesFrame');
+            const loading = document.getElementById('slidesLoading');
+            const fallback = document.getElementById('slidesFallback');
+            const openExternal = document.getElementById('slidesOpenExternal');
+            const titleEl = document.getElementById('slidesTitle');
+            if (!modal || !frame || !loading || !fallback) return;
+
+            titleEl.textContent = title || 'Slides';
+            loading.classList.remove('hidden');
+            fallback.classList.add('hidden');
+            if (openExternal) openExternal.href = (norm && norm.raw) || url;
+
+            setSlidesSize(localStorage.getItem(SP_SIZE_KEY) || 'normal');
+            frame.src = norm ? norm.src : url;
+            const onLoad = () => { loading.classList.add('hidden'); frame.removeEventListener('load', onLoad); };
+            frame.addEventListener('load', onLoad);
+            setTimeout(() => {
+                if (!loading.classList.contains('hidden')) {
+                    loading.classList.add('hidden');
+                    fallback.classList.remove('hidden');
+                }
+            }, 5000);
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSlidesViewer() {
+            const modal = document.getElementById('slidesModal');
+            const frame = document.getElementById('slidesFrame');
+            if (frame) frame.src = 'about:blank';
+            if (modal) modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            if (typeof showPage === 'function') showPage('learning');
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            document.getElementById('spSizeNormal')?.addEventListener('click', ()=>setSlidesSize('normal'));
+            document.getElementById('spSizeLarge')?.addEventListener('click', ()=>setSlidesSize('large'));
+            document.getElementById('spSizeFull')?.addEventListener('click', ()=>setSlidesSize('full'));
+            document.addEventListener('keydown', function(e){
+                const modal = document.getElementById('slidesModal');
+                if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') {
+                    e.preventDefault();
+                    closeSlidesViewer();
+                }
+            });
+            document.getElementById('slidesModal')?.addEventListener('click', function(e){ if (e.target === this) closeSlidesViewer(); });
+        });
+        // ===== End Slides (PDF) Viewer =====
+        </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98288178e4bb6e8c',t:'MTc1ODQ0NjYyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

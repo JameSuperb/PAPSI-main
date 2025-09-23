@@ -1947,17 +1947,16 @@ function renderCalendar() {
                 myLearning = [];
                 filteredLearningCourses = [];
                 learningCurrentPage = 1;
-                renderLearningCourses();
-                updateLearningCounters();
+                // Go through canonical pipeline to ensure sorting/counters/stats
+                filterLearningCourses();
                 return;
             }
             myLearning = attendedArr.map((it, i) => normalizeAttendedItem(it, i));
             filteredLearningCourses = [...myLearning];
             learningCurrentPage = 1;
             populateLearningFilters();
-            renderLearningCourses();
-            updateLearningCounters();
-            renderLearningStats();
+            // Use canonical pipeline so default sort (newest) applies on first render
+            filterLearningCourses();
         }
 
         // Populate My Learning filters from current myLearning data
@@ -2756,9 +2755,8 @@ function renderCalendar() {
 
             // Initialize learning courses grid if learning page is shown
             if (page === 'learning') {
-                renderLearningCourses();
-                updateLearningCounters();
-                renderLearningStats();
+                // Use canonical pipeline to apply current filters and default sort
+                filterLearningCourses();
                 // Ensure stats visibility preference is applied when entering the page
                 try { applyLearningStatsVisibility(); } catch {}
             }

@@ -8,7 +8,7 @@
     <script>
     // --- DYNAMIC ANNOUNCEMENTS ---
     async function loadAnnouncements() {
-        const url = "https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=announcement&func=announcement";
+    const url = "https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec?SH=announcement&func=announcement";
         const container = document.getElementById('announcementsContainer');
         container.innerHTML = '<div class="text-center text-gray-500 py-8">Loading announcements...</div>';
         try {
@@ -87,6 +87,11 @@
             color: #166938;
             border-bottom: 2px solid #166938;
         }
+        /* Year bar animation + styling */
+        .animate-width { animation: barGrow .9s cubic-bezier(.65,.05,.36,1) forwards; transform-origin: left; }
+        @keyframes barGrow { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+        .year-bar-item { transition: background .25s, box-shadow .25s; }
+        .year-bar-item:hover { background:#f5f9f6; }
         .card-hover {
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -240,6 +245,41 @@
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
+    <style>
+    /* Inline enhancement: refresh button spin + hover micro-interaction */
+    @keyframes refresh-spin { to { transform: rotate(360deg); } }
+    .refresh-icon.spin { animation: refresh-spin .8s linear infinite; }
+    .refresh-btn:hover .refresh-icon:not(.spin) { animation: refresh-spin .6s linear; }
+    .refresh-btn:focus-visible { outline: 2px solid #166534; outline-offset: 2px; }
+    /* Module modal styles */
+    .module-modal-content { max-width: 80rem; }
+    .mm-body { height: 80vh; }
+    .mm-frame { width:100%; height:100%; border:0; background:#fff; }
+    .modules-toggle-active { background:#166534; color:#fff; }
+    </style>
+    <style>
+    /* Mobile Filter Drawer (progressive enhancement) */
+    @media (max-width: 767px) {
+        .filters-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1490; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+        .filters-overlay.visible { opacity:1; pointer-events:auto; }
+        .filters-drawer { position:fixed; top:0; left:0; bottom:0; width:290px; max-width:85%; background:#fff; z-index:1500; box-shadow:0 10px 30px -5px rgba(0,0,0,.25); display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .30s ease; }
+        .filters-drawer.open { transform:translateX(0); }
+        .filters-drawer-header { padding:0.85rem 1rem; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; }
+        .filters-drawer-body { padding:1rem; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        .filters-drawer-close-btn { padding:.5rem; border-radius:.375rem; }
+        body.filters-lock { overflow:hidden; touch-action:none; }
+        /* Hide original inline cards when converted to drawer */
+        .filters-inline-hidden { display:none !important; }
+    }
+    @media (min-width: 768px) {
+        /* Desktop: reset drawer elements so content displays inline normally */
+        .filters-overlay { display:none !important; }
+        .filters-drawer { position:static; width:auto; max-width:none; height:auto; transform:none !important; box-shadow:none; background:transparent; }
+        .filters-drawer-header { display:none; }
+        .filters-drawer-body { padding:0; overflow:visible; }
+        .filters-mobile-trigger { display:none !important; }
+    }
+    </style>
     <!-- Auth Overlay (Phase 1: UI only; hidden until wired) -->
     <div id="authOverlay" class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[2000] overflow-auto hidden">
         <div class="min-h-screen flex items-center justify-center p-6">
@@ -854,17 +894,42 @@
     }
     function setPending(btn, isPending, text) {
         if (!btn) return;
+        const inlineSpin = btn.hasAttribute('data-inline-spin');
         if (isPending) {
-            btn.dataset.prevText = btn.textContent || '';
-            const label = text || btn.textContent || '';
-            btn.innerHTML = `<span class="inline-block w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin align-[-2px]"></span>${escapeHtml(label)}`;
-            btn.disabled = true;
-            btn.classList.add('opacity-70','cursor-not-allowed');
+            if (inlineSpin) {
+                const icon = btn.querySelector('.refresh-icon');
+                if (icon) icon.classList.add('spin');
+                if (text) {
+                    const span = btn.querySelector('span');
+                    if (span) span.textContent = text;
+                }
+                btn.disabled = true;
+                btn.classList.add('opacity-70','cursor-not-allowed');
+            } else {
+                if (!btn.dataset.prevHtml) btn.dataset.prevHtml = btn.innerHTML;
+                const label = text || btn.textContent || '';
+                btn.innerHTML = `<span class=\"inline-block w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin align-[-2px]\"></span>${escapeHtml(label)}`;
+                btn.disabled = true;
+                btn.classList.add('opacity-70','cursor-not-allowed');
+            }
         } else {
-            btn.textContent = text || btn.dataset.prevText || btn.textContent || '';
-            btn.disabled = false;
-            btn.classList.remove('opacity-70','cursor-not-allowed');
-            delete btn.dataset.prevText;
+            if (inlineSpin) {
+                const icon = btn.querySelector('.refresh-icon');
+                if (icon) icon.classList.remove('spin');
+                // restore original text if we altered it
+                // (We didn't store old text separately; if needed we could, but leaving as-is keeps last label.)
+                btn.disabled = false;
+                btn.classList.remove('opacity-70','cursor-not-allowed');
+            } else {
+                if (btn.dataset.prevHtml) {
+                    btn.innerHTML = btn.dataset.prevHtml;
+                    delete btn.dataset.prevHtml;
+                } else {
+                    btn.textContent = text || btn.textContent || '';
+                }
+                btn.disabled = false;
+                btn.classList.remove('opacity-70','cursor-not-allowed');
+            }
         }
     }
     function clearAuthStatuses() {
@@ -922,8 +987,6 @@
                     <h1 class="text-xl font-bold text-papsi-dark">Member Portal</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button id="refreshBtn" class="px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm">Refresh</button>
-                    <button id="logoutBtn" class="hidden px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm">Logout</button>
                     <div class="w-8 h-8 bg-papsi-green rounded-full flex items-center justify-center">
                         <span id="headerInitials" class="text-white text-sm font-medium">MM</span>
                     </div>
@@ -943,11 +1006,25 @@
                         <span id="homeWelcomeInitials" class="text-white text-xl font-medium">MM</span>
                     </div>
                     <div>
-                        <h2 id="homeWelcomeName" class="text-2xl font-bold text-papsi-dark">Welcome, Member</h2>
+                        <h2 class="text-2xl font-bold text-papsi-dark leading-snug">
+                            Welcome<br>
+                            <span id="homeWelcomeName" class="block">Member</span>
+                        </h2>
                         <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mt-2">
                             Active Member
                         </span>
                     </div>
+                </div>
+                <!-- Option B Integration: Inline About & Privacy buttons inside the Welcome card -->
+                <div class="flex flex-wrap items-center gap-2 pt-3 mt-1 border-t border-gray-100">
+                    <button type="button" onclick="openInfoModal('aboutInfoModal')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-papsi-dark focus:outline-none focus:ring-2 focus:ring-papsi-green/60 focus:ring-offset-1 transition">
+                        <svg class="w-4 h-4 text-papsi-green" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-9.5a.75.75 0 111.5 0v5a.75.75 0 01-1.5 0v-5zM10 7a.875.875 0 100-1.75A.875.875 0 0010 7z" clip-rule="evenodd"/></svg>
+                        <span>About PAPSI</span>
+                    </button>
+                    <button type="button" onclick="openInfoModal('privacyInfoModal')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-papsi-dark focus:outline-none focus:ring-2 focus:ring-papsi-green/60 focus:ring-offset-1 transition">
+                        <svg class="w-4 h-4 text-papsi-green" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a6 6 0 016 6v1.086a2 2 0 01.586 1.414l-.007.178c-.1 1.897-.698 3.495-1.89 4.947-1.135 1.382-2.63 2.405-4.57 3.162a1.99 1.99 0 01-1.438 0c-1.94-.757-3.435-1.78-4.57-3.162-1.192-1.452-1.79-3.05-1.89-4.947L2 10.5A2 2 0 012.586 9.086V8a6 6 0 016-6z"/><path fill="#fff" d="M10 7a2 2 0 00-2 2v2.25a2 2 0 001.106 1.79l.788.394.788-.395A2 2 0 0012 11.25V9a2 2 0 00-2-2z"/></svg>
+                        <span>Privacy Policy</span>
+                    </button>
                 </div>
             </div>
 
@@ -967,14 +1044,30 @@
                 <div class="relative overflow-hidden">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-2xl font-bold text-papsi-dark">My Learning</h2>
-                        <button id="learningStatsToggle" class="text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" aria-controls="learningStatsGrid" aria-expanded="true">Hide Stats</button>
+                        <button id="learningStatsToggle" class="text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" aria-controls="learningStatsSection" aria-expanded="false">Show Stats</button>
                     </div>
-                    <div id="learningStatsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
+                    <div id="learningStatsSection" class="hidden">
+                        <div id="learningStatsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
+                        <div id="learningYearBars" class="space-y-2 mb-2"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Search and Filter Controls -->
-            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <!-- Mobile Trigger (My Learning Filters) -->
+            <div class="mb-4 md:hidden">
+                <button id="learningFiltersMobileBtn" type="button" class="filters-mobile-trigger flex items-center gap-2 px-3 py-2 rounded bg-papsi-green text-white text-sm font-medium shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="learningFiltersDrawer">Filters
+                    <span id="learningFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
+                </button>
+            </div>
+            <!-- Search and Filter Controls (Learning) -->
+            <div id="learningFiltersDrawer" class="filters-drawer md:bg-white md:rounded-lg md:shadow-sm md:p-4 mb-6" role="dialog" aria-modal="true" aria-labelledby="learningFiltersHeading">
+                <div class="filters-drawer-header md:hidden">
+                    <h3 id="learningFiltersHeading" class="font-semibold text-papsi-dark text-sm">My Learning Filters</h3>
+                    <button type="button" class="filters-drawer-close-btn text-gray-500 hover:text-gray-700 hover:bg-gray-100" aria-label="Close filters" onclick="closeFiltersDrawer('learning')">
+                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l8 8M6 14L14 6"/></svg>
+                    </button>
+                </div>
+                <div class="filters-drawer-body md:p-0">
                 <div class="flex flex-col md:flex-row gap-4 items-center">
                     <!-- Search Bar -->
                     <div class="flex-1 relative">
@@ -1014,12 +1107,13 @@
                     </select>
                 </div>
                 
-                <!-- Results Counter -->
-                <div class="mt-4 text-sm text-gray-600">
-                    <div id="learningResultsCounter" class="font-medium">
-                        Showing 6 of 6 courses
+                    <!-- Results Counter -->
+                    <div class="mt-4 text-sm text-gray-600">
+                        <div id="learningResultsCounter" class="font-medium">
+                            Showing 6 of 6 courses
+                        </div>
                     </div>
-                </div>
+                </div><!-- /drawer body -->
             </div>
             
 
@@ -1029,30 +1123,40 @@
             
             <!-- Video Player Modal -->
             <div id="videoPlayerModal" class="modal hidden z-50">
-                <div id="videoModalContent" class="modal-content video-modal-content video-size-normal mx-auto p-0">
-                    <div class="flex items-center justify-between px-4 py-3 border-b rounded-t-lg bg-white">
-                        <h3 id="videoPlayerTitle" class="text-lg font-bold text-papsi-dark">Video</h3>
-                        <div class="flex items-center gap-2">
-                            <button id="vpSizeNormal" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Normal</button>
-                            <button id="vpSizeLarge" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Large</button>
-                            <button id="vpSizeFull" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Full Screen</button>
-                            <button onclick="closeVideoPlayer()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close video player" type="button">&times;</button>
-                        </div>
+                <div id="videoModalContent" class="modal-content video-modal-content video-size-normal mx-auto p-0 flex flex-col">
+                    <!-- Header: Title + Close -->
+                    <div class="flex items-start justify-between px-4 py-3 border-b bg-white rounded-t-lg">
+                        <h3 id="videoPlayerTitle" class="text-lg font-bold text-papsi-dark flex-1 min-w-0 whitespace-normal break-words pr-6" title="Video Title">Video</h3>
+                        <button onclick="closeVideoPlayer()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close video player" type="button">&times;</button>
                     </div>
+                    <!-- Body: Video Area -->
                     <div class="bg-white">
-                        <div class="vp-aspect bg-black rounded-b-lg overflow-hidden relative">
+                        <div class="vp-aspect bg-black overflow-hidden relative">
                             <div id="videoEmbedContainer"></div>
                             <div id="videoLoading" class="absolute inset-0 flex items-center justify-center">
                                 <span class="inline-block w-10 h-10 border-4 border-white/70 border-t-transparent rounded-full animate-spin"></span>
                             </div>
-                            <div id="videoFallback" class="hidden absolute inset-0 flex items-center justify-center">
-                                <div class="bg-white/95 rounded p-4 text-center max-w-md">
+                            <div id="videoFallback" class="hidden absolute inset-0 flex items-center justify-center p-4">
+                                <div class="bg-white/95 rounded p-4 text-center max-w-md shadow">
                                     <div class="font-semibold text-papsi-dark mb-1">Unable to embed this video</div>
                                     <div class="text-sm text-gray-600 mb-3">The source may block embedding. You can open it in a new tab:</div>
                                     <a id="videoOpenExternal" target="_blank" rel="noopener" class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700">Open Video</a>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <!-- Footer: Size Controls -->
+                    <div class="px-4 py-3 border-t bg-white flex items-center gap-2 rounded-b-lg">
+                        <button id="vpSizeNormal" class="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green" type="button" title="Normal size" aria-label="Normal size">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="4" y="6" width="12" height="8" rx="1"/></svg>
+                        </button>
+                        <button id="vpSizeLarge" class="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green" type="button" title="Large size" aria-label="Large size">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5.5" width="13" height="9" rx="1"/><path d="M6 5.5v-2M14 5.5v-2M6 17v-2M14 17v-2" stroke-linecap="round"/></svg>
+                        </button>
+                        <button id="vpSizeFull" class="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green" type="button" title="Full screen" aria-label="Full screen">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4"/></svg>
+                        </button>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -1062,12 +1166,7 @@
                 <div id="slidesModalContent" class="modal-content slides-modal-content slides-size-normal mx-auto p-0">
                     <div class="flex items-center justify-between px-4 py-3 border-b rounded-t-lg bg-white">
                         <h3 id="slidesTitle" class="text-lg font-bold text-papsi-dark">Slides</h3>
-                        <div class="flex items-center gap-2">
-                            <button id="spSizeNormal" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Normal</button>
-                            <button id="spSizeLarge" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Large</button>
-                            <button id="spSizeFull" class="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" type="button">Full Screen</button>
-                            <button onclick="closeSlidesViewer()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close slides" type="button">&times;</button>
-                        </div>
+                        <button onclick="closeSlidesViewer()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close slides" type="button">&times;</button>
                     </div>
                     <div class="bg-white">
                         <div class="sp-body rounded-b-lg overflow-hidden relative">
@@ -1080,6 +1179,40 @@
                                     <div class="font-semibold text-papsi-dark mb-1">Unable to embed this PDF</div>
                                     <div class="text-sm text-gray-600 mb-3">The source may block embedding. You can open it in a new tab:</div>
                                     <a id="slidesOpenExternal" target="_blank" rel="noopener" class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700">Open PDF</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modules (Drive Folder) Modal -->
+            <div id="modulesModal" class="modal hidden z-50">
+                <div id="modulesModalContent" class="modal-content module-modal-content mx-auto p-0">
+                    <div class="px-4 py-3 border-b rounded-t-lg bg-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex rounded overflow-hidden border">
+                                <button id="modulesViewList" type="button" class="px-2 py-1 text-xs flex items-center gap-1 hover:bg-gray-200" title="List view" aria-label="List view">
+                                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h12M4 10h12M4 14h12" stroke-linecap="round"/></svg>
+                                </button>
+                                <button id="modulesViewGrid" type="button" class="px-2 py-1 text-xs flex items-center gap-1 hover:bg-gray-200" title="Grid view" aria-label="Grid view">
+                                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="4" height="4" rx="1"/><rect x="12" y="4" width="4" height="4" rx="1"/><rect x="4" y="12" width="4" height="4" rx="1"/><rect x="12" y="12" width="4" height="4" rx="1"/></svg>
+                                </button>
+                            </div>
+                            <button onclick="closeModulesViewer()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close modules" type="button">&times;</button>
+                        </div>
+                        <h3 id="modulesTitle" class="text-lg font-bold text-papsi-dark whitespace-normal break-words leading-snug">Modules</h3>
+                    </div>
+                    <div class="bg-white">
+                        <div class="mm-body rounded-b-lg overflow-hidden relative">
+                            <iframe id="modulesFrame" class="mm-frame" title="Modules Folder"></iframe>
+                            <div id="modulesLoading" class="absolute inset-0 flex items-center justify-center bg-white/70">
+                                <span class="inline-block w-10 h-10 border-4 border-gray-300 border-t-transparent rounded-full animate-spin"></span>
+                            </div>
+                            <div id="modulesFallback" class="hidden absolute inset-0 flex items-center justify-center p-4">
+                                <div class="bg-white/95 rounded p-4 text-center max-w-md shadow">
+                                    <div class="font-semibold text-papsi-dark mb-1">Unable to embed this folder</div>
+                                    <div class="text-sm text-gray-600 mb-3">Open it in a new tab:</div>
+                                    <a id="modulesOpenExternal" target="_blank" rel="noopener" class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700">Open Folder</a>
                                 </div>
                             </div>
                         </div>
@@ -1099,9 +1232,35 @@
                     <span id="cartCount" class="ml-1">0</span>
                 </button>
             </div>
+            <!-- Training Statistics Header -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-papsi-dark">Training Statistics</h3>
+                        <button id="trainingStatsToggle" class="text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" aria-controls="trainingStatsSection" aria-expanded="false">Show Stats</button>
+                    </div>
+                    <div id="trainingStatsSection" class="hidden">
+                        <div id="trainingStatsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
+                        <div id="trainingYearBars" class="space-y-2 mb-2"></div>
+                    </div>
+                </div>
+            </div>
             
-            <!-- Search and Filter Controls -->
-            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <!-- Mobile Trigger (Training Filters) -->
+            <div class="mb-4 md:hidden">
+                <button id="trainingFiltersMobileBtn" type="button" class="filters-mobile-trigger flex items-center gap-2 px-3 py-2 rounded bg-papsi-green text-white text-sm font-medium shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="trainingFiltersDrawer">Filters
+                    <span id="trainingFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
+                </button>
+            </div>
+            <!-- Search and Filter Controls (Training Center) -->
+            <div id="trainingFiltersDrawer" class="filters-drawer md:bg-white md:rounded-lg md:shadow-sm md:p-4 mb-6" role="dialog" aria-modal="true" aria-labelledby="trainingFiltersHeading">
+                <div class="filters-drawer-header md:hidden">
+                    <h3 id="trainingFiltersHeading" class="font-semibold text-papsi-dark text-sm">Training Filters</h3>
+                    <button type="button" class="filters-drawer-close-btn text-gray-500 hover:text-gray-700 hover:bg-gray-100" aria-label="Close filters" onclick="closeFiltersDrawer('training')">
+                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l8 8M6 14L14 6"/></svg>
+                    </button>
+                </div>
+                <div class="filters-drawer-body md:p-0">
                 <div class="flex flex-col md:flex-row gap-4 items-center">
                     <!-- Search Bar -->
                     <div class="flex-1 relative">
@@ -1134,12 +1293,13 @@
                     </select>
                 </div>
                 
-                <!-- Results Counter -->
-                <div class="mt-4 text-sm text-gray-600">
-                    <div id="resultsCounter" class="font-medium">
-                        Showing 6 of 6 courses
+                    <!-- Results Counter -->
+                    <div class="mt-4 text-sm text-gray-600">
+                        <div id="resultsCounter" class="font-medium">
+                            Showing 6 of 6 courses
+                        </div>
                     </div>
-                </div>
+                </div><!-- /drawer body -->
             </div>
             
             <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1290,6 +1450,216 @@ function renderCalendar() {
     // Optionally, you can add a click handler to each cell to show a modal with all events for that day
 }
 </script>
+<script>
+// === Sticky Checkout Bar & Cart UX Enhancement (Persistent) ===
+const CART_COACH_KEY = 'PAPSI_CART_COACH_DONE';
+const CART_HIDE_BAR_KEY = 'PAPSI_HIDE_CART_BAR';
+const CART_STORAGE_KEY = 'PAPSI_CART_ITEMS';
+
+// Load persisted cart early if available
+try {
+    const savedCart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
+    if (Array.isArray(savedCart) && savedCart.every(x => typeof x === 'string')) {
+        cartCourses = savedCart; // will sync UI after data load
+    }
+} catch {}
+
+function persistCart(){
+    try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartCourses)); } catch {}
+}
+
+function formatMoney(n){ return '₱' + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function computeCartSubtotal(){
+    let subtotal = 0;
+    (cartCourses||[]).forEach(id=>{
+        const c = (allCourses||[]).find(x=>x.id===id);
+        if(!c) return;
+        let price = 0;
+        if (c.price) price = parseFloat(String(c.price).replace(/[^0-9.]/g,''));
+        if(!isNaN(price)) subtotal += price;
+    });
+    return subtotal;
+}
+function updateCartBar(){
+    const bar = document.getElementById('cartStickyBar');
+    if(!bar) return;
+    const count = cartCourses.length;
+    if(count === 0){
+        bar.classList.add('hidden');
+        dismissCoachMark();
+        return;
+    }
+    const c1 = document.getElementById('cartBarCount');
+    const c2 = document.getElementById('cartBarItems');
+    const sub = document.getElementById('cartBarSubtotal');
+    if(c1) c1.textContent = count;
+    if(c2) c2.textContent = count;
+    if(sub) sub.textContent = formatMoney(computeCartSubtotal());
+    bar.classList.remove('hidden');
+    positionCoachMark();
+}
+function hideCartBar(){
+    const bar = document.getElementById('cartStickyBar');
+    if(bar) bar.classList.add('hidden');
+    try { localStorage.setItem(CART_HIDE_BAR_KEY,'1'); } catch {}
+}
+function maybeShowCartBarFirstTime(){
+    try { if(localStorage.getItem(CART_HIDE_BAR_KEY)==='1') return; } catch {}
+    updateCartBar();
+}
+function showAddToastWithAction(title){
+    try {
+        showToast(`${title} added to cart`, 'success', 4000);
+        const container = document.getElementById('toastContainer');
+        const last = container?.lastElementChild;
+        if(last){
+            const btn = document.createElement('button');
+            btn.textContent = 'View Cart';
+            btn.className = 'ml-auto bg-white/20 hover:bg-white/30 text-white text-xs px-2 py-1 rounded';
+            btn.onclick = () => openCart();
+            last.appendChild(btn);
+        }
+    } catch {}
+}
+// Coach mark
+function positionCoachMark(){
+    const coach = document.getElementById('cartCoachMark');
+    const bar = document.getElementById('cartStickyBar');
+    if(!coach || !bar || bar.classList.contains('hidden')) return;
+    const rect = bar.getBoundingClientRect();
+    coach.style.left = (rect.left + 24) + 'px';
+    coach.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+}
+function showCoachMarkOnce(){
+    try { if(localStorage.getItem(CART_COACH_KEY)==='1') return; } catch {}
+    const coach = document.getElementById('cartCoachMark');
+    const bar = document.getElementById('cartStickyBar');
+    if(!coach || !bar || bar.classList.contains('hidden')) return;
+    coach.classList.remove('hidden');
+    positionCoachMark();
+    window.addEventListener('resize', positionCoachMark);
+    window.addEventListener('scroll', positionCoachMark, { passive:true });
+}
+function dismissCoachMark(){
+    const coach = document.getElementById('cartCoachMark');
+    if(coach && !coach.classList.contains('hidden')){
+        coach.classList.add('hidden');
+        window.removeEventListener('resize', positionCoachMark);
+        window.removeEventListener('scroll', positionCoachMark);
+        try { localStorage.setItem(CART_COACH_KEY,'1'); } catch {}
+    }
+}
+window.dismissCoachMark = dismissCoachMark;
+
+// Clear entire cart
+function clearEntireCart(){
+    if(!cartCourses.length) return;
+    cartCourses = [];
+    persistCart();
+    renderCourses();
+    updateCartCount();
+    closeCart();
+    updateCartBar();
+    try { showToast('Cart cleared','info'); } catch {}
+}
+
+// Wrap originals — preserve existing behavior
+if(typeof addToCart === 'function'){
+    const __origAddToCart = addToCart;
+    addToCart = function(courseId){
+        const pre = cartCourses.length;
+        __origAddToCart(courseId);
+        if(cartCourses.length > pre){
+            persistCart();
+            const c = (allCourses||[]).find(x=>x.id===courseId);
+            showAddToastWithAction(c ? c.title : 'Course');
+            updateCartBar();
+            if(pre === 0){ setTimeout(showCoachMarkOnce, 600); }
+        }
+    };
+}
+if(typeof updateCartCount === 'function'){
+    const __origUpdateCartCount = updateCartCount;
+    updateCartCount = function(){ __origUpdateCartCount(); updateCartBar(); };
+}
+if(typeof removeFromCart === 'function'){
+    const __origRemoveFromCart = removeFromCart;
+    removeFromCart = function(id){ __origRemoveFromCart(id); persistCart(); updateCartBar(); };
+}
+if(typeof openCart === 'function'){
+    const __origOpenCart = openCart;
+    openCart = function(){ __origOpenCart(); updateCartBar(); };
+}
+if(typeof closeCart === 'function'){
+    const __origCloseCart = closeCart;
+    closeCart = function(){ __origCloseCart(); updateCartBar(); };
+}
+
+// After training data loads, ensure cart items still valid & prune removed courses
+const __origRenderCourses = typeof renderCourses === 'function' ? renderCourses : null;
+if(__origRenderCourses){
+    renderCourses = function(){
+        __origRenderCourses();
+        // prune cart of non-existent IDs (e.g., after data refresh)
+        const before = cartCourses.length;
+        cartCourses = cartCourses.filter(id => (allCourses||[]).some(c => c.id === id));
+        if(cartCourses.length !== before) { persistCart(); updateCartCount(); }
+        updateCartBar();
+    };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    maybeShowCartBarFirstTime();
+    if(cartCourses.length){ setTimeout(showCoachMarkOnce, 800); }
+});
+</script>
+        <!-- Sticky Checkout Bar & Coach Mark -->
+        <div id="cartStickyBar" class="fixed left-0 right-0 bottom-4 z-[1100] px-3 hidden">
+            <div class="mx-auto max-w-4xl bg-white border shadow-lg rounded-xl flex items-center justify-between gap-4 px-4 py-3 animate-[cartBarIn_.35s_ease]">
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="openCart()" class="relative w-11 h-11 rounded-full bg-papsi-green text-white flex items-center justify-center hover:bg-green-700 transition" aria-label="Open cart">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.35 2.7A1 1 0 007 17h10a1 1 0 00.95-.68L21 13M7 13V6a1 1 0 011-1h5a1 1 0 011 1v7"/>
+                        </svg>
+                        <span id="cartBarCount" class="absolute -top-1 -right-1 text-[10px] bg-white text-papsi-green font-bold px-1.5 py-0.5 rounded-full shadow">0</span>
+                    </button>
+                    <div class="leading-tight">
+                        <div class="text-xs text-gray-500">Subtotal</div>
+                        <div class="text-sm font-semibold text-papsi-dark"><span id="cartBarSubtotal">₱0.00</span></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" onclick="openCart()" class="text-sm px-4 py-2 rounded bg-papsi-green text-white font-medium hover:bg-green-700 shadow-sm">Checkout (<span id="cartBarItems">0</span>)</button>
+                    <button type="button" onclick="clearEntireCart()" class="text-sm px-3 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Clear Cart</button>
+                    <button type="button" onclick="hideCartBar()" class="p-2 text-gray-400 hover:text-gray-600" aria-label="Hide sticky cart bar">
+                        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l8 8M6 14L14 6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="cartCoachMark" class="fixed z-[1150] hidden" role="dialog" aria-label="Cart guidance">
+            <div class="relative bg-white border shadow-xl rounded-lg p-3 max-w-xs text-sm">
+                <div class="font-semibold text-papsi-dark mb-1">Next step</div>
+                <p class="text-gray-600 mb-2">Tap Checkout to proceed with registration.</p>
+                <div class="flex justify-end gap-2">
+                    <button class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="dismissCoachMark()">Close</button>
+                    <button class="text-xs px-2 py-1 rounded bg-papsi-green text-white hover:bg-green-700" onclick="dismissCoachMark(); openCart();">Open Cart</button>
+                </div>
+                <div class="absolute -top-2 left-6 w-4 h-4 bg-white border-l border-t rotate-45" aria-hidden="true"></div>
+            </div>
+        </div>
+        <style>
+            @keyframes cartBarIn {from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+        </style>
+        <!-- Added-to-Cart Success Banner Animation -->
+        <style>
+            @keyframes cartAddedPulse { 
+                0% { transform: scale(.985); box-shadow:0 0 0 0 rgba(22,105,56,0.45); }
+                35% { transform: scale(1); box-shadow:0 0 0 10px rgba(22,105,56,0); }
+                100% { transform: scale(1); box-shadow:0 0 0 0 rgba(22,105,56,0); }
+            }
+            .added-banner-animate { animation: cartAddedPulse 1.8s ease-out 1; }
+        </style>
                 <div class="bg-white rounded-lg shadow-sm p-6 card-hover">
                     <div class="flex items-center mb-4">
                         <div class="w-12 h-12 bg-green-400 rounded-lg flex items-center justify-center mr-4">
@@ -1414,6 +1784,17 @@ function renderCalendar() {
                                 };
                             }
                         });
+                        // Coming soon placeholders for Apply as Speaker & Request Partnership
+                        const soonBtns = Array.from(fbPageBtns).filter(b => {
+                            const t = b.textContent.trim();
+                            return t === 'Apply as Speaker' || t === 'Request Partnership';
+                        });
+                        soonBtns.forEach(b => {
+                            b.addEventListener('click', function(e){
+                                e.preventDefault();
+                                try { showToast('Feature coming soon', 'info'); } catch { alert('Feature coming soon'); }
+                            });
+                        });
                     })();
                     </script>
                 </div>
@@ -1439,7 +1820,24 @@ function renderCalendar() {
 
         <!-- Profile Page -->
         <div id="profile-page" class="page-content hidden">
-            <h2 class="text-2xl font-bold text-papsi-dark mb-6">Profile</h2>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-papsi-dark">Profile</h2>
+                <div class="flex items-center gap-3">
+                    <button id="refreshBtn" class="refresh-btn flex items-center gap-1 px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm" title="Refresh Profile" type="button" aria-label="Refresh Profile" data-inline-spin="true">
+                        <svg class="refresh-icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M16.5 7.5h5v5" />
+                            <path d="M2.5 11.5a9 9 0 0115.364-5.364L21.5 9" />
+                            <path d="M7.5 16.5h-5v-5" />
+                            <path d="M21.5 12.5a9 9 0 01-15.364 5.364L2.5 15" />
+                        </svg>
+                        <span>Refresh</span>
+                    </button>
+                    <button id="logoutBtn" class="hidden flex items-center gap-1 px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm" title="Logout" type="button">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><path stroke-linecap="round" stroke-linejoin="round" d="M10 17l5-5-5-5"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3"/></svg>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center space-x-6 mb-8">
                     <div class="w-24 h-24 bg-papsi-green rounded-full flex items-center justify-center">
@@ -1925,6 +2323,12 @@ function renderCalendar() {
             const d = parseFlexDate(it?.date);
             const hoursRaw = (typeof it?.hours === 'number') ? it.hours : (it?.hours ? parseFloat(String(it.hours).replace(/[^0-9.]/g, '')) : 0);
             const hoursNum = isNaN(hoursRaw) ? 0 : hoursRaw;
+            // Attempt to resolve module URL from multiple potential key variants
+            const moduleUrl = (
+                it?.module || it?.Module || it?.modules || it?.Modules ||
+                it?.['module link'] || it?.['Module Link'] || it?.['module_url'] ||
+                it?.['moduleURL'] || it?.['ModuleURL'] || it?.['moduleurl'] || ''
+            );
             return {
                 id: `learn-${idx}`,
                 title: String(it?.title || ''),
@@ -1935,7 +2339,7 @@ function renderCalendar() {
                 duration: hoursNum ? `${hoursNum} hours` : (it?.hours ? `${it.hours} hours` : ''),
                 hoursNum: hoursNum,
                 video: String(it?.video || ''),
-                module: String(it?.module || ''),
+                module: String(moduleUrl || ''),
                 presentation: String(it?.presentation || ''),
                 description: ''
             };
@@ -1992,7 +2396,7 @@ function renderCalendar() {
 
         // Fetch courses from endpoint and populate allCourses
         async function loadTrainingCourses() {
-            const url = "https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec?ID=1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg&SH=training&func=training";
+            const url = "https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec?SH=training&func=training";
             const grid = document.getElementById('coursesGrid');
             const counter = document.getElementById('resultsCounter');
             grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">Loading courses...</div>`;
@@ -2004,6 +2408,7 @@ function renderCalendar() {
                     title: item.title,
                     date: new Date(item.date),
                     hours: item.hours,
+                    hoursNum: parseFloat(item.hours) || 0,
                     instructor: item.speaker,
                     image: (typeof item.poster === 'string' && item.poster.startsWith('http')) ? item.poster : '',
                     category: item.category,
@@ -2060,6 +2465,7 @@ function renderCalendar() {
             const categoryFilter = document.getElementById('categoryFilter').value;
             const speakerFilter = document.getElementById('speakerFilter').value;
             const dateSort = document.getElementById('dateSort').value;
+            const yearFilter = window.trainingYearFilter || null;
 
             // Filter courses
             filteredCourses = allCourses.filter(course => {
@@ -2070,8 +2476,8 @@ function renderCalendar() {
                 
                 const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
                 const matchesSpeaker = speakerFilter === 'all' || course.instructor === speakerFilter;
-
-                return matchesSearch && matchesCategory && matchesSpeaker;
+                const matchesYear = !yearFilter || (course.date instanceof Date && !isNaN(course.date) && course.date.getFullYear() === yearFilter);
+                return matchesSearch && matchesCategory && matchesSpeaker && matchesYear;
             });
 
             // Sort courses
@@ -2088,6 +2494,7 @@ function renderCalendar() {
 
             renderCourses();
             updateCounters();
+            renderTrainingStats();
         }
 
         function renderCourses() {
@@ -2173,9 +2580,27 @@ function renderCalendar() {
                             </div>
                         </div>
                         <div class="p-4">
-                            <button class="w-full py-2 rounded transition-colors ${isInCart(course.id) ? 'bg-gray-400 cursor-not-allowed' : 'bg-papsi-green hover:bg-green-700 text-white'}" onclick="addToCart('${course.id}'); event.stopPropagation();" ${isInCart(course.id) ? 'disabled' : ''}>
-                                ${isInCart(course.id) ? 'Added to Cart' : 'Register Now'}
-                            </button>
+                            ${isInCart(course.id) ? `
+                                <div class=\"added-success-banner added-banner-animate w-full rounded-md bg-green-50 border border-green-200 p-3 flex flex-col gap-3\" role=\"status\" aria-live=\"polite\">
+                                    <div class=\"flex items-start gap-3\">
+                                        <div class=\"flex-shrink-0 w-8 h-8 rounded-full bg-papsi-green text-white flex items-center justify-center\">
+                                            <svg class=\"w-5 h-5\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a1 1 0 00-1.414-1.414L9 10.414 7.557 8.97a1 1 0 10-1.414 1.415l2.121 2.12a1 1 0 001.414 0l4.179-4.314z\" clip-rule=\"evenodd\"/></svg>
+                                        </div>
+                                        <div class=\"flex-1\">
+                                            <p class=\"text-sm font-semibold text-papsi-green leading-snug\">Added to cart</p>
+                                            <p class=\"text-xs text-green-700 mt-0.5\">Proceed to checkout when you're ready.</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type=\"button\" onclick=\"openCart(); event.stopPropagation();\" class=\"w-full inline-flex items-center justify-center gap-2 bg-papsi-green hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded-md shadow-sm transition\">
+                                            <span>View Cart</span>
+                                            <svg class=\"w-4 h-4\" viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 3h2l.4 2M7 13h7.5a1 1 0 00.93-.64L18 7H5.4M7 13l-1.3 2.6A1 1 0 007 17h8M7 13V6a1 1 0 011-1h3.5\"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : `
+                                <button class=\"w-full py-2 rounded bg-papsi-green hover:bg-green-700 text-white text-sm font-medium\" onclick=\"addToCart('${course.id}'); event.stopPropagation();\">Register Now</button>
+                            `}
                         </div>
                     </div>
                 `;
@@ -2432,7 +2857,6 @@ function renderCalendar() {
             // Build endpoint URL
             const base = 'https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec';
             const params = new URLSearchParams({
-                ID: '1BkWJctNZtAJtGKw-EXhJnCXm1BhiUz1SZaWL5EyMmjg',
                 SH: 'voucher',
                 func: 'voucher',
                 code: code
@@ -2477,6 +2901,7 @@ function renderCalendar() {
             const categoryFilter = document.getElementById('learningCategoryFilter').value;
             const speakerFilter = document.getElementById('learningSpeakerFilter').value;
             const dateSort = document.getElementById('learningDateSort').value;
+            const yearFilter = window.learningYearFilter || null; // numeric year or null
 
             // Filter courses from the user's learning list
             filteredLearningCourses = myLearning.filter(course => {
@@ -2487,8 +2912,8 @@ function renderCalendar() {
                 
                 const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
                 const matchesSpeaker = speakerFilter === 'all' || course.instructor === speakerFilter;
-
-                return matchesSearch && matchesCategory && matchesSpeaker;
+                const matchesYear = !yearFilter || (course.date instanceof Date && !isNaN(course.date) && course.date.getFullYear() === yearFilter);
+                return matchesSearch && matchesCategory && matchesSpeaker && matchesYear;
             });
 
             // Sort courses
@@ -2629,8 +3054,9 @@ function renderCalendar() {
 
         // Render dynamic statistics header for My Learning
         function renderLearningStats() {
-            const el = document.getElementById('learningStatsGrid');
-            if (!el) return;
+            const grid = document.getElementById('learningStatsGrid');
+            const yearBars = document.getElementById('learningYearBars');
+            if (!grid) return;
             const total = myLearning.length;
             const categories = myLearning.reduce((acc, c) => {
                 const key = c.category || 'Other';
@@ -2649,25 +3075,100 @@ function renderCalendar() {
                     const color = categoryStatsText(cat);
                     parts.push(`<div class="text-center"><div class="text-xl font-semibold ${color}">${count}</div><div class="text-sm text-gray-600">${escapeHtml(cat)}</div></div>`);
                 });
+            grid.innerHTML = parts.join('');
 
-            el.innerHTML = parts.join('');
+            // Year mini bar indicators
+            if (yearBars) {
+                const yearCounts = myLearning.reduce((acc, c) => {
+                    if (c.date instanceof Date && !isNaN(c.date)) {
+                        const y = c.date.getFullYear();
+                        acc[y] = (acc[y] || 0) + 1;
+                    }
+                    return acc;
+                }, {});
+                const years = Object.keys(yearCounts).map(y=>parseInt(y,10)).sort((a,b)=> a-b); // oldest -> newest for sparkline
+                if (!years.length) {
+                    yearBars.innerHTML = '';
+                    yearBars.classList.add('hidden');
+                } else {
+                    yearBars.classList.remove('hidden');
+                    const maxVal = Math.max(...years.map(y => yearCounts[y]));
+                    const grandTotal = years.reduce((s,y)=>s+yearCounts[y],0) || 1;
+                    // Build sparkline points (cumulative)
+                    let cumulative = 0;
+                    const sparkWidth = 160;
+                    const sparkHeight = 38;
+                    const pts = years.map((y, idx) => {
+                        cumulative += yearCounts[y];
+                        const x = (idx/(years.length-1||1))*sparkWidth;
+                        const yPos = sparkHeight - (cumulative / grandTotal)*sparkHeight;
+                        return `${x.toFixed(1)},${yPos.toFixed(1)}`;
+                    }).join(' ');
+                    const sparkline = `<div class="mt-4 mb-2"><div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-600">Cumulative Growth</span><span class="text-[10px] text-gray-500">${grandTotal} total</span></div><svg viewBox="0 0 ${sparkWidth} ${sparkHeight}" class="w-full max-w-xs h-10 text-papsi-green/70"><polyline fill="none" stroke="currentColor" stroke-width="2" points="${pts}" stroke-linejoin="round" stroke-linecap="round" /></svg></div>`;
+
+                    const selected = window.learningYearFilter || null;
+                    const barsHtml = years.slice().reverse().map(y => { // reverse to show newest first visually under sparkline
+                        const count = yearCounts[y];
+                        const pct = maxVal ? (count / maxVal) * 100 : 0;
+                        const share = ((count / grandTotal) * 100).toFixed(1);
+                        const active = selected === y;
+                        return `<button type="button" data-year="${y}" class="group w-full flex items-center gap-3 text-left year-bar-item ${active?'ring-1 ring-papsi-green/60 bg-green-50':''}" title="${count} course${count!==1?'s':''} in ${y} (${share}% of total)">
+    <div class="w-14 text-right text-xs ${active?'text-papsi-green font-semibold':'text-gray-600 font-medium'}">${y}</div>
+    <div class="relative flex-1 h-3 rounded bg-gray-100 overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-papsi-green to-emerald-500 origin-left scale-x-0 bar-grow" style="width:${pct}%;"></div>
+        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-semibold text-white/90 mix-blend-difference pointer-events-none">${count}</span>
+        <span class="absolute -right-1 -top-4 text-[10px] text-gray-500 group-hover:text-papsi-green transition">${share}%</span>
+    </div>
+</button>`;
+                    }).join('');
+
+                    yearBars.innerHTML = sparkline + barsHtml + `<div class="mt-2"><button type="button" id="resetYearFilterBtn" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 ${selected? '':'opacity-40 cursor-default'}" ${selected? '':'disabled'}>All Years</button></div>`;
+
+                    // Animate bars
+                    requestAnimationFrame(()=>{
+                        yearBars.querySelectorAll('.bar-grow').forEach(el=>{
+                            el.classList.add('animate-width');
+                        });
+                    });
+
+                    // Bind click handlers
+                    yearBars.querySelectorAll('[data-year]').forEach(btn=>{
+                        btn.addEventListener('click', () => {
+                            const y = parseInt(btn.getAttribute('data-year'),10);
+                            if (window.learningYearFilter === y) {
+                                window.learningYearFilter = null; // toggle off
+                            } else {
+                                window.learningYearFilter = y;
+                            }
+                            filterLearningCourses();
+                        });
+                    });
+                    const resetBtn = document.getElementById('resetYearFilterBtn');
+                    if (resetBtn) resetBtn.addEventListener('click', () => {
+                        if (window.learningYearFilter) {
+                            window.learningYearFilter = null;
+                            filterLearningCourses();
+                        }
+                    });
+                }
+            }
         }
 
         // --- Learning Stats Visibility Toggle ---
         const LEARNING_STATS_VISIBLE_KEY = 'PAPSI_LEARNING_STATS_VISIBLE';
 
         function applyLearningStatsVisibility() {
-            const statsGrid = document.getElementById('learningStatsGrid');
+            const statsSection = document.getElementById('learningStatsSection');
             const toggleBtn = document.getElementById('learningStatsToggle');
-            if (!statsGrid || !toggleBtn) return;
-            const visible = (localStorage.getItem(LEARNING_STATS_VISIBLE_KEY) ?? 'true') === 'true';
-            statsGrid.classList.toggle('hidden', !visible);
+            if (!statsSection || !toggleBtn) return;
+            const visible = (localStorage.getItem(LEARNING_STATS_VISIBLE_KEY) ?? 'false') === 'true';
+            statsSection.classList.toggle('hidden', !visible);
             toggleBtn.setAttribute('aria-expanded', String(visible));
             toggleBtn.textContent = visible ? 'Hide Stats' : 'Show Stats';
         }
 
         function toggleLearningStats() {
-            const current = (localStorage.getItem(LEARNING_STATS_VISIBLE_KEY) ?? 'true') === 'true';
+            const current = (localStorage.getItem(LEARNING_STATS_VISIBLE_KEY) ?? 'false') === 'true';
             localStorage.setItem(LEARNING_STATS_VISIBLE_KEY, String(!current));
             applyLearningStatsVisibility();
         }
@@ -2683,6 +3184,97 @@ function renderCalendar() {
         document.addEventListener('DOMContentLoaded', function() {
             initLearningStatsVisibility();
         });
+
+        // --- Training Stats (Hub) ---
+        const TRAINING_STATS_VISIBLE_KEY = 'PAPSI_TRAINING_STATS_VISIBLE';
+
+        function applyTrainingStatsVisibility() {
+            const statsSection = document.getElementById('trainingStatsSection');
+            const toggleBtn = document.getElementById('trainingStatsToggle');
+            if (!statsSection || !toggleBtn) return;
+            const visible = (localStorage.getItem(TRAINING_STATS_VISIBLE_KEY) ?? 'false') === 'true';
+            statsSection.classList.toggle('hidden', !visible);
+            toggleBtn.setAttribute('aria-expanded', String(visible));
+            toggleBtn.textContent = visible ? 'Hide Stats' : 'Show Stats';
+        }
+
+        function toggleTrainingStats() {
+            const current = (localStorage.getItem(TRAINING_STATS_VISIBLE_KEY) ?? 'false') === 'true';
+            localStorage.setItem(TRAINING_STATS_VISIBLE_KEY, String(!current));
+            applyTrainingStatsVisibility();
+        }
+
+        function initTrainingStatsVisibility() {
+            const toggleBtn = document.getElementById('trainingStatsToggle');
+            if (toggleBtn) toggleBtn.addEventListener('click', toggleTrainingStats);
+            applyTrainingStatsVisibility();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initTrainingStatsVisibility();
+        });
+
+        function renderTrainingStats() {
+            const grid = document.getElementById('trainingStatsGrid');
+            const yearBars = document.getElementById('trainingYearBars');
+            if (!grid) return;
+            const total = allCourses.length;
+            const categories = allCourses.reduce((acc, c) => {
+                const key = c.category || 'Other';
+                acc[key] = (acc[key] || 0) + 1; return acc;
+            }, {});
+            const totalHours = allCourses.reduce((sum, c) => sum + (c.hoursNum || 0), 0);
+            const parts = [
+                `<div class="text-center"><div class="text-2xl font-bold text-papsi-green">${total}</div><div class="text-sm text-gray-600">Total Courses</div></div>`,
+                `<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">${totalHours}</div><div class="text-sm text-gray-600">Total Hours</div></div>`
+            ];
+            Object.entries(categories).sort((a,b)=> a[0].localeCompare(b[0])).forEach(([cat,count])=>{
+                const color = categoryStatsText(cat);
+                parts.push(`<div class=\"text-center\"><div class=\"text-xl font-semibold ${color}\">${count}</div><div class=\"text-sm text-gray-600\">${escapeHtml(cat)}</div></div>`)
+            });
+            grid.innerHTML = parts.join('');
+
+            if (yearBars) {
+                const yearCounts = allCourses.reduce((acc,c)=>{
+                    if (c.date instanceof Date && !isNaN(c.date)) {
+                        const y = c.date.getFullYear();
+                        acc[y] = (acc[y]||0)+1;
+                    }
+                    return acc;
+                }, {});
+                const years = Object.keys(yearCounts).map(y=>parseInt(y,10)).sort((a,b)=> a-b);
+                if (!years.length) {
+                    yearBars.innerHTML='';
+                    yearBars.classList.add('hidden');
+                } else {
+                    yearBars.classList.remove('hidden');
+                    const maxVal = Math.max(...years.map(y=>yearCounts[y]));
+                    const grandTotal = years.reduce((s,y)=> s+yearCounts[y],0) || 1;
+                    let cumulative = 0; const sparkWidth=160; const sparkHeight=38;
+                    const pts = years.map((y,i)=>{ cumulative+=yearCounts[y]; const x=(i/(years.length-1||1))*sparkWidth; const yPos=sparkHeight-(cumulative/grandTotal)*sparkHeight; return `${x.toFixed(1)},${yPos.toFixed(1)}`; }).join(' ');
+                    const sparkline = `<div class=\"mt-4 mb-2\"><div class=\"flex items-center justify-between mb-1\"><span class=\"text-xs font-medium text-gray-600\">Cumulative Growth</span><span class=\"text-[10px] text-gray-500\">${grandTotal} total</span></div><svg viewBox=\"0 0 ${sparkWidth} ${sparkHeight}\" class=\"w-full max-w-xs h-10 text-papsi-green/70\"><polyline fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" points=\"${pts}\" stroke-linejoin=\"round\" stroke-linecap=\"round\" /></svg></div>`;
+                    const selected = window.trainingYearFilter || null;
+                    const barsHtml = years.slice().reverse().map(y=>{
+                        const count=yearCounts[y];
+                        const pct = maxVal ? (count/maxVal)*100:0;
+                        const share = ((count/grandTotal)*100).toFixed(1);
+                        const active = selected===y;
+                        return `<button type=\"button\" data-year=\"${y}\" class=\"group w-full flex items-center gap-3 text-left year-bar-item ${active?'ring-1 ring-papsi-green/60 bg-green-50':''}\" title=\"${count} course${count!==1?'s':''} in ${y} (${share}% of total)\"><div class=\"w-14 text-right text-xs ${active?'text-papsi-green font-semibold':'text-gray-600 font-medium'}\">${y}</div><div class=\"relative flex-1 h-3 rounded bg-gray-100 overflow-hidden\"><div class=\"h-full bg-gradient-to-r from-papsi-green to-emerald-500 origin-left scale-x-0 bar-grow\" style=\"width:${pct}%;\"></div><span class=\"absolute inset-0 flex items-center justify-center text-[10px] font-semibold text-white/90 mix-blend-difference pointer-events-none\">${count}</span><span class=\"absolute -right-1 -top-4 text-[10px] text-gray-500 group-hover:text-papsi-green transition\">${share}%</span></div></button>`;
+                    }).join('');
+                    yearBars.innerHTML = sparkline + barsHtml + `<div class=\"mt-2\"><button type=\"button\" id=\"resetTrainingYearFilterBtn\" class=\"text-xs px-2 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 ${selected?'':'opacity-40 cursor-default'}\" ${selected?'':'disabled'}>All Years</button></div>`;
+                    requestAnimationFrame(()=>{ yearBars.querySelectorAll('.bar-grow').forEach(el=> el.classList.add('animate-width')); });
+                    yearBars.querySelectorAll('[data-year]').forEach(btn=>{
+                        btn.addEventListener('click',()=>{
+                            const y = parseInt(btn.getAttribute('data-year'),10);
+                            if (window.trainingYearFilter === y) { window.trainingYearFilter = null; } else { window.trainingYearFilter = y; }
+                            filterCourses();
+                        });
+                    });
+                    const resetBtn = document.getElementById('resetTrainingYearFilterBtn');
+                    if (resetBtn) resetBtn.addEventListener('click',()=>{ if (window.trainingYearFilter) { window.trainingYearFilter=null; filterCourses(); }});
+                }
+            }
+        }
 
         function clearLearningSearch() {
             document.getElementById('learningSearchInput').value = '';
@@ -2751,6 +3343,7 @@ function renderCalendar() {
             if (page === 'hub') {
                 renderCourses();
                 updateCounters();
+                try { renderTrainingStats(); applyTrainingStatsVisibility(); } catch {}
             }
 
             // Initialize learning courses grid if learning page is shown
@@ -3278,6 +3871,10 @@ function audioRegisterNow() {
                 openSlidesViewer(url, course.title || 'Slides');
                 return;
             }
+            if (contentType === 'module') {
+                openModulesViewer(url, course.title || 'Modules');
+                return;
+            }
             try { window.open(url, '_blank', 'noopener'); } catch (_) { location.href = url; }
         }
 
@@ -3387,6 +3984,159 @@ function audioRegisterNow() {
             }
         }
     </script>
+    <script>
+    // === Mobile Filter Drawer Logic ===
+    (function(){
+        const body = document.body;
+        let lastFocusedTrigger = null;
+        const overlayId = 'filtersGlobalOverlay';
+
+        function ensureOverlay(){
+            let ov = document.getElementById(overlayId);
+            if(!ov){
+                ov = document.createElement('div');
+                ov.id = overlayId;
+                ov.className = 'filters-overlay';
+                ov.addEventListener('click', () => closeFiltersDrawer());
+                document.body.appendChild(ov);
+            }
+            return ov;
+        }
+
+        function isMobile(){ return window.matchMedia('(max-width: 767px)').matches; }
+
+        function focusTrap(container){
+            if(!container) return;
+            const selectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+            const nodes = Array.from(container.querySelectorAll(selectors)).filter(el => el.offsetParent !== null);
+            if(!nodes.length) return;
+            function handle(e){
+                if(e.key === 'Tab'){
+                    const first = nodes[0];
+                    const last = nodes[nodes.length-1];
+                    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+                    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+                } else if(e.key === 'Escape') {
+                    e.preventDefault(); closeFiltersDrawer();
+                }
+            }
+            container.__trapHandler = handle;
+            container.addEventListener('keydown', handle);
+        }
+
+        function releaseTrap(container){
+            if(container && container.__trapHandler){
+                container.removeEventListener('keydown', container.__trapHandler);
+                delete container.__trapHandler;
+            }
+        }
+
+        function openFiltersDrawer(kind){
+            if(!isMobile()) return; // desktop uses inline layout
+            const id = kind === 'learning' ? 'learningFiltersDrawer' : 'trainingFiltersDrawer';
+            const drawer = document.getElementById(id);
+            if(!drawer) return;
+            lastFocusedTrigger = document.activeElement;
+            const overlay = ensureOverlay();
+            overlay.classList.add('visible');
+            drawer.classList.add('open');
+            body.classList.add('filters-lock');
+            drawer.setAttribute('aria-hidden','false');
+            const trigger = document.getElementById(kind === 'learning' ? 'learningFiltersMobileBtn' : 'trainingFiltersMobileBtn');
+            if(trigger) trigger.setAttribute('aria-expanded','true');
+            setTimeout(()=>{ // focus first input
+                const firstInput = drawer.querySelector('input, select, button');
+                if(firstInput) try{ firstInput.focus(); }catch{}
+            }, 30);
+            focusTrap(drawer);
+        }
+        window.openFiltersDrawer = openFiltersDrawer;
+
+        function closeFiltersDrawer(forceKind){
+            const overlay = document.getElementById(overlayId);
+            if(overlay) overlay.classList.remove('visible');
+            body.classList.remove('filters-lock');
+            ['learningFiltersDrawer','trainingFiltersDrawer'].forEach(id => {
+                const el = document.getElementById(id);
+                if(!el) return;
+                if(forceKind){
+                    if((forceKind==='learning' && id!=='learningFiltersDrawer') || (forceKind==='training' && id!=='trainingFiltersDrawer')) return;
+                }
+                el.classList.remove('open');
+                el.setAttribute('aria-hidden','true');
+                releaseTrap(el);
+            });
+            ['learningFiltersMobileBtn','trainingFiltersMobileBtn'].forEach(id => {
+                const t = document.getElementById(id); if(t) t.setAttribute('aria-expanded','false');
+            });
+            if(lastFocusedTrigger && document.contains(lastFocusedTrigger)){
+                try { lastFocusedTrigger.focus(); } catch {}
+            }
+        }
+        window.closeFiltersDrawer = closeFiltersDrawer;
+
+        function toggleDrawer(kind){
+            const id = kind==='learning' ? 'learningFiltersDrawer' : 'trainingFiltersDrawer';
+            const drawer = document.getElementById(id);
+            if(!drawer) return;
+            if(drawer.classList.contains('open')) closeFiltersDrawer(kind); else openFiltersDrawer(kind);
+        }
+
+        function countActiveFilters(kind){
+            // Determine active (excluding defaults)
+            if(kind==='learning'){
+                let count = 0;
+                const search = document.getElementById('learningSearchInput');
+                if(search && search.value.trim()) count++;
+                const cat = document.getElementById('learningCategoryFilter');
+                if(cat && cat.value !== 'all') count++;
+                const sp = document.getElementById('learningSpeakerFilter');
+                if(sp && sp.value !== 'all') count++;
+                const sort = document.getElementById('learningDateSort');
+                if(sort && sort.value !== 'newest') count++; // treat non-default sort as active
+                const badge = document.getElementById('learningFiltersActiveCount');
+                if(badge){
+                    if(count){ badge.textContent = count; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+                }
+            } else {
+                let count = 0;
+                const search = document.getElementById('searchInput');
+                if(search && search.value.trim()) count++;
+                const cat = document.getElementById('categoryFilter');
+                if(cat && cat.value !== 'all') count++;
+                const sp = document.getElementById('speakerFilter');
+                if(sp && sp.value !== 'all') count++;
+                const sort = document.getElementById('dateSort');
+                if(sort && sort.value !== 'newest') count++;
+                const badge = document.getElementById('trainingFiltersActiveCount');
+                if(badge){
+                    if(count){ badge.textContent = count; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+                }
+            }
+        }
+        window.__updateFilterActiveCounts = function(){ countActiveFilters('learning'); countActiveFilters('training'); };
+
+        document.addEventListener('DOMContentLoaded', function(){
+            // Add overlay element eagerly for smoother animation
+            ensureOverlay();
+            const lBtn = document.getElementById('learningFiltersMobileBtn');
+            const tBtn = document.getElementById('trainingFiltersMobileBtn');
+            if(lBtn) lBtn.addEventListener('click', () => toggleDrawer('learning'));
+            if(tBtn) tBtn.addEventListener('click', () => toggleDrawer('training'));
+            // Close on resize to desktop
+            window.addEventListener('resize', () => {
+                if(!isMobile()) closeFiltersDrawer();
+            });
+            // Hook existing filter triggers to update counts
+            ['learningSearchInput','learningCategoryFilter','learningSpeakerFilter','learningDateSort','searchInput','categoryFilter','speakerFilter','dateSort'].forEach(id => {
+                const el = document.getElementById(id); if(el){ el.addEventListener('input', window.__updateFilterActiveCounts); el.addEventListener('change', window.__updateFilterActiveCounts); }
+            });
+            // Initial calc after a short delay (after data loads)
+            setTimeout(window.__updateFilterActiveCounts, 1200);
+        });
+    })();
+    // === End Mobile Filter Drawer Logic ===
+    </script>
 
     <script>
         // Populate Profile page dynamically from a provided JSON object
@@ -3408,7 +4158,7 @@ function audioRegisterNow() {
             if (avatarEl) avatarEl.textContent = buildInitials(p);
             if (headerInitEl) headerInitEl.textContent = buildInitials(p);
             if (homeInitEl) homeInitEl.textContent = buildInitials(p);
-            if (homeNameEl) homeNameEl.textContent = `Welcome, ${buildFullName(p)}`;
+            if (homeNameEl) homeNameEl.textContent = buildFullName(p);
 
             // Account
             setValue('emailInput', p.email);
@@ -3422,6 +4172,7 @@ function audioRegisterNow() {
             setValue('suffixInput', p.suffix);
             setValue('birthDateInput', normalizeDateInput(p.birthdate));
             setValue('mobileInput', p.mobile);
+            try { applyMobileFormattingOnLoad(); } catch {}
 
             // Affiliation
             setValue('schoolInput', p.school);
@@ -3505,6 +4256,60 @@ function audioRegisterNow() {
             if (val === 'Other') return other ? (other.value || '').trim() : '';
             return val;
         }
+        // === Mobile Number Formatting (Philippines 11-digit 09XX-XXX-XXXX) ===
+        function normalizeDigits(str){ return (str||'').replace(/[^0-9]/g,''); }
+        function formatMobilePH(raw){
+            let d = normalizeDigits(raw);
+            // If 10 digits and starts with 9, assume missing leading 0.
+            if(d.length === 10 && d.startsWith('9')) d = '0' + d;
+            if(d.length !== 11) return raw; // only format when we have 11 after normalization
+            return d.slice(0,4)+'-'+d.slice(4,7)+'-'+d.slice(7);
+        }
+        function applyMobileFormattingOnLoad(){
+            const input = document.getElementById('mobileInput');
+            if(!input) return;
+            const formatted = formatMobilePH(input.value);
+            input.value = formatted;
+        }
+        function attachMobileFormattingHandlers(){
+            const input = document.getElementById('mobileInput');
+            if(!input || input.__mobileFormatBound) return;
+            input.__mobileFormatBound = true;
+            input.addEventListener('focus', () => {
+                // show raw digits while editing
+                const digits = normalizeDigits(input.value);
+                input.value = digits;
+            });
+            input.addEventListener('input', () => {
+                // keep only digits, limit to 11 (PH mobile standard)
+                let digits = normalizeDigits(input.value);
+                if(digits.length > 11) digits = digits.slice(0,11);
+                input.value = digits; // show digits during typing
+            });
+            input.addEventListener('blur', () => {
+                const digits = normalizeDigits(input.value);
+                const formatted = formatMobilePH(digits);
+                // If formatter returned original raw (no change) but digits were altered (e.g., partial), keep digits; else use formatted
+                if(formatted === digits || formatted === input.value){
+                    input.value = formatted;
+                } else {
+                    input.value = formatted;
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', attachMobileFormattingHandlers);
+        // Intercept profile form submission to strip hyphens before sending
+        (function(){
+            document.addEventListener('DOMContentLoaded', function(){
+                const form = document.querySelector('#profile-page form');
+                if(!form) return;
+                form.addEventListener('submit', function(){
+                    const mobileEl = document.getElementById('mobileInput');
+                    if(mobileEl){ mobileEl.value = normalizeDigits(mobileEl.value); }
+                }, true); // capture so it runs before earlier submit handler reading value
+            });
+        })();
+        // === End Mobile Number Formatting ===
         function buildFullName(p) {
             const parts = [];
             if (p.firstname) parts.push(p.firstname);
@@ -3831,9 +4636,7 @@ function audioRegisterNow() {
         }
 
         document.addEventListener('DOMContentLoaded', function(){
-            document.getElementById('spSizeNormal')?.addEventListener('click', ()=>setSlidesSize('normal'));
-            document.getElementById('spSizeLarge')?.addEventListener('click', ()=>setSlidesSize('large'));
-            document.getElementById('spSizeFull')?.addEventListener('click', ()=>setSlidesSize('full'));
+            // Size buttons removed (Normal/Large/Full) – default size applied; listeners no longer needed.
             document.addEventListener('keydown', function(e){
                 const modal = document.getElementById('slidesModal');
                 if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') {
@@ -3845,5 +4648,223 @@ function audioRegisterNow() {
         });
         // ===== End Slides (PDF) Viewer =====
         </script>
+        <script>
+        // ===== Modules (Drive Folder) Viewer =====
+        const MODULES_VIEW_KEY = 'PAPSI_MODULES_VIEW'; // list | grid
+        function normalizeModuleUrl(input) {
+            const raw = String(input || '').trim();
+            if (!raw) return null;
+            const m1 = raw.match(/drive\.google\.com\/drive\/folders\/([^/?#]+)/i);
+            const m2 = raw.match(/drive\.google\.com\/drive\/u\/\d+\/folders\/([^/?#]+)/i);
+            let folderId = (m1 && m1[1]) || (m2 && m2[1]) || '';
+            if (!folderId) {
+                try { const u = new URL(raw); const id = u.searchParams.get('id'); if (id) folderId = id; } catch {}
+            }
+            if (folderId) {
+                return { mode: 'drive-folder', folderId, raw };
+            }
+            return { mode: 'other', raw };
+        }
+
+        function buildEmbeddedFolderSrc(folderId, viewMode) {
+            const mode = (viewMode === 'grid') ? 'grid' : 'list';
+            return `https://drive.google.com/embeddedfolderview?id=${folderId}#${mode}`;
+        }
+
+        function applyModulesViewToggle(active) {
+            const listBtn = document.getElementById('modulesViewList');
+            const gridBtn = document.getElementById('modulesViewGrid');
+            if (!listBtn || !gridBtn) return;
+            listBtn.classList.remove('modules-toggle-active');
+            gridBtn.classList.remove('modules-toggle-active');
+            if (active === 'grid') gridBtn.classList.add('modules-toggle-active'); else listBtn.classList.add('modules-toggle-active');
+        }
+
+        let currentModulesFolder = null; // remember folderId for view switching
+
+        function openModulesViewer(url, title) {
+            const norm = normalizeModuleUrl(url);
+            if (!norm) return;
+            if (norm.mode !== 'drive-folder') {
+                // fallback open in new tab
+                try { window.open(norm.raw, '_blank', 'noopener'); } catch (_) { location.href = norm.raw; }
+                return;
+            }
+            currentModulesFolder = norm.folderId;
+            const modal = document.getElementById('modulesModal');
+            const frame = document.getElementById('modulesFrame');
+            const loading = document.getElementById('modulesLoading');
+            const fallback = document.getElementById('modulesFallback');
+            const openExternal = document.getElementById('modulesOpenExternal');
+            const titleEl = document.getElementById('modulesTitle');
+            if (!modal || !frame || !loading || !fallback) {
+                console.warn('Modules modal markup missing; opening in new tab instead.');
+                try { window.open(norm.raw, '_blank', 'noopener'); } catch (_) { location.href = norm.raw; }
+                return;
+            }
+
+            const savedView = (localStorage.getItem(MODULES_VIEW_KEY) === 'grid') ? 'grid' : 'list';
+            applyModulesViewToggle(savedView);
+
+            titleEl.textContent = title || 'Modules';
+            loading.classList.remove('hidden');
+            fallback.classList.add('hidden');
+            if (openExternal) openExternal.href = norm.raw;
+
+            frame.src = buildEmbeddedFolderSrc(norm.folderId, savedView);
+            const onLoad = () => { loading.classList.add('hidden'); frame.removeEventListener('load', onLoad); };
+            frame.addEventListener('load', onLoad);
+            setTimeout(() => {
+                if (!loading.classList.contains('hidden')) {
+                    loading.classList.add('hidden');
+                    fallback.classList.remove('hidden');
+                }
+            }, 6000);
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModulesViewer() {
+            const modal = document.getElementById('modulesModal');
+            const frame = document.getElementById('modulesFrame');
+            if (frame) frame.src = 'about:blank';
+            if (modal) modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            if (typeof showPage === 'function') showPage('learning');
+            currentModulesFolder = null;
+        }
+
+        function switchModulesView(mode) {
+            if (!currentModulesFolder) return;
+            try { localStorage.setItem(MODULES_VIEW_KEY, mode === 'grid' ? 'grid' : 'list'); } catch {}
+            applyModulesViewToggle(mode);
+            const frame = document.getElementById('modulesFrame');
+            if (frame) frame.src = buildEmbeddedFolderSrc(currentModulesFolder, mode);
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            document.getElementById('modulesModal')?.addEventListener('click', function(e){ if (e.target === this) closeModulesViewer(); });
+            document.getElementById('modulesViewList')?.addEventListener('click', () => switchModulesView('list'));
+            document.getElementById('modulesViewGrid')?.addEventListener('click', () => switchModulesView('grid'));
+            document.addEventListener('keydown', function(e){
+                const modal = document.getElementById('modulesModal');
+                if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') {
+                    e.preventDefault();
+                    closeModulesViewer();
+                }
+            });
+        });
+        // ===== End Modules (Drive Folder) Viewer =====
+        </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98288178e4bb6e8c',t:'MTc1ODQ0NjYyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<!-- About & Privacy Information Modals (Option B) -->
+<div id="aboutInfoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="aboutInfoTitle">
+    <div class="modal-content max-w-3xl mx-auto p-0" role="document">
+        <div class="px-6 py-4 border-b flex items-start justify-between">
+            <h3 id="aboutInfoTitle" class="text-xl font-bold text-papsi-dark">About PAPSI</h3>
+            <button type="button" class="text-gray-400 hover:text-gray-600" aria-label="Close about dialog" onclick="closeInfoModal('aboutInfoModal')">&times;</button>
+        </div>
+            <div class="p-6 space-y-4 text-sm leading-relaxed max-h-[70vh] overflow-y-auto" id="aboutInfoBody">
+                <p><strong>PAPSI</strong> (Philippine Association of Physics and Science Instructors) is a national organization dedicated to advancing the teaching and learning of science, particularly in the fields of natural and physical sciences. Guided by experts from De La Salle University and other leading institutions, PAPSI brings together educators who are passionate about raising the quality of science education across the Philippines. Through conferences, seminars, trainings, and research initiatives, PAPSI fosters collaboration, professional growth, and the sharing of best practices among science instructors.</p>
+                <p>Our mission is to promote excellence in science teaching by equipping educators with the latest knowledge, skills, and pedagogical approaches. Beyond physics and general science, PAPSI also emphasizes the importance of statistics, research, laboratory skills, Disaster Risk Reduction and Resiliency (DRRR), and ICT integration in education. We envision a community of competent, confident, and inspired educators who not only deepen their expertise but also cultivate in students a lasting appreciation for science. By uniting teachers nationwide, PAPSI aims to be a leading force in shaping innovative, effective, and future-ready education.</p>
+                <p>Through this member portal you can: access training opportunities, track your professional learning, view announcements, manage your profile, and connect with the broader PAPSI community.</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Professional development and training center</li>
+                    <li>Archiving of attended seminars and modules</li>
+                    <li>Secure certificate verification utility</li>
+                    <li>Community engagement & upcoming initiatives</li>
+                </ul>
+                <p class="text-gray-600">For inquiries or collaboration proposals, please use the Contact Support feature found under Extras.</p>
+            </div>
+        <div class="px-6 py-4 border-t bg-gray-50 flex justify-end">
+            <button type="button" class="px-4 py-2 rounded bg-papsi-green text-white text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-papsi-green" onclick="closeInfoModal('aboutInfoModal')">Close</button>
+        </div>
+    </div>
+</div>
+<div id="privacyInfoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="privacyInfoTitle">
+    <div class="modal-content max-w-3xl mx-auto p-0" role="document">
+        <div class="px-6 py-4 border-b flex items-start justify-between">
+            <h3 id="privacyInfoTitle" class="text-xl font-bold text-papsi-dark">Privacy Policy</h3>
+            <button type="button" class="text-gray-400 hover:text-gray-600" aria-label="Close privacy dialog" onclick="closeInfoModal('privacyInfoModal')">&times;</button>
+        </div>
+        <div class="p-6 space-y-4 text-sm leading-relaxed max-h-[70vh] overflow-y-auto" id="privacyInfoBody">
+            <p>Your privacy matters. PAPSI collects only the minimum information necessary to operate member services (e.g., name, contact details, professional profile, attended trainings).</p>
+            <p><strong>Data Usage:</strong> Information is used to display your learning history, personalize content, and facilitate training registration.</p>
+            <p><strong>Storage & Retention:</strong> Limited profile data may be stored in secure systems and locally in your browser (e.g., preferences) for faster experience. You may clear local storage at any time.</p>
+            <p><strong>Sharing:</strong> PAPSI does not sell your data. Aggregated or anonymized insights may be used for program improvement.</p>
+            <p><strong>Your Rights:</strong> You may request correction or removal of your profile data subject to organizational verification.</p>
+            <p class="text-gray-600">For privacy-related concerns contact: <span class="font-medium">papsi.seminar@gmail.com</span></p>
+        </div>
+        <div class="px-6 py-4 border-t bg-gray-50 flex justify-end">
+            <button type="button" class="px-4 py-2 rounded bg-papsi-green text-white text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-papsi-green" onclick="closeInfoModal('privacyInfoModal')">Close</button>
+        </div>
+    </div>
+</div>
+<script>
+// === About & Privacy Info Modals (Option B Support) ===
+(function(){
+    if(window.__PAPSI_INFO_MODALS_BOUND) return; // idempotency guard
+    window.__PAPSI_INFO_MODALS_BOUND = true;
+
+    const focusStack = [];
+
+    function trapFocus(modal){
+        const selectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+        const focusables = Array.from(modal.querySelectorAll(selectors)).filter(el=>el.offsetParent!==null);
+        if(!focusables.length) return;
+        let first = focusables[0];
+        let last = focusables[focusables.length-1];
+        modal.addEventListener('keydown', function(e){
+            if(e.key === 'Tab'){
+                if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+                else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+            }
+        });
+    }
+
+    window.openInfoModal = function(id){
+        const modal = document.getElementById(id);
+        if(!modal) return;
+        const previouslyFocused = document.activeElement;
+        focusStack.push(previouslyFocused);
+        modal.classList.remove('hidden');
+        document.body.style.overflow='hidden';
+        // Focus first focusable
+        setTimeout(()=>{
+            const btn = modal.querySelector('button, [href], [tabindex]:not([tabindex="-1"])');
+            if(btn) try{btn.focus();}catch{}
+            trapFocus(modal);
+        },0);
+    };
+
+    window.closeInfoModal = function(id){
+        const modal = document.getElementById(id);
+        if(!modal) return;
+        modal.classList.add('hidden');
+        document.body.style.overflow='auto';
+        const toFocus = focusStack.pop();
+        if(toFocus && typeof toFocus.focus === 'function') setTimeout(()=>{ try{toFocus.focus();}catch{} },0);
+    };
+
+    // Overlay click to close
+    ['aboutInfoModal','privacyInfoModal'].forEach(mid => {
+        const m = document.getElementById(mid);
+        if(!m) return;
+        m.addEventListener('click', function(e){ if(e.target === m) closeInfoModal(mid); });
+    });
+
+    // Global ESC handler
+    document.addEventListener('keydown', function(e){
+        if(e.key !== 'Escape') return;
+        const openModals = ['aboutInfoModal','privacyInfoModal'].map(id=>document.getElementById(id)).filter(m=>m && !m.classList.contains('hidden'));
+        if(!openModals.length) return;
+        e.preventDefault();
+        // Close the top-most (last opened)
+        closeInfoModal(openModals[openModals.length-1].id);
+    });
+})();
+// === End About & Privacy Info Modals ===
+</script>
+</body>
 </html>

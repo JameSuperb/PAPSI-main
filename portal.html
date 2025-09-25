@@ -1039,25 +1039,35 @@
 
         <!-- My Learning Page -->
         <div id="learning-page" class="page-content hidden">
-            <!-- Learning Statistics Header -->
+            <!-- Learning Header + Toolbar -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div class="relative overflow-hidden">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-2xl font-bold text-papsi-dark">My Learning</h2>
-                        <button id="learningStatsToggle" class="text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" aria-controls="learningStatsSection" aria-expanded="false">Show Stats</button>
+                    <h2 class="text-2xl font-bold text-papsi-dark mb-2">My Learning</h2>
+                    <!-- One-line toolbar: Filters (mobile) + Show/Hide Stats -->
+                    <div class="flex items-center gap-2 mb-4">
+                        <button id="learningFiltersMobileBtn" type="button" class="filters-mobile-trigger md:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="learningFiltersDrawer">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M3 4.5A1.5 1.5 0 014.5 3h11A1.5 1.5 0 0117 4.5v.382a1.5 1.5 0 01-.44 1.06l-4.56 4.56v4.248a1 1 0 01-1.37.93l-2-.75A1 1 0 017 13.996v-3.494L2.44 5.942A1.5 1.5 0 012 4.882V4.5z"/>
+                            </svg>
+                            <span>Filters</span>
+                            <span id="learningFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
+                        </button>
+
+                        <button id="learningStatsToggle" class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-controls="learningStatsSection" aria-expanded="false" type="button">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M3 3a1 1 0 000 2h1v10a2 2 0 002 2h8a1 1 0 100-2H6a1 1 0 01-1-1V5h9a1 1 0 100-2H3z"/>
+                                <path d="M8 7a1 1 0 011-1h1v8H9a1 1 0 01-1-1V7zM12 9a1 1 0 011-1h1v6h-1a1 1 0 01-1-1V9z"/>
+                            </svg>
+                            <span>Show Stats</span>
+                        </button>
                     </div>
+
+                    <!-- Stats section (collapsible) -->
                     <div id="learningStatsSection" class="hidden">
                         <div id="learningStatsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
                         <div id="learningYearBars" class="space-y-2 mb-2"></div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Mobile Trigger (My Learning Filters) -->
-            <div class="mb-4 md:hidden">
-                <button id="learningFiltersMobileBtn" type="button" class="filters-mobile-trigger flex items-center gap-2 px-3 py-2 rounded bg-papsi-green text-white text-sm font-medium shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="learningFiltersDrawer">Filters
-                    <span id="learningFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
-                </button>
             </div>
             <!-- Search and Filter Controls (Learning) -->
             <div id="learningFiltersDrawer" class="filters-drawer md:bg-white md:rounded-lg md:shadow-sm md:p-4 mb-6" role="dialog" aria-modal="true" aria-labelledby="learningFiltersHeading">
@@ -1223,34 +1233,37 @@
 
         <!-- Hub Page -->
         <div id="hub-page" class="page-content hidden">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-papsi-dark">Center for Teacher Excellence</h2>
-                <button id="cartButton" class="flex items-center space-x-2 bg-papsi-green text-white px-4 py-2 rounded shadow hover:bg-green-700 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.35 2.7A1 1 0 007 17h10a1 1 0 00.95-.68L21 13M7 13V6a1 1 0 011-1h5a1 1 0 011 1v7" />
-                    </svg>
-                    <span id="cartCount" class="ml-1">0</span>
-                </button>
-            </div>
-            <!-- Training Statistics Header -->
+            <!-- Title, toolbar, and stats inside one white container -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div class="relative overflow-hidden">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-bold text-papsi-dark">Training Statistics</h3>
-                        <button id="trainingStatsToggle" class="text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200" aria-controls="trainingStatsSection" aria-expanded="false">Show Stats</button>
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-2xl font-bold text-papsi-dark">Center for Teacher Excellence</h2>
                     </div>
+                    <!-- One-line toolbar: Filters (mobile) + Show/Hide Stats -->
+                    <div class="flex items-center gap-2 mb-4">
+                        <button id="trainingFiltersMobileBtn" type="button" class="filters-mobile-trigger md:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="trainingFiltersDrawer">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M3 4.5A1.5 1.5 0 014.5 3h11A1.5 1.5 0 0117 4.5v.382a1.5 1.5 0 01-.44 1.06l-4.56 4.56v4.248a1 1 0 01-1.37.93l-2-.75A1 1 0 017 13.996v-3.494L2.44 5.942A1.5 1.5 0 012 4.882V4.5z"/>
+                            </svg>
+                            <span>Filters</span>
+                            <span id="trainingFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
+                        </button>
+
+                        <button id="trainingStatsToggle" class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-controls="trainingStatsSection" aria-expanded="false" type="button">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M3 3a1 1 0 000 2h1v10a2 2 0 002 2h8a1 1 0 100-2H6a1 1 0 01-1-1V5h9a1 1 0 100-2H3z"/>
+                                <path d="M8 7a1 1 0 011-1h1v8H9a1 1 0 01-1-1V7zM12 9a1 1 0 011-1h1v6h-1a1 1 0 01-1-1V9z"/>
+                            </svg>
+                            <span>Show Stats</span>
+                        </button>
+                    </div>
+
+                    <!-- Stats section (collapsible) -->
                     <div id="trainingStatsSection" class="hidden">
                         <div id="trainingStatsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
                         <div id="trainingYearBars" class="space-y-2 mb-2"></div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Mobile Trigger (Training Filters) -->
-            <div class="mb-4 md:hidden">
-                <button id="trainingFiltersMobileBtn" type="button" class="filters-mobile-trigger flex items-center gap-2 px-3 py-2 rounded bg-papsi-green text-white text-sm font-medium shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="trainingFiltersDrawer">Filters
-                    <span id="trainingFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
-                </button>
             </div>
             <!-- Search and Filter Controls (Training Center) -->
             <div id="trainingFiltersDrawer" class="filters-drawer md:bg-white md:rounded-lg md:shadow-sm md:p-4 mb-6" role="dialog" aria-modal="true" aria-labelledby="trainingFiltersHeading">
@@ -1305,7 +1318,9 @@
             <div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Training center courses will be dynamically populated here -->
                 </div>
-                <div id="coursesPagination" class="w-full flex justify-center mt-6"></div>
+                <div id="coursesPagination" class="w-full flex justify-center mt-6 mb-2 md:mb-3"></div>
+                <!-- Spacer to ensure content remains visible above fixed cart bar -->
+                <div id="trainingBottomSpacer" class="h-0"></div>
                 <!-- Cart Modal -->
                 <div id="cartModal" class="modal hidden z-50">
                     <div class="modal-content mx-auto">
@@ -1331,6 +1346,7 @@
                                 <div class="flex-1 text-right mt-2 md:mt-0">
                                     <div class="text-sm text-gray-600">Subtotal: <span id="cartSubtotal" class="font-semibold text-papsi-dark">₱0.00</span></div>
                                     <div id="cartDiscountRow" class="text-sm text-gray-600 hidden">Discount: <span id="cartDiscount" class="font-semibold text-papsi-green">-₱0.00</span></div>
+                                    <div id="cartVoucherRow" class="text-sm text-gray-600 hidden">Voucher: <span id="cartVoucher" class="font-semibold text-papsi-green">-₱0.00</span></div>
                                     <div class="text-base font-bold text-papsi-green">Total: <span id="cartTotal">₱0.00</span></div>
                                 </div>
                             </div>
@@ -1469,34 +1485,81 @@ function persistCart(){
 }
 
 function formatMoney(n){ return '₱' + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function computeCartSubtotal(){
-    let subtotal = 0;
-    (cartCourses||[]).forEach(id=>{
-        const c = (allCourses||[]).find(x=>x.id===id);
-        if(!c) return;
-        let price = 0;
-        if (c.price) price = parseFloat(String(c.price).replace(/[^0-9.]/g,''));
-        if(!isNaN(price)) subtotal += price;
+function parseCourseFees(course){
+    // Supports either numeric fields (regular_fee, promo_fee) or string fields (originalPrice, price)
+    let reg = 0, promo = 0;
+    if (course && course.regular_fee != null) {
+        reg = parseFloat(String(course.regular_fee).toString().replace(/[^0-9.]/g, '')) || 0;
+    } else if (course && course.originalPrice) {
+        reg = parseFloat(String(course.originalPrice).toString().replace(/[^0-9.]/g, '')) || 0;
+    }
+    if (course && course.promo_fee != null) {
+        promo = parseFloat(String(course.promo_fee).toString().replace(/[^0-9.]/g, '')) || 0;
+    } else if (course && course.price) {
+        promo = parseFloat(String(course.price).toString().replace(/[^0-9.]/g, '')) || 0;
+    }
+    if (reg === 0 && promo > 0) reg = promo; // fallback: if no regular specified, treat promo as regular
+    if (promo === 0 && reg > 0) promo = reg; // fallback: if no promo specified, treat promo same as regular
+    return { reg, promo };
+}
+function computeCartTotals(){
+    let regularSum = 0;
+    let promoSum = 0;
+    (cartCourses||[]).forEach(id => {
+        const c = (allCourses||[]).find(x => x.id === id);
+        if (!c) return;
+        const { reg, promo } = parseCourseFees(c);
+        regularSum += reg;
+        promoSum += promo;
     });
-    return subtotal;
+    const baseDiscount = Math.max(0, regularSum - promoSum);
+    let voucherDiscount = 0;
+    try {
+        if (appliedVoucher && typeof appliedVoucher.percentage === 'number' && appliedVoucher.percentage > 0) {
+            voucherDiscount = promoSum * (appliedVoucher.percentage / 100);
+        }
+    } catch {}
+    const total = Math.max(0, promoSum - voucherDiscount);
+    return { regularSum, promoSum, baseDiscount, voucherDiscount, total };
 }
 function updateCartBar(){
-    const bar = document.getElementById('cartStickyBar');
-    if(!bar) return;
     const count = cartCourses.length;
-    if(count === 0){
-        bar.classList.add('hidden');
+    const onHub = (window.__currentPage === 'hub');
+
+    // Hide global sticky bar on all pages (we only use the Training Center bar)
+    const sticky = document.getElementById('cartStickyBar');
+    if (sticky) {
+        sticky.classList.add('hidden');
         dismissCoachMark();
-        return;
     }
-    const c1 = document.getElementById('cartBarCount');
-    const c2 = document.getElementById('cartBarItems');
-    const sub = document.getElementById('cartBarSubtotal');
-    if(c1) c1.textContent = count;
-    if(c2) c2.textContent = count;
-    if(sub) sub.textContent = formatMoney(computeCartSubtotal());
-    bar.classList.remove('hidden');
-    positionCoachMark();
+
+    // Training Center bottom bar for hub page
+    const tbar = document.getElementById('trainingCartBar');
+    if (tbar) {
+        if (onHub && count > 0) {
+            const { regularSum, total } = computeCartTotals();
+            const subEl = document.getElementById('trainingBarSubtotal');
+            const totEl = document.getElementById('trainingBarTotal');
+            const cntEl = document.getElementById('trainingBarCount');
+            if (subEl) subEl.textContent = formatMoney(regularSum);
+            if (totEl) totEl.textContent = formatMoney(total);
+            if (cntEl) cntEl.textContent = count;
+            tbar.classList.remove('hidden');
+            // Add bottom padding to hub page so pagination isn't covered by the bar
+            const hub = document.getElementById('hub-page');
+            if (hub) { hub.classList.add('pb-28','md:pb-24'); }
+            // Expand bottom spacer just above the bar
+            const spacer = document.getElementById('trainingBottomSpacer');
+            if (spacer) { spacer.className = 'h-24 md:h-20'; }
+        } else {
+            tbar.classList.add('hidden');
+            // Remove extra padding when bar is hidden
+            const hub = document.getElementById('hub-page');
+            if (hub) { hub.classList.remove('pb-28','md:pb-24'); }
+            const spacer = document.getElementById('trainingBottomSpacer');
+            if (spacer) { spacer.className = 'h-0'; }
+        }
+    }
 }
 function hideCartBar(){
     const bar = document.getElementById('cartStickyBar');
@@ -1563,52 +1626,19 @@ function clearEntireCart(){
     try { showToast('Cart cleared','info'); } catch {}
 }
 
-// Wrap originals — preserve existing behavior
-if(typeof addToCart === 'function'){
-    const __origAddToCart = addToCart;
-    addToCart = function(courseId){
-        const pre = cartCourses.length;
-        __origAddToCart(courseId);
-        if(cartCourses.length > pre){
-            persistCart();
-            const c = (allCourses||[]).find(x=>x.id===courseId);
-            showAddToastWithAction(c ? c.title : 'Course');
-            updateCartBar();
-            if(pre === 0){ setTimeout(showCoachMarkOnce, 600); }
-        }
-    };
-}
-if(typeof updateCartCount === 'function'){
-    const __origUpdateCartCount = updateCartCount;
-    updateCartCount = function(){ __origUpdateCartCount(); updateCartBar(); };
-}
-if(typeof removeFromCart === 'function'){
-    const __origRemoveFromCart = removeFromCart;
-    removeFromCart = function(id){ __origRemoveFromCart(id); persistCart(); updateCartBar(); };
-}
-if(typeof openCart === 'function'){
-    const __origOpenCart = openCart;
-    openCart = function(){ __origOpenCart(); updateCartBar(); };
-}
-if(typeof closeCart === 'function'){
-    const __origCloseCart = closeCart;
-    closeCart = function(){ __origCloseCart(); updateCartBar(); };
-}
-
-// After training data loads, ensure cart items still valid & prune removed courses
-const __origRenderCourses = typeof renderCourses === 'function' ? renderCourses : null;
-if(__origRenderCourses){
-    renderCourses = function(){
-        __origRenderCourses();
-        // prune cart of non-existent IDs (e.g., after data refresh)
-        const before = cartCourses.length;
-        cartCourses = cartCourses.filter(id => (allCourses||[]).some(c => c.id === id));
-        if(cartCourses.length !== before) { persistCart(); updateCartCount(); }
-        updateCartBar();
-    };
-}
+// Keep sticky bar in sync on load and after UI changes
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Ensure cart bars are not nested inside any hidden page-content container
+    try {
+        ['cartStickyBar','trainingCartBar','cartCoachMark'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.closest('.page-content')) {
+                document.body.appendChild(el);
+            }
+        });
+    } catch {}
+
     maybeShowCartBarFirstTime();
     if(cartCourses.length){ setTimeout(showCoachMarkOnce, 800); }
 });
@@ -1635,6 +1665,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l8 8M6 14L14 6"/></svg>
                     </button>
                 </div>
+            </div>
+        </div>
+        <!-- Training Center Bottom Cart Bar (only visible on hub page when cart > 0) -->
+    <div id="trainingCartBar" class="fixed left-0 right-0 bottom-24 md:bottom-20 z-[1100] px-3 hidden">
+            <div class="mx-auto max-w-4xl bg-white border shadow-lg rounded-xl flex items-center justify-between gap-4 px-4 py-3">
+                <div class="flex items-center gap-6">
+                    <div class="leading-tight">
+                        <div class="text-xs text-gray-500">Subtotal</div>
+                        <div class="text-sm font-semibold text-papsi-dark"><span id="trainingBarSubtotal">₱0.00</span></div>
+                    </div>
+                    <div class="leading-tight">
+                        <div class="text-xs text-gray-500">Total</div>
+                        <div class="text-sm font-semibold text-papsi-green"><span id="trainingBarTotal">₱0.00</span></div>
+                    </div>
+                </div>
+                <button type="button" onclick="openCart()" class="relative flex items-center gap-2 bg-papsi-green text-white px-4 py-2 rounded shadow hover:bg-green-700 transition" aria-label="Open cart">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.3 2.6A1 1 0 007 17h10"/>
+                    </svg>
+                    <span>Cart</span>
+                    <span id="trainingBarCount" class="absolute -top-2 -right-2 text-[10px] bg-white text-papsi-green font-bold px-1.5 py-0.5 rounded-full shadow">0</span>
+                </button>
             </div>
         </div>
         <div id="cartCoachMark" class="fixed z-[1150] hidden" role="dialog" aria-label="Cart guidance">
@@ -2554,13 +2606,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span class="${categoryBadgeClasses(course.category)} px-2 py-1 rounded text-xs font-medium">${course.category || 'Other'}</span>
                             </div>
                             <div class="absolute top-2 right-2 flex space-x-1">
-                                <button onclick="showAbout('${course.id}')" class="bg-white rounded-full p-2 shadow-sm hover:shadow transition-all" aria-label="About">
-                                    <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                <button onclick="showAbout('${course.id}')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all" aria-label="About">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
-                                <button onclick="playAudio('${course.id}')" class="bg-white rounded-full p-2 shadow-sm hover:shadow transition-all ${!course.audio ? 'opacity-50 cursor-not-allowed' : ''}" ${!course.audio ? 'disabled' : ''} aria-label="Audio Preview">
-                                    <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                <button onclick="playAudio('${course.id}')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all ${!course.audio ? 'opacity-50 cursor-not-allowed' : ''}" ${!course.audio ? 'disabled' : ''} aria-label="Audio Preview">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
@@ -2628,13 +2680,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <span class="${categoryBadgeClasses(course.category)} px-2 py-1 rounded text-xs font-medium">${course.category}</span>
                             </div>
                             <div class="absolute top-2 right-2 flex space-x-1">
-                                <button onclick="showAbout('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all" aria-label="About">
-                                    <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                <button onclick="showAbout('${course.id}')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all" aria-label="About">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
-                                <button onclick="playAudio('${course.id}')" class="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-sm transition-all ${!course.audio ? 'opacity-50 cursor-not-allowed' : ''}" ${!course.audio ? 'disabled' : ''} aria-label="Audio Preview">
-                                    <svg class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                <button onclick="playAudio('${course.id}')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all ${!course.audio ? 'opacity-50 cursor-not-allowed' : ''}" ${!course.audio ? 'disabled' : ''} aria-label="Audio Preview">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                     </svg>
                                 </button>
@@ -2713,16 +2765,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Cart logic
         function addToCart(courseId) {
+            const wasEmpty = cartCourses.length === 0;
             if (!cartCourses.includes(courseId)) {
                 cartCourses.push(courseId);
                 renderCourses();
                 updateCartCount();
+                try { persistCart(); } catch {}
+                try {
+                    const c = (allCourses||[]).find(x=>x.id===courseId);
+                    showAddToastWithAction(c ? c.title : 'Course');
+                } catch {}
+                try { updateCartBar(); } catch {}
+                if (wasEmpty) { try { setTimeout(showCoachMarkOnce, 600); } catch {} }
             }
         }
 
         function updateCartCount() {
             const cartCount = document.getElementById('cartCount');
-            cartCount.textContent = cartCourses.length;
+            if (cartCount) cartCount.textContent = cartCourses.length;
+            try { updateCartBar(); } catch {}
         }
 
     function openCart() {
@@ -2731,9 +2792,9 @@ document.addEventListener('DOMContentLoaded', () => {
             closeAudio();
             // Render cart list
             const cartList = document.getElementById('cartList');
-            let subtotal = 0;
-            let total = 0;
-            let voucherDiscount = 0;
+            let subtotal = 0; // regular sum
+            let total = 0;    // final total after voucher
+            let voucherDiscount = 0; // voucher amount computed from promo sum
             if (cartCourses.length === 0) {
                 cartList.innerHTML = '<div class="text-gray-500 text-center">Your cart is empty.</div>';
                 setTimeout(() => {
@@ -2748,20 +2809,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 cartList.innerHTML = cartCourses.map(id => {
                     const course = allCourses.find(c => c.id === id);
                     if (!course) return '';
-                    // Parse prices
-                    let reg = 0, promo = 0;
-                    if (course.originalPrice && course.price) {
-                        reg = parseFloat(course.originalPrice.replace(/[^\d.]/g, ''));
-                        promo = parseFloat(course.price.replace(/[^\d.]/g, ''));
-                    } else if (course.price) {
-                        promo = parseFloat(course.price.replace(/[^\d.]/g, ''));
-                    }
-                    subtotal += promo;
+                    // Parse prices (supports regular_fee/promo_fee or originalPrice/price)
+                    const fees = parseCourseFees(course);
+                    subtotal += fees.reg; // subtotal should add regular fee
                     return `<div class="flex flex-col md:flex-row md:justify-between md:items-center border-b pb-2 gap-1 group">
                         <span class="font-medium">${course.title}</span>
                         <span class="flex items-center gap-2">
-                            ${reg > 0 ? `<span class='text-gray-400 line-through text-sm'>₱${reg.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>` : ''}
-                            <span class="font-semibold text-papsi-gold">₱${promo.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                            ${fees.reg > 0 ? `<span class='text-gray-400 line-through text-sm'>₱${fees.reg.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>` : ''}
+                            <span class="font-semibold text-papsi-gold">₱${fees.promo.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
                             <button onclick="removeFromCart('${course.id}')" class="ml-2 text-gray-400 hover:text-red-600 transition-colors" title="Remove">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
@@ -2777,25 +2832,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }, 0);
             }
-            // Voucher logic: apply validated voucher percentage if present
-            if (appliedVoucher && typeof appliedVoucher.percentage === 'number' && appliedVoucher.percentage > 0) {
-                voucherDiscount = subtotal * (appliedVoucher.percentage / 100);
-            }
-            total = subtotal - voucherDiscount;
-            // Update subtotal and total
-            document.getElementById('cartSubtotal').textContent = `₱${subtotal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            // Totals computation according to new rules
+            const { regularSum, promoSum, baseDiscount, voucherDiscount: vDisc, total: finalTotal } = computeCartTotals();
+            document.getElementById('cartSubtotal').textContent = `₱${regularSum.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             const discountRow = document.getElementById('cartDiscountRow');
             const discountEl = document.getElementById('cartDiscount');
             if (discountRow && discountEl) {
-                if (voucherDiscount > 0) {
+                if (baseDiscount > 0) {
                     discountRow.classList.remove('hidden');
-                    discountEl.textContent = `-₱${voucherDiscount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                    discountEl.textContent = `-₱${baseDiscount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
                 } else {
                     discountRow.classList.add('hidden');
                     discountEl.textContent = '-₱0.00';
                 }
             }
-            document.getElementById('cartTotal').textContent = `₱${total.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            const voucherRow = document.getElementById('cartVoucherRow');
+            const voucherEl = document.getElementById('cartVoucher');
+            if (voucherRow && voucherEl) {
+                if (vDisc > 0) {
+                    voucherRow.classList.remove('hidden');
+                    voucherEl.textContent = `-₱${vDisc.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                } else {
+                    voucherRow.classList.add('hidden');
+                    voucherEl.textContent = '-₱0.00';
+                }
+            }
+            document.getElementById('cartTotal').textContent = `₱${finalTotal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             // Listen for voucher input changes
             setTimeout(() => {
                 const voucherInput = document.getElementById('voucherInput');
@@ -2807,8 +2869,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             appliedVoucher = null;
                             const vs = document.getElementById('voucherStatus');
                             if (vs) vs.innerHTML = '';
-                            const discountRow = document.getElementById('cartDiscountRow');
-                            if (discountRow) discountRow.classList.add('hidden');
+                            const voucherRow = document.getElementById('cartVoucherRow');
+                            if (voucherRow) voucherRow.classList.add('hidden');
                         }
                         openCart();
                     };
@@ -2823,6 +2885,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 openCart();
                 updateCartCount();
                 renderCourses(); // Re-render course grid to update button state
+                try { persistCart(); } catch {}
+                try { updateCartBar(); } catch {}
             }
         }
         function confirmRegistration() {
@@ -2838,6 +2902,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (vs) vs.innerHTML = '';
             const discountRow = document.getElementById('cartDiscountRow');
             if (discountRow) discountRow.classList.add('hidden');
+            const voucherRow = document.getElementById('cartVoucherRow');
+            if (voucherRow) voucherRow.classList.add('hidden');
         }
 
         // Validate voucher via Apps Script endpoint and apply discount
@@ -3333,6 +3399,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Show selected page
             document.getElementById(page + '-page').classList.remove('hidden');
+            // Track active page for cart bar logic
+            window.__currentPage = page;
             
             // Add active class to selected button
             const activeBtn = document.getElementById(page + '-btn');
@@ -3344,6 +3412,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCourses();
                 updateCounters();
                 try { renderTrainingStats(); applyTrainingStatsVisibility(); } catch {}
+                try { updateCartBar(); } catch {}
             }
 
             // Initialize learning courses grid if learning page is shown
@@ -3353,6 +3422,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Ensure stats visibility preference is applied when entering the page
                 try { applyLearningStatsVisibility(); } catch {}
             }
+
+            // Always refresh cart bar visibility after any navigation
+            try { updateCartBar(); } catch {}
         }
 
         function openImageViewer(src, alt) {
@@ -3887,14 +3959,16 @@ function audioRegisterNow() {
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('cartButton').addEventListener('click', openCart);
+            const hubCartBtn = document.getElementById('cartButton');
+            if (hubCartBtn) hubCartBtn.addEventListener('click', openCart);
             const cartModal = document.getElementById('cartModal');
             // Note: Escape handling for cart is managed in the keydown listener above
-            loadAnnouncements();
             loadAnnouncements();
             loadTrainingCourses();
             renderLearningCourses();
             updateLearningCounters();
+            if (!window.__currentPage) window.__currentPage = 'home';
+            try { updateCartBar(); } catch {}
 
             // Wire Enter key on input to submit in verification modal
             const verifyInput = document.getElementById('verifyCodeInput');

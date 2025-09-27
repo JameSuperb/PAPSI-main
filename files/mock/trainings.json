@@ -1,0 +1,17 @@
+[
+  { "id":"M1", "title":"Data Analysis Basics", "category":"Workshop", "speaker":"A. Santos", "year":"2025", "price":1200, "promo":900, "photo":"images/training1.png" },
+  { "id":"M2", "title":"Web Accessibility 101", "category":"Webinar", "speaker":"B. Reyes", "year":"2024", "price":800, "promo":600, "photo":"images/training2.png" },
+  { "id":"M3", "title":"Advanced Excel", "category":"Seminar", "speaker":"C. Dela Cruz", "year":"2023", "price":1500, "promo":1200, "photo":"images/training3.png" },
+  { "id":"M4", "title":"Intro to Machine Learning", "category":"Workshop", "speaker":"D. Garcia", "year":"2025", "price":2000, "promo":1500, "photo":"images/training4.png" },
+  { "id":"M5", "title":"Cloud Fundamentals", "category":"Seminar", "speaker":"E. Ramos", "year":"2022", "price":1800, "promo":1400, "photo":"images/training5.png" },
+  { "id":"M6", "title":"Project Management Essentials", "category":"Seminar", "speaker":"F. Bautista", "year":"2021", "price":1300, "promo":1000, "photo":"images/training6.png" },
+  { "id":"M7", "title":"Cybersecurity for Everyone", "category":"Webinar", "speaker":"G. Villanueva", "year":"2024", "price":1000, "promo":800, "photo":"images/training1.png" },
+  { "id":"M8", "title":"UI/UX Fundamentals", "category":"Workshop", "speaker":"H. Aquino", "year":"2023", "price":1600, "promo":1200, "photo":"images/training2.png" },
+  { "id":"M9", "title":"Python for Beginners", "category":"Workshop", "speaker":"I. Navarro", "year":"2025", "price":1500, "promo":1100, "photo":"images/training3.png" },
+  { "id":"M10", "title":"Public Speaking", "category":"Seminar", "speaker":"J. Lim", "year":"2022", "price":900, "promo":700, "photo":"images/training4.png" },
+  { "id":"M11", "title":"Research Methods", "category":"Seminar", "speaker":"K. Mendoza", "year":"2021", "price":1400, "promo":1100, "photo":"images/training5.png" },
+  { "id":"M12", "title":"Effective Writing", "category":"Webinar", "speaker":"L. Cruz", "year":"2024", "price":700, "promo":500, "photo":"images/training6.png" },
+  { "id":"M13", "title":"Digital Marketing Essentials", "category":"Workshop", "speaker":"M. Ortiz", "year":"2023", "price":1700, "promo":1300, "photo":"images/training1.png" },
+  { "id":"M14", "title":"Time Management Mastery", "category":"Seminar", "speaker":"N. Flores", "year":"2022", "price":950, "promo":750, "photo":"images/training2.png" },
+  { "id":"M15", "title":"Critical Thinking", "category":"Seminar", "speaker":"O. Perez", "year":"2021", "price":1100, "promo":850, "photo":"images/training3.png" }
+]

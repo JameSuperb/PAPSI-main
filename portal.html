@@ -396,11 +396,10 @@
     <script>
     // ===== Auth Validate Handler (Phase 3) =====
     const AUTH_BASE = 'https://script.google.com/macros/s/AKfycbydRAAaO83lKJpCpu7a48YlncAX9R5N1KvRx5LqMofd6Dd-O1S_Mnp9tGysVGFV7q6dZQ/exec';
-    const AUTH_ID = '1y_WaSDuORzYQzoXdxP7uDrWQaz4qYCRk8Ys25UkySFg';
     const AUTH_SH = 'Sheet1';
 
     function buildAuthUrl(func, query = {}) {
-        const params = new URLSearchParams({ ID: AUTH_ID, SH: AUTH_SH, func });
+        const params = new URLSearchParams({ SH: AUTH_SH, func });
         Object.entries(query).forEach(([k, v]) => {
             if (v !== undefined && v !== null) params.append(k, String(v));
         });
@@ -899,9 +898,11 @@
             if (inlineSpin) {
                 const icon = btn.querySelector('.refresh-icon');
                 if (icon) icon.classList.add('spin');
-                if (text) {
-                    const span = btn.querySelector('span');
-                    if (span) span.textContent = text;
+                // Store original label once, then set pending label (if provided)
+                const span = btn.querySelector('span');
+                if (span) {
+                    if (!btn.dataset.prevText) btn.dataset.prevText = span.textContent || '';
+                    if (text) span.textContent = text;
                 }
                 btn.disabled = true;
                 btn.classList.add('opacity-70','cursor-not-allowed');
@@ -916,8 +917,11 @@
             if (inlineSpin) {
                 const icon = btn.querySelector('.refresh-icon');
                 if (icon) icon.classList.remove('spin');
-                // restore original text if we altered it
-                // (We didn't store old text separately; if needed we could, but leaving as-is keeps last label.)
+                // Restore original label if previously stored; otherwise use provided fallback
+                const span = btn.querySelector('span');
+                const restore = btn.dataset.prevText || text || '';
+                if (span && restore) span.textContent = restore;
+                if (btn.dataset.prevText) delete btn.dataset.prevText;
                 btn.disabled = false;
                 btn.classList.remove('opacity-70','cursor-not-allowed');
             } else {
@@ -1043,24 +1047,32 @@
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div class="relative overflow-hidden">
                     <h2 class="text-2xl font-bold text-papsi-dark mb-2">My Learning</h2>
-                    <!-- One-line toolbar: Filters (mobile) + Show/Hide Stats -->
-                    <div class="flex items-center gap-2 mb-4">
-                        <button id="learningFiltersMobileBtn" type="button" class="filters-mobile-trigger md:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="learningFiltersDrawer">
-                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path d="M3 4.5A1.5 1.5 0 014.5 3h11A1.5 1.5 0 0117 4.5v.382a1.5 1.5 0 01-.44 1.06l-4.56 4.56v4.248a1 1 0 01-1.37.93l-2-.75A1 1 0 017 13.996v-3.494L2.44 5.942A1.5 1.5 0 012 4.882V4.5z"/>
-                            </svg>
-                            <span>Filters</span>
-                            <span id="learningFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
-                        </button>
-
-                        <button id="learningStatsToggle" class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-controls="learningStatsSection" aria-expanded="false" type="button">
-                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path d="M3 3a1 1 0 000 2h1v10a2 2 0 002 2h8a1 1 0 100-2H6a1 1 0 01-1-1V5h9a1 1 0 100-2H3z"/>
-                                <path d="M8 7a1 1 0 011-1h1v8H9a1 1 0 01-1-1V7zM12 9a1 1 0 011-1h1v6h-1a1 1 0 01-1-1V9z"/>
-                            </svg>
-                            <span>Show Stats</span>
-                        </button>
+                    <!-- Transient success banner (shown after registration) -->
+                    <div id="learningSuccessBanner" class="hidden mb-3 rounded-md border border-green-200 bg-green-50 px-3 py-2 flex items-start gap-2" role="status" aria-live="polite">
+                        <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a1 1 0 00-1.414-1.414L9 10.414 7.557 8.97a1 1 0 10-1.414 1.415l2.121 2.12a1 1 0 001.414 0l4.179-4.314z" clip-rule="evenodd"/></svg>
+                        <div id="learningSuccessBannerText" class="text-sm text-green-800">Registration submitted successfully.</div>
                     </div>
+                    <!-- Segmented toolbar: Filters + Show/Hide Stats + Clear -->
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="inline-flex rounded-md overflow-hidden border bg-white/70">
+                            <button id="learningFiltersMobileBtn" type="button" class="filters-mobile-trigger inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white hover:bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-papsi-green rounded-none border-r" aria-expanded="false" aria-controls="learningFiltersDrawer">
+                                <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M3 4.5A1.5 1.5 0 014.5 3h11A1.5 1.5 0 0117 4.5v.382a1.5 1.5 0 01-.44 1.06l-4.56 4.56v4.248a1 1 0 01-1.37.93l-2-.75A1 1 0 017 13.996v-3.494L2.44 5.942A1.5 1.5 0 012 4.882V4.5z"/>
+                                </svg>
+                                <span>Filters</span>
+                                <span id="learningFiltersActiveCount" class="hidden text-[10px] bg-gray-100 text-gray-600 px-1 rounded">0</span>
+                            </button>
+                            <button id="learningStatsToggle" class="inline-flex items-center gap-2 text-sm px-3 py-1.5 font-medium bg-white hover:bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-papsi-green rounded-none" aria-controls="learningStatsSection" aria-expanded="false" type="button">
+                                <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M4 12a1 1 0 011-1h1a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM9 9a1 1 0 011-1h1a1 1 0 011 1v6a1 1 0 01-1 1h-1a1 1 0 01-1-1V9zM14 6a1 1 0 011-1h1a1 1 0 011 1v9a1 1 0 01-1 1h-1a1 1 0 01-1-1V6z"/>
+                                </svg>
+                                <span>Show Stats</span>
+                            </button>
+                        </div>
+                        <button id="learningClearFilters" type="button" class="hidden text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-papsi-green">Clear</button>
+                    </div>
+                    <!-- Active filter chips -->
+                    <div id="learningFilterChips" class="flex flex-wrap items-center gap-2 mb-4 hidden"></div>
 
                     <!-- Stats section (collapsible) -->
                     <div id="learningStatsSection" class="hidden">
@@ -1239,24 +1251,27 @@
                     <div class="flex items-center justify-between mb-2">
                         <h2 class="text-2xl font-bold text-papsi-dark">Center for Teacher Excellence</h2>
                     </div>
-                    <!-- One-line toolbar: Filters (mobile) + Show/Hide Stats -->
-                    <div class="flex items-center gap-2 mb-4">
-                        <button id="trainingFiltersMobileBtn" type="button" class="filters-mobile-trigger md:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm font-medium shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-papsi-green" aria-expanded="false" aria-controls="trainingFiltersDrawer">
-                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path d="M3 4.5A1.5 1.5 0 014.5 3h11A1.5 1.5 0 0117 4.5v.382a1.5 1.5 0 01-.44 1.06l-4.56 4.56v4.248a1 1 0 01-1.37.93l-2-.75A1 1 0 017 13.996v-3.494L2.44 5.942A1.5 1.5 0 012 4.882V4.5z"/>
-                            </svg>
-                            <span>Filters</span>
-                            <span id="trainingFiltersActiveCount" class="hidden text-xs bg-white/20 px-1 rounded">0</span>
-                        </button>
-
-                        <button id="trainingStatsToggle" class="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-controls="trainingStatsSection" aria-expanded="false" type="button">
-                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path d="M3 3a1 1 0 000 2h1v10a2 2 0 002 2h8a1 1 0 100-2H6a1 1 0 01-1-1V5h9a1 1 0 100-2H3z"/>
-                                <path d="M8 7a1 1 0 011-1h1v8H9a1 1 0 01-1-1V7zM12 9a1 1 0 011-1h1v6h-1a1 1 0 01-1-1V9z"/>
-                            </svg>
-                            <span>Show Stats</span>
-                        </button>
+                    <!-- Segmented toolbar: Filters + Show/Hide Stats + Clear -->
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="inline-flex rounded-md overflow-hidden border bg-white/70">
+                            <button id="trainingFiltersMobileBtn" type="button" class="filters-mobile-trigger inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white hover:bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-papsi-green rounded-none border-r" aria-expanded="false" aria-controls="trainingFiltersDrawer">
+                                <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M3 4.5A1.5 1.5 0 014.5 3h11A1.5 1.5 0 0117 4.5v.382a1.5 1.5 0 01-.44 1.06l-4.56 4.56v4.248a1 1 0 01-1.37.93l-2-.75A1 1 0 017 13.996v-3.494L2.44 5.942A1.5 1.5 0 012 4.882V4.5z"/>
+                                </svg>
+                                <span>Filters</span>
+                                <span id="trainingFiltersActiveCount" class="hidden text-[10px] bg-gray-100 text-gray-600 px-1 rounded">0</span>
+                            </button>
+                            <button id="trainingStatsToggle" class="inline-flex items-center gap-2 text-sm px-3 py-1.5 font-medium bg-white hover:bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-papsi-green rounded-none" aria-controls="trainingStatsSection" aria-expanded="false" type="button">
+                                <svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M4 12a1 1 0 011-1h1a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM9 9a1 1 0 011-1h1a1 1 0 011 1v6a1 1 0 01-1 1h-1a1 1 0 01-1-1V9zM14 6a1 1 0 011-1h1a1 1 0 011 1v9a1 1 0 01-1 1h-1a1 1 0 01-1-1V6z"/>
+                                </svg>
+                                <span>Show Stats</span>
+                            </button>
+                        </div>
+                        <button id="trainingClearFilters" type="button" class="hidden text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-papsi-green">Clear</button>
                     </div>
+                    <!-- Active filter chips -->
+                    <div id="trainingFilterChips" class="flex flex-wrap items-center gap-2 mb-4 hidden"></div>
 
                     <!-- Stats section (collapsible) -->
                     <div id="trainingStatsSection" class="hidden">
@@ -1322,7 +1337,7 @@
                 <!-- Spacer to ensure content remains visible above fixed cart bar -->
                 <div id="trainingBottomSpacer" class="h-0"></div>
                 <!-- Cart Modal -->
-                <div id="cartModal" class="modal hidden z-50">
+                <div id="cartModal" class="modal hidden z-[1300]">
                     <div class="modal-content mx-auto">
                         <div class="flex justify-between items-center border-b pb-2 mb-4">
                             <h3 class="text-xl font-bold text-papsi-dark">My Cart</h3>
@@ -1471,6 +1486,7 @@ function renderCalendar() {
 const CART_COACH_KEY = 'PAPSI_CART_COACH_DONE';
 const CART_HIDE_BAR_KEY = 'PAPSI_HIDE_CART_BAR';
 const CART_STORAGE_KEY = 'PAPSI_CART_ITEMS';
+let CART_MODAL_OPEN = false;
 
 // Load persisted cart early if available
 try {
@@ -1522,6 +1538,15 @@ function computeCartTotals(){
     const total = Math.max(0, promoSum - voucherDiscount);
     return { regularSum, promoSum, baseDiscount, voucherDiscount, total };
 }
+function overlayBlocksCartBar(){
+    try{
+        const isOpen = (el) => el && !el.classList.contains('hidden');
+        const iv = document.getElementById('imageViewer');
+        const about = document.getElementById('aboutModal');
+        const audio = document.getElementById('audioModal');
+        return isOpen(iv) || isOpen(about) || isOpen(audio);
+    }catch{ return false; }
+}
 function updateCartBar(){
     const count = cartCourses.length;
     const onHub = (window.__currentPage === 'hub');
@@ -1536,7 +1561,7 @@ function updateCartBar(){
     // Training Center bottom bar for hub page
     const tbar = document.getElementById('trainingCartBar');
     if (tbar) {
-        if (onHub && count > 0) {
+        if (onHub && count > 0 && !CART_MODAL_OPEN && !overlayBlocksCartBar()) {
             const { regularSum, total } = computeCartTotals();
             const subEl = document.getElementById('trainingBarSubtotal');
             const totEl = document.getElementById('trainingBarTotal');
@@ -2173,8 +2198,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="aboutContent" class="space-y-4">
                     <!-- Content will be populated by JavaScript -->
                 </div>
-                <div class="mt-6 flex space-x-3">
-                    <button onclick="closeAbout()" class="flex-1 bg-papsi-green text-white py-2 px-4 rounded hover:bg-green-700 transition-colors">
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="aboutRegisterBtn" onclick="aboutRegisterNow()" class="bg-papsi-green text-white py-2 px-4 rounded hover:bg-green-700 transition-colors">
+                        Register Now
+                    </button>
+                    <button onclick="closeAbout()" class="bg-gray-200 text-gray-700 py-2 px-4 rounded hover:bg-gray-300 transition-colors">
                         Close
                     </button>
                 </div>
@@ -2547,6 +2575,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCourses();
             updateCounters();
             renderTrainingStats();
+            try{ renderTrainingFilterChips(); }catch{}
         }
 
         function renderCourses() {
@@ -2725,6 +2754,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     pag.innerHTML = '';
                 }
             }
+            try{ renderTrainingFilterChips(); }catch{}
         }
 
         function changeCoursesPage(delta) {
@@ -2763,6 +2793,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
+        // Render active filter chips for Training Center
+        function renderTrainingFilterChips(){
+            const chips = document.getElementById('trainingFilterChips');
+            const clearBtn = document.getElementById('trainingClearFilters');
+            if(!chips || !clearBtn) return;
+            const search = document.getElementById('searchInput');
+            const category = document.getElementById('categoryFilter');
+            const speaker = document.getElementById('speakerFilter');
+            const year = window.trainingYearFilter || null;
+            const items = [];
+            if(search && search.value.trim()) items.push({ key:'search', label:`Search: ${search.value.trim()}` });
+            if(category && category.value !== 'all') items.push({ key:'category', label:`Category: ${category.value}` });
+            if(speaker && speaker.value !== 'all') items.push({ key:'speaker', label:`Speaker: ${speaker.value}` });
+            if(year) items.push({ key:'year', label:`Year: ${year}` });
+            if(!items.length){ chips.classList.add('hidden'); clearBtn.classList.add('hidden'); chips.innerHTML=''; return; }
+            chips.classList.remove('hidden'); clearBtn.classList.remove('hidden');
+            chips.innerHTML = items.map(it => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 text-papsi-green text-xs font-medium" data-key="${it.key}">${it.label}<button type="button" class="ml-1 text-papsi-green/80 hover:text-papsi-green" aria-label="Remove ${it.key}" data-remove="${it.key}">×</button></span>`).join('');
+            chips.querySelectorAll('[data-remove]').forEach(btn=>{
+                btn.addEventListener('click',()=>{
+                    const key = btn.getAttribute('data-remove');
+                    if(key==='search'){ if(search){ search.value=''; const cs=document.getElementById('clearSearch'); if(cs) cs.classList.add('hidden'); } }
+                    if(key==='category'){ if(category){ category.value='all'; } }
+                    if(key==='speaker'){ if(speaker){ speaker.value='all'; } }
+                    if(key==='year'){ window.trainingYearFilter = null; }
+                    filterCourses();
+                    try{ window.__updateFilterActiveCounts(); }catch{}
+                });
+            });
+        }
+
         // Cart logic
         function addToCart(courseId) {
             const wasEmpty = cartCourses.length === 0;
@@ -2787,9 +2847,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
     function openCart() {
-            // Hide other modals
-            closeAbout();
-            closeAudio();
+        // Mark modal as open and immediately hide any cart bars/coach marks
+        try { CART_MODAL_OPEN = true; } catch {}
+        try { updateCartBar(); } catch {}
+        try { dismissCoachMark(); } catch {}
+        // Hide other modals
+        closeAbout();
+        closeAudio();
             // Render cart list
             const cartList = document.getElementById('cartList');
             let subtotal = 0; // regular sum
@@ -2889,9 +2953,150 @@ document.addEventListener('DOMContentLoaded', () => {
                 try { updateCartBar(); } catch {}
             }
         }
-        function confirmRegistration() {
-            alert('Registration confirmed! (Implement actual registration logic here)');
-            closeCart();
+        // Format helpers
+        function formatDateMDY(d){
+            try {
+                const dt = (d instanceof Date) ? d : new Date(d);
+                if (isNaN(dt)) return '';
+                const m = String(dt.getMonth()+1).padStart(2,'0');
+                const day = String(dt.getDate()).padStart(2,'0');
+                const y = dt.getFullYear();
+                return `${m}/${day}/${y}`;
+            } catch { return ''; }
+        }
+        function formatTimestampUS(d){
+            try {
+                const dt = (d instanceof Date) ? d : new Date(d);
+                if (isNaN(dt)) return '';
+                const mdy = formatDateMDY(dt);
+                let h = dt.getHours();
+                const min = String(dt.getMinutes()).padStart(2,'0');
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                h = h % 12; if (h === 0) h = 12;
+                const hh = String(h).padStart(2,'0');
+                return `${mdy} ${hh}:${min} ${ampm}`;
+            } catch { return ''; }
+        }
+        async function confirmRegistration() {
+            try {
+                // Guard: must be logged in and have items
+                const profile = window.PAPSI_PROFILE || null;
+                if (!profile || !profile.email) {
+                    try { showToast('Please log in before confirming registration.', 'error'); } catch {}
+                    return;
+                }
+                if (!Array.isArray(cartCourses) || cartCourses.length === 0) {
+                    try { showToast('Your cart is empty.', 'info'); } catch {}
+                    return;
+                }
+
+                const btn = document.getElementById('confirmRegistrationBtn');
+                const prevText = btn?.textContent;
+                setPending(btn, true, 'Submitting…');
+
+                // Build trainings from cart
+                const selected = (cartCourses||[])
+                    .map(id => (allCourses||[]).find(c => c.id === id))
+                    .filter(Boolean);
+                // Requirement: remove dates in trainingtext and trainingjson when submitting
+                const trainingtext = selected.map(c => c.title).join(' | ');
+                const trainingjson = selected.map(c => ({ title: c.title }));
+
+                // Compute totals, preserve voucher state for submission
+                const { regularSum, baseDiscount, voucherDiscount, total } = computeCartTotals();
+
+                // Derive profile fields (prefer current UI values when available)
+                // Build fullname: First Name + Middle Initial + Last Name + Suffix (skip blanks)
+                const first = String(profile.firstname || '').trim();
+                const mi = String(profile.middleinitial || '').trim();
+                const last = String(profile.lastname || '').trim();
+                const suf = String(profile.suffix || '').trim();
+                const fullname = [first, mi, last, suf].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+                // Build nametext: concatenate name parts without spaces/periods and UPPERCASE
+                const nametext = (first + mi + last + suf).replace(/[\.\s]/g, '').toUpperCase();
+                const mobileRaw = (document.getElementById('mobileInput')?.value || profile.mobile || '').toString();
+                const specializationVal = (typeof getSelectWithOtherValue === 'function') ? (getSelectWithOtherValue('specializationSelect','specializationOther') || profile.specialization || '') : (profile.specialization || '');
+
+                const payload = {
+                    timestamp: formatTimestampUS(new Date()),
+                    email: profile.email || '',
+                    id: profile.id || '',
+                    title: profile.title || '',
+                    firstname: profile.firstname || '',
+                    middleinitial: profile.middleinitial || '',
+                    lastname: profile.lastname || '',
+                    suffix: profile.suffix || '',
+                    fullname: fullname,
+                    nametext: nametext,
+                    mobile: mobileRaw.replace(/[^0-9]/g,'') || '',
+                    specialization: specializationVal,
+                    school: document.getElementById('schoolInput')?.value || profile.school || '',
+                    type: document.getElementById('typeSelect')?.value || profile.type || '',
+                    address: document.getElementById('addressTextarea')?.value || profile.address || '',
+                    subtotal: regularSum,
+                    discount: baseDiscount,
+                    vouchercode: (appliedVoucher && appliedVoucher.code) ? appliedVoucher.code : 'none',
+                    voucherdiscount: voucherDiscount,
+                    total: total,
+                    trainingtext: trainingtext,
+                    trainingjson: trainingjson
+                };
+
+                // POST to Apps Script library with SH=Sheet1&func=cart (explicit per spec)
+                const url = `${AUTH_BASE}?SH=Sheet1&func=cart`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    // Use a simple request to avoid CORS preflight (OPTIONS)
+                    headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
+                    body: JSON.stringify(payload)
+                });
+                const text = await res.text();
+
+                if (!res.ok) {
+                    try { showToast((text || 'Registration failed.'), 'error', 6000); } catch {}
+                    setPending(btn, false, prevText || 'Confirm Registration');
+                    return;
+                }
+
+                let message = '';
+                try {
+                    const data = JSON.parse(text);
+                    message = data?.message || data?.status || data?.result || '';
+                } catch {
+                    message = text;
+                }
+                try { showToast((message || 'Registration submitted.').trim(), 'success', 6000); } catch {}
+                // If backend indicates email dispatch, show a small success modal overlay
+                try {
+                    if (typeof message === 'string' && /Recorded and email dispatched\./i.test(message.trim())) {
+                        if (typeof openRegistrationSuccessModal === 'function') {
+                            openRegistrationSuccessModal(profile.email || '');
+                        }
+                    }
+                } catch {}
+
+                // Clear cart and update UI
+                cartCourses = [];
+                try { persistCart(); } catch {}
+                try { renderCourses(); } catch {}
+                try { updateCartCount(); } catch {}
+                try { appliedVoucher = null; } catch {}
+                try { closeCart(); } catch {}
+                try { updateCartBar(); } catch {}
+                // Route to My Learning with transient success banner
+                try {
+                    window.__showLearningSuccessBanner = true;
+                    window.__learningSuccessMessage = (message && String(message).trim()) || 'Registration submitted successfully.';
+                    if (typeof showPage === 'function') showPage('learning');
+                } catch {}
+
+                setPending(btn, false, prevText || 'Confirm Registration');
+            } catch (err) {
+                console.error('confirmRegistration error', err);
+                try { showToast(err?.message || 'Network error. Please try again.', 'error', 6000); } catch {}
+                const btn = document.getElementById('confirmRegistrationBtn');
+                setPending(btn, false, 'Confirm Registration');
+            }
         }
 
         function closeCart() {
@@ -2904,6 +3109,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (discountRow) discountRow.classList.add('hidden');
             const voucherRow = document.getElementById('cartVoucherRow');
             if (voucherRow) voucherRow.classList.add('hidden');
+            // Mark modal as closed and refresh cart bar visibility
+            try { CART_MODAL_OPEN = false; } catch {}
+            try { updateCartBar(); } catch {}
         }
 
         // Validate voucher via Apps Script endpoint and apply discount
@@ -2995,6 +3203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderLearningCourses();
             updateLearningCounters();
             renderLearningStats();
+            try{ renderLearningFilterChips(); }catch{}
         }
 
         function renderLearningCourses() {
@@ -3081,6 +3290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `);
             }
+            try{ renderLearningFilterChips(); }catch{}
         }
 
         function changeLearningPage(delta) {
@@ -3118,6 +3328,39 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('learningResultsCounter').textContent = `Showing ${shownCourses} of ${totalAvailable} courses`;
         }
 
+        // Render active filter chips for My Learning
+        function renderLearningFilterChips(){
+            const chips = document.getElementById('learningFilterChips');
+            const clearBtn = document.getElementById('learningClearFilters');
+            if(!chips || !clearBtn) return;
+            const search = document.getElementById('learningSearchInput');
+            const category = document.getElementById('learningCategoryFilter');
+            const speaker = document.getElementById('learningSpeakerFilter');
+            const year = window.learningYearFilter || null;
+            const sort = document.getElementById('learningDateSort');
+            const items = [];
+            if(search && search.value.trim()) items.push({ key:'search', label:`Search: ${search.value.trim()}` });
+            if(category && category.value !== 'all') items.push({ key:'category', label:`Category: ${category.value}` });
+            if(speaker && speaker.value !== 'all') items.push({ key:'speaker', label:`Speaker: ${speaker.value}` });
+            if(year) items.push({ key:'year', label:`Year: ${year}` });
+            if(sort && sort.value !== 'newest') items.push({ key:'sort', label:`Sort: Oldest` });
+            if(!items.length){ chips.classList.add('hidden'); clearBtn.classList.add('hidden'); chips.innerHTML=''; return; }
+            chips.classList.remove('hidden'); clearBtn.classList.remove('hidden');
+            chips.innerHTML = items.map(it => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 text-papsi-green text-xs font-medium" data-key="${it.key}">${it.label}<button type="button" class="ml-1 text-papsi-green/80 hover:text-papsi-green" aria-label="Remove ${it.key}" data-remove="${it.key}">×</button></span>`).join('');
+            chips.querySelectorAll('[data-remove]').forEach(btn=>{
+                btn.addEventListener('click',()=>{
+                    const key = btn.getAttribute('data-remove');
+                    if(key==='search'){ if(search){ search.value=''; const cs=document.getElementById('clearLearningSearch'); if(cs) cs.classList.add('hidden'); } }
+                    if(key==='category'){ if(category){ category.value='all'; } }
+                    if(key==='speaker'){ if(speaker){ speaker.value='all'; } }
+                    if(key==='year'){ window.learningYearFilter = null; }
+                    if(key==='sort'){ if(sort){ sort.value='newest'; } }
+                    filterLearningCourses();
+                    try{ window.__updateFilterActiveCounts(); }catch{}
+                });
+            });
+        }
+
         // Render dynamic statistics header for My Learning
         function renderLearningStats() {
             const grid = document.getElementById('learningStatsGrid');
@@ -3133,15 +3376,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const parts = [
                 `<div class="text-center"><div class="text-2xl font-bold text-papsi-green">${total}</div><div class="text-sm text-gray-600">Total Sessions</div></div>`,
-                `<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">${totalHours}</div><div class="text-sm text-gray-600">Total Hours</div></div>`
+                `<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">${totalHours}</div><div class="text-sm text-gray-600">Total Hours</div></div>`,
+                `<div class="col-span-full text-[11px] text-gray-600 mt-1">Click a category to filter courses.</div>`
             ];
             Object.entries(categories)
                 .sort((a,b)=> a[0].localeCompare(b[0]))
                 .forEach(([cat, count]) => {
                     const color = categoryStatsText(cat);
-                    parts.push(`<div class="text-center"><div class="text-xl font-semibold ${color}">${count}</div><div class="text-sm text-gray-600">${escapeHtml(cat)}</div></div>`);
+                    const catEnc = encodeURIComponent(cat);
+                    parts.push(`<button type="button" data-cat="${catEnc}" class="text-center group rounded p-2 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-papsi-green/40" title="Filter by ${escapeHtml(cat)}"><div class="text-xl font-semibold ${color} group-hover:text-papsi-green">${count}</div><div class="text-sm text-gray-600">${escapeHtml(cat)}</div></button>`);
                 });
             grid.innerHTML = parts.join('');
+
+            // Make category tiles clickable to apply category filter
+            grid.querySelectorAll('[data-cat]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const raw = btn.getAttribute('data-cat') || '';
+                    const val = decodeURIComponent(raw);
+                    const sel = document.getElementById('learningCategoryFilter');
+                    if (sel) {
+                        const opts = Array.from(sel.options).map(o => o.value);
+                        sel.value = opts.includes(val) ? val : 'all';
+                    }
+                    filterLearningCourses();
+                    try { window.__updateFilterActiveCounts(); } catch {}
+                    // Optionally scroll to list
+                    const gridEl = document.getElementById('learningCoursesGrid');
+                    try { gridEl?.scrollIntoView({behavior:'smooth', block:'start'}); } catch {}
+                });
+            });
 
             // Year mini bar indicators
             if (yearBars) {
@@ -3170,7 +3433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const yPos = sparkHeight - (cumulative / grandTotal)*sparkHeight;
                         return `${x.toFixed(1)},${yPos.toFixed(1)}`;
                     }).join(' ');
-                    const sparkline = `<div class="mt-4 mb-2"><div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-600">Cumulative Growth</span><span class="text-[10px] text-gray-500">${grandTotal} total</span></div><svg viewBox="0 0 ${sparkWidth} ${sparkHeight}" class="w-full max-w-xs h-10 text-papsi-green/70"><polyline fill="none" stroke="currentColor" stroke-width="2" points="${pts}" stroke-linejoin="round" stroke-linecap="round" /></svg></div>`;
+                    const sparkline = `<div class=\"mt-4 mb-2\"><div class=\"flex items-center justify-between mb-1\"><span class=\"text-xs font-medium text-gray-600\">Cumulative Growth</span><span class=\"text-[10px] text-gray-500\">${grandTotal} total</span></div><svg viewBox=\"0 0 ${sparkWidth} ${sparkHeight}\" class=\"w-full max-w-xs h-10 text-papsi-green/70\"><polyline fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" points=\"${pts}\" stroke-linejoin=\"round\" stroke-linecap=\"round\" /></svg><div class=\"text-[11px] text-gray-600 mt-1\">Click a year to filter courses.</div></div>`;
 
                     const selected = window.learningYearFilter || null;
                     const barsHtml = years.slice().reverse().map(y => { // reverse to show newest first visually under sparkline
@@ -3230,7 +3493,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const visible = (localStorage.getItem(LEARNING_STATS_VISIBLE_KEY) ?? 'false') === 'true';
             statsSection.classList.toggle('hidden', !visible);
             toggleBtn.setAttribute('aria-expanded', String(visible));
-            toggleBtn.textContent = visible ? 'Hide Stats' : 'Show Stats';
+                    toggleBtn.setAttribute('aria-pressed', String(visible));
+                    const label = toggleBtn.querySelector('span');
+                    if (label) label.textContent = visible ? 'Hide Stats' : 'Show Stats';
+                    const icon = toggleBtn.querySelector('svg');
+                    if (icon) { icon.classList.toggle('text-papsi-green', visible); icon.classList.toggle('text-gray-600', !visible); }
         }
 
         function toggleLearningStats() {
@@ -3261,7 +3528,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const visible = (localStorage.getItem(TRAINING_STATS_VISIBLE_KEY) ?? 'false') === 'true';
             statsSection.classList.toggle('hidden', !visible);
             toggleBtn.setAttribute('aria-expanded', String(visible));
-            toggleBtn.textContent = visible ? 'Hide Stats' : 'Show Stats';
+                    toggleBtn.setAttribute('aria-pressed', String(visible));
+                    const label = toggleBtn.querySelector('span');
+                    if (label) label.textContent = visible ? 'Hide Stats' : 'Show Stats';
+                    const icon = toggleBtn.querySelector('svg');
+                    if (icon) { icon.classList.toggle('text-papsi-green', visible); icon.classList.toggle('text-gray-600', !visible); }
         }
 
         function toggleTrainingStats() {
@@ -3292,13 +3563,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalHours = allCourses.reduce((sum, c) => sum + (c.hoursNum || 0), 0);
             const parts = [
                 `<div class="text-center"><div class="text-2xl font-bold text-papsi-green">${total}</div><div class="text-sm text-gray-600">Total Courses</div></div>`,
-                `<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">${totalHours}</div><div class="text-sm text-gray-600">Total Hours</div></div>`
+                `<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">${totalHours}</div><div class="text-sm text-gray-600">Total Hours</div></div>`,
+                `<div class="col-span-full text-[11px] text-gray-600 mt-1">Click a category to filter courses.</div>`
             ];
             Object.entries(categories).sort((a,b)=> a[0].localeCompare(b[0])).forEach(([cat,count])=>{
                 const color = categoryStatsText(cat);
-                parts.push(`<div class=\"text-center\"><div class=\"text-xl font-semibold ${color}\">${count}</div><div class=\"text-sm text-gray-600\">${escapeHtml(cat)}</div></div>`)
+                const catEnc = encodeURIComponent(cat);
+                parts.push(`<button type=\"button\" data-cat=\"${catEnc}\" class=\"text-center group rounded p-2 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-papsi-green/40\" title=\"Filter by ${escapeHtml(cat)}\"><div class=\"text-xl font-semibold ${color} group-hover:text-papsi-green\">${count}</div><div class=\"text-sm text-gray-600\">${escapeHtml(cat)}</div></button>`)
             });
             grid.innerHTML = parts.join('');
+
+            // Click to filter by category in Training Center
+            grid.querySelectorAll('[data-cat]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const raw = btn.getAttribute('data-cat') || '';
+                    const val = decodeURIComponent(raw);
+                    const sel = document.getElementById('categoryFilter');
+                    if (sel) {
+                        const opts = Array.from(sel.options).map(o => o.value);
+                        sel.value = opts.includes(val) ? val : 'all';
+                    }
+                    filterCourses();
+                    try { window.__updateFilterActiveCounts(); } catch {}
+                    const gridEl = document.getElementById('coursesGrid');
+                    try { gridEl?.scrollIntoView({behavior:'smooth', block:'start'}); } catch {}
+                });
+            });
 
             if (yearBars) {
                 const yearCounts = allCourses.reduce((acc,c)=>{
@@ -3318,7 +3608,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const grandTotal = years.reduce((s,y)=> s+yearCounts[y],0) || 1;
                     let cumulative = 0; const sparkWidth=160; const sparkHeight=38;
                     const pts = years.map((y,i)=>{ cumulative+=yearCounts[y]; const x=(i/(years.length-1||1))*sparkWidth; const yPos=sparkHeight-(cumulative/grandTotal)*sparkHeight; return `${x.toFixed(1)},${yPos.toFixed(1)}`; }).join(' ');
-                    const sparkline = `<div class=\"mt-4 mb-2\"><div class=\"flex items-center justify-between mb-1\"><span class=\"text-xs font-medium text-gray-600\">Cumulative Growth</span><span class=\"text-[10px] text-gray-500\">${grandTotal} total</span></div><svg viewBox=\"0 0 ${sparkWidth} ${sparkHeight}\" class=\"w-full max-w-xs h-10 text-papsi-green/70\"><polyline fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" points=\"${pts}\" stroke-linejoin=\"round\" stroke-linecap=\"round\" /></svg></div>`;
+                    const sparkline = `<div class=\"mt-4 mb-2\"><div class=\"flex items-center justify-between mb-1\"><span class=\"text-xs font-medium text-gray-600\">Cumulative Growth</span><span class=\"text-[10px] text-gray-500\">${grandTotal} total</span></div><svg viewBox=\"0 0 ${sparkWidth} ${sparkHeight}\" class=\"w-full max-w-xs h-10 text-papsi-green/70\"><polyline fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" points=\"${pts}\" stroke-linejoin=\"round\" stroke-linecap=\"round\" /></svg><div class=\"text-[11px] text-gray-600 mt-1\">Click a year to filter courses.</div></div>`;
                     const selected = window.trainingYearFilter || null;
                     const barsHtml = years.slice().reverse().map(y=>{
                         const count=yearCounts[y];
@@ -3421,6 +3711,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterLearningCourses();
                 // Ensure stats visibility preference is applied when entering the page
                 try { applyLearningStatsVisibility(); } catch {}
+                // If a post-registration flag is set, show success banner briefly
+                try {
+                    if (window.__showLearningSuccessBanner) {
+                        const b = document.getElementById('learningSuccessBanner');
+                        const t = document.getElementById('learningSuccessBannerText');
+                        if (b) {
+                            b.classList.remove('hidden');
+                            if (t && typeof window.__learningSuccessMessage === 'string') t.textContent = window.__learningSuccessMessage;
+                            // Hide after 4 seconds
+                            setTimeout(() => { b.classList.add('hidden'); }, 4000);
+                        }
+                        // Reset flag
+                        window.__showLearningSuccessBanner = false;
+                        window.__learningSuccessMessage = '';
+                    }
+                } catch {}
             }
 
             // Always refresh cart bar visibility after any navigation
@@ -3443,6 +3749,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Prevent body scroll when viewer is open
             document.body.style.overflow = 'hidden';
+            try { updateCartBar(); } catch {}
         }
 
         function closeImageViewer() {
@@ -3451,6 +3758,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Restore body scroll
             document.body.style.overflow = 'auto';
+            try { updateCartBar(); } catch {}
         }
 
     let aboutCourseId = null;
@@ -3508,12 +3816,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 0);
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            try { updateCartBar(); } catch {}
         }
 
         function closeAbout() {
             const modal = document.getElementById('aboutModal');
             modal.classList.add('hidden');
             document.body.style.overflow = 'auto';
+            try { updateCartBar(); } catch {}
         }
 
     let audioCourseId = null;
@@ -3562,6 +3872,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+            try { updateCartBar(); } catch {}
         }
 
 // Move these out of the modal functions so they are global
@@ -3588,6 +3899,7 @@ function audioRegisterNow() {
             if (el && !el.paused) {
                 try { el.pause(); el.currentTime = 0; } catch {}
             }
+            try { updateCartBar(); } catch {}
         }
 
         function toggleAudio() {
@@ -4195,8 +4507,9 @@ function audioRegisterNow() {
             ensureOverlay();
             const lBtn = document.getElementById('learningFiltersMobileBtn');
             const tBtn = document.getElementById('trainingFiltersMobileBtn');
-            if(lBtn) lBtn.addEventListener('click', () => toggleDrawer('learning'));
-            if(tBtn) tBtn.addEventListener('click', () => toggleDrawer('training'));
+            const isDesk = () => !isMobile();
+            if(lBtn) lBtn.addEventListener('click', () => { if(isDesk()){ const drawer = document.getElementById('learningFiltersDrawer'); drawer?.scrollIntoView({behavior:'smooth', block:'start'});} else { toggleDrawer('learning'); } });
+            if(tBtn) tBtn.addEventListener('click', () => { if(isDesk()){ const drawer = document.getElementById('trainingFiltersDrawer'); drawer?.scrollIntoView({behavior:'smooth', block:'start'});} else { toggleDrawer('training'); } });
             // Close on resize to desktop
             window.addEventListener('resize', () => {
                 if(!isMobile()) closeFiltersDrawer();
@@ -4207,6 +4520,38 @@ function audioRegisterNow() {
             });
             // Initial calc after a short delay (after data loads)
             setTimeout(window.__updateFilterActiveCounts, 1200);
+
+            // Clear buttons
+            const lc = document.getElementById('learningClearFilters');
+            if(lc) lc.addEventListener('click', () => {
+                const search = document.getElementById('learningSearchInput');
+                const cs = document.getElementById('clearLearningSearch');
+                const cat = document.getElementById('learningCategoryFilter');
+                const sp = document.getElementById('learningSpeakerFilter');
+                const sort = document.getElementById('learningDateSort');
+                if(search){ search.value=''; if(cs) cs.classList.add('hidden'); }
+                if(cat) cat.value='all';
+                if(sp) sp.value='all';
+                if(sort) sort.value='newest';
+                window.learningYearFilter = null;
+                filterLearningCourses();
+                try{ window.__updateFilterActiveCounts(); }catch{}
+            });
+            const tc = document.getElementById('trainingClearFilters');
+            if(tc) tc.addEventListener('click', () => {
+                const search = document.getElementById('searchInput');
+                const cs = document.getElementById('clearSearch');
+                const cat = document.getElementById('categoryFilter');
+                const sp = document.getElementById('speakerFilter');
+                const sort = document.getElementById('dateSort');
+                if(search){ search.value=''; if(cs) cs.classList.add('hidden'); }
+                if(cat) cat.value='all';
+                if(sp) sp.value='all';
+                if(sort) sort.value='newest';
+                window.trainingYearFilter = null;
+                filterCourses();
+                try{ window.__updateFilterActiveCounts(); }catch{}
+            });
         });
     })();
     // === End Mobile Filter Drawer Logic ===
@@ -4418,10 +4763,66 @@ function audioRegisterNow() {
         }
 
         // If a global object is present, auto-populate
-        if (window.PAPSI_PROFILE) {
-            try { setProfile(window.PAPSI_PROFILE); } catch (_) { /* no-op */ }
+                if (window.PAPSI_PROFILE) {
+                        try { setProfile(window.PAPSI_PROFILE); } catch (_) { /* no-op */ }
+                }
+        </script>
+
+        <!-- Registration Success Modal -->
+        <div id="registrationSuccessOverlay" class="fixed inset-0 bg-black/50 z-[3500] hidden" role="dialog" aria-modal="true" aria-labelledby="regSuccessTitle">
+            <div class="absolute inset-0 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+                    <div class="flex items-center justify-between px-4 py-3 border-b">
+                        <h3 id="regSuccessTitle" class="text-lg font-semibold text-papsi-dark">Registration Successful</h3>
+                        <button id="regSuccessCloseX" class="text-gray-500 hover:text-gray-700" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="px-4 py-4">
+                        <p id="regSuccessSubtitle" class="text-gray-700">
+                            Please see our email containing the payment procedures. Sent to your email address: <span class="font-semibold"></span>
+                        </p>
+                    </div>
+                    <div class="px-4 pb-4 flex gap-2 justify-end">
+                        <button id="regSuccessOk" class="bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700">Ok</button>
+                        <button id="regSuccessClose" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+        // Support functions for Registration Success modal
+        function openRegistrationSuccessModal(email){
+            try {
+                const overlay = document.getElementById('registrationSuccessOverlay');
+                const subtitle = document.getElementById('regSuccessSubtitle');
+                const emailSpan = subtitle?.querySelector('span');
+                if (emailSpan) emailSpan.textContent = String(email || '').trim();
+                overlay?.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                // Focus OK for easy dismiss
+                setTimeout(() => { try { document.getElementById('regSuccessOk')?.focus(); } catch {} }, 0);
+            } catch {}
         }
-    </script>
+        function closeRegistrationSuccessModal(){
+            try {
+                const overlay = document.getElementById('registrationSuccessOverlay');
+                overlay?.classList.add('hidden');
+                document.body.style.overflow = '';
+            } catch {}
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            const closeX = document.getElementById('regSuccessCloseX');
+            const closeBtn = document.getElementById('regSuccessClose');
+            const okBtn = document.getElementById('regSuccessOk');
+            closeX?.addEventListener('click', closeRegistrationSuccessModal);
+            closeBtn?.addEventListener('click', closeRegistrationSuccessModal);
+            okBtn?.addEventListener('click', closeRegistrationSuccessModal);
+            document.getElementById('registrationSuccessOverlay')?.addEventListener('click', function(e){ if (e.target === this) closeRegistrationSuccessModal(); });
+            document.addEventListener('keydown', function(e){
+                const ov = document.getElementById('registrationSuccessOverlay');
+                if (ov && !ov.classList.contains('hidden') && e.key === 'Escape') closeRegistrationSuccessModal();
+            });
+        });
+        </script>
 
     <!-- Contact Support Modal -->
     <div id="supportModal" class="modal hidden z-50">

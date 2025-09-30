@@ -589,12 +589,12 @@ textarea.form-control {
 }
 
 .navigation {
-  background: linear-gradient(to right, transparent 50%, #086b31 50%);
+  background: #166938; /* Solid PAPSI green: removes left transparent space */
   transition: 0.2s ease;
 }
 @media (max-width: 991px) {
   .navigation {
-    background: #1a1a37;
+    background: #166938;
   }
 }
 
@@ -787,6 +787,25 @@ link:focus,
     padding: 250px 0 200px;
   }
 }
+
+/* =========================
+   PAPSI Navbar (Global)
+   ========================= */
+/* Keep header above all content (Bootstrap modals are ~1050) */
+.header { z-index: 1030; }
+
+/* Solid background so navbar-dark links are visible */
+.papsi-navbar { background-color: #166938; }
+.papsi-navbar .nav-link { color: #ffffff !important; }
+.papsi-navbar .nav-link:hover { color: #f59e0b !important; }
+
+/* Ensure collapsed menu has a solid background on mobile */
+@media (max-width: 991px) {
+  .papsi-navbar .navbar-collapse { background-color: #166938; }
+}
+
+/* Brand logo sizing consistency */
+.navbar-brand img { height: 48px; }
 
 .hero-slider .prevArrow,
 .hero-slider .nextArrow {

@@ -236,8 +236,25 @@
 				<div id="checkoutEmailHelp" class="md:col-span-2 text-xs text-gray-500">We'll send the payment instructions to this email. Use a format like name@example.com.</div>
 			</div>
 			<div class="mt-4 flex gap-2 justify-end">
-				<button id="submitCheckoutBtn" onclick="confirmRegistration()" class="bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors">Submit</button>
+				<button id="submitCheckoutBtn" onclick="handleCheckoutSubmit()" class="bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors">Submit</button>
 				<button onclick="closeCheckoutModal()" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">Cancel</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Final Submit Confirmation Modal -->
+	<div id="submitConfirmModal" class="modal">
+		<div class="modal-content mx-auto max-w-sm">
+			<div class="flex justify-between items-center border-b pb-2 mb-3">
+				<h3 class="text-lg font-semibold text-papsi-dark">Confirmation</h3>
+				<button onclick="closeSubmitConfirm()" class="text-gray-400 hover:text-gray-600" aria-label="Close">
+					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+				</button>
+			</div>
+			<p class="text-gray-700 mb-4">Do you confirm the courses and want to receive the payment procedures on your email?</p>
+			<div class="flex gap-2 justify-end">
+				<button id="submitConfirmYes" class="bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700" onclick="proceedFinalSubmit()">Yes</button>
+				<button id="submitConfirmCancel" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300" onclick="cancelFinalSubmit()">Cancel</button>
 			</div>
 		</div>
 	</div>
@@ -800,8 +817,7 @@
 		async function confirmRegistration(){
 			try{
 				if(!Array.isArray(cartCourses) || cartCourses.length===0){ showToast('Your cart is empty.','info',3000); return; }
-				// Validate required checkout fields
-				if(!validateCheckoutRequireds()) return;
+				// Validation is performed before opening confirmation; proceed directly
 				// Read details from Checkout Details modal
 				var email = String((document.getElementById('checkoutEmail')||{}).value||'').trim();
 				var titleSel = document.getElementById('checkoutTitleSelect');
@@ -904,6 +920,17 @@
 		}
 		function closeCheckoutModal(){ var m=document.getElementById('checkoutModal'); if(m){ m.classList.remove('open'); } }
 
+		// Final submit confirmation modal helpers
+		function openSubmitConfirm(){
+			closeCheckoutModal();
+			var m = document.getElementById('submitConfirmModal'); if(m){ m.classList.add('open'); }
+			document.body.style.overflow='hidden';
+			setTimeout(function(){ try { document.getElementById('submitConfirmYes').focus(); } catch(e){} }, 0);
+		}
+		function closeSubmitConfirm(){ var m=document.getElementById('submitConfirmModal'); if(m){ m.classList.remove('open'); } document.body.style.overflow='auto'; }
+		function proceedFinalSubmit(){ closeSubmitConfirm(); confirmRegistration(); }
+		function cancelFinalSubmit(){ closeSubmitConfirm(); openCheckoutModal(); }
+
 		function handleTitleChange(){
 			try{
 				var sel=document.getElementById('checkoutTitleSelect');
@@ -934,16 +961,30 @@
 			}catch(e){}
 		}
 
+		// Submit button handler: validate first, then show confirmation
+		function handleCheckoutSubmit(){
+			// Ensure the checkout modal is visible during validation so errors are clear
+			openCheckoutModal();
+			if(!validateCheckoutRequireds()){
+				// Validation already shows toasts/highlights; don't proceed
+				return;
+			}
+			// All good: open final confirmation
+			openSubmitConfirm();
+		}
+
 		// Success modal helpers
 		function openRegistrationSuccessModal(email){ try{ var overlay=document.getElementById('registrationSuccessOverlay'); var subtitle=document.getElementById('regSuccessSubtitle'); var span=null; if(subtitle){ var s=subtitle.getElementsByTagName('span'); if(s && s.length) span=s[0]; } if(span) span.textContent = String(email||'').trim(); if(overlay) overlay.classList.remove('hidden'); document.body.style.overflow='hidden'; setTimeout(function(){ var ok=document.getElementById('regSuccessOk'); if(ok) try{ ok.focus(); }catch(e){} },0); }catch(e){} }
 		function closeRegistrationSuccessModal(){ try{ var overlay=document.getElementById('registrationSuccessOverlay'); if(overlay) overlay.classList.add('hidden'); document.body.style.overflow=''; }catch(e){} }
 
 		// Esc helpers
-		document.addEventListener('keydown', function(e){ if(e && e.key==='Escape'){ var ov=document.getElementById('registrationSuccessOverlay'); if(ov && !ov.classList.contains('hidden')){ closeRegistrationSuccessModal(); } var cm=document.getElementById('cartModal'); if(cm && cm.classList.contains('open')){ closeCart(); } var ab=document.getElementById('aboutModal'); if(ab && ab.classList.contains('open')){ closeAbout(); } var au=document.getElementById('audioModal'); if(au && au.classList.contains('open')){ closeAudio(); } var co=document.getElementById('checkoutModal'); if(co && co.classList.contains('open')){ closeCheckoutModal(); } var iv=document.getElementById('imageViewer'); if(iv && iv.classList.contains('open')){ closeImageViewer(); } } });
+		document.addEventListener('keydown', function(e){ if(e && e.key==='Escape'){ var ov=document.getElementById('registrationSuccessOverlay'); if(ov && !ov.classList.contains('hidden')){ closeRegistrationSuccessModal(); } var cm=document.getElementById('cartModal'); if(cm && cm.classList.contains('open')){ closeCart(); } var ab=document.getElementById('aboutModal'); if(ab && ab.classList.contains('open')){ closeAbout(); } var au=document.getElementById('audioModal'); if(au && au.classList.contains('open')){ closeAudio(); } var co=document.getElementById('checkoutModal'); if(co && co.classList.contains('open')){ closeCheckoutModal(); } var sc=document.getElementById('submitConfirmModal'); if(sc && sc.classList.contains('open')){ closeSubmitConfirm(); } var iv=document.getElementById('imageViewer'); if(iv && iv.classList.contains('open')){ closeImageViewer(); } } });
 		document.getElementById('regSuccessCloseX').addEventListener('click', closeRegistrationSuccessModal);
 		document.getElementById('regSuccessClose').addEventListener('click', closeRegistrationSuccessModal);
 		document.getElementById('regSuccessOk').addEventListener('click', closeRegistrationSuccessModal);
 		document.getElementById('registrationSuccessOverlay').addEventListener('click', function(e){ if(e.target===this) closeRegistrationSuccessModal(); });
+		// Close confirmation when clicking overlay
+		document.getElementById('submitConfirmModal').addEventListener('click', function(e){ if(e.target===this) cancelFinalSubmit(); });
 
 		// Simple escape/attr helpers
 		function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }

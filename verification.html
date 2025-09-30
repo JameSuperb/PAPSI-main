@@ -44,6 +44,43 @@
   <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
   <link rel="icon" href="images/favicon.png" type="image/x-icon">
 
+  <style>
+    /* Lightweight modal styles specific to verification to avoid Bootstrap conflicts */
+    .hidden { display: none !important; }
+    .verify-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000; /* above header/navbar */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .verify-modal-content {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .verify-modal-close {
+      background: transparent;
+      border: 0;
+      font-size: 1.5rem;
+      line-height: 1;
+      color: #6c757d;
+      cursor: pointer;
+    }
+    /* Ensure result text matches label size */
+    .verify-modal-content label,
+    .verify-modal-content #verifyResult,
+    .verify-modal-content #membershipVerifyResult { font-size: 1rem; }
+  </style>
+
 </head>
 
 <body>
@@ -176,6 +213,26 @@
     </div>
 </div>
 
+<!-- Membership Verification Modal -->
+<div id="membershipVerifyModal" class="verify-modal hidden" role="dialog" aria-modal="true" aria-labelledby="membershipVerifyModalTitle">
+  <div class="verify-modal-content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 id="membershipVerifyModalTitle" class="mb-0">Verify Membership</h5>
+      <button class="verify-modal-close" aria-label="Close" onclick="closeMembershipVerifyModal()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label for="membershipIdInput" class="font-weight-bold">Enter the PAPSI ID</label>
+      <input id="membershipIdInput" type="text" class="form-control" placeholder="Enter your PAPSI ID" />
+    </div>
+    <div class="d-flex justify-content-end mb-3">
+      <button class="btn btn-success mr-2" onclick="verifyMembership()">Verify</button>
+      <button class="btn btn-secondary" onclick="closeMembershipVerifyModal()">Cancel</button>
+    </div>
+    <div id="membershipVerifyResult"></div>
+  </div>
+  
+</div>
+
 <!-- page title -->
 <section class="page-title-section overlay" data-background="images/backgrounds/page-title.jpg">
   <div class="container">
@@ -203,8 +260,8 @@
   
         <ul>
           <li>1. Enter the unique verification code provided on your PAPSI certificate.</li>
-          <li>2. Submit the form, and we will process your request within the day.</li>
-          <li>3. The verification result, which includes the participant's name and certificate title, will be sent directly to the email address you provide.</li>
+          <li>2. Click verify. It will take a few seconds to verify the code.</li>
+          <li>3. The verification result, which includes the participant's name and certificate title, will be shown below.</li>
         </ul>
         <p> </p>
   
@@ -212,7 +269,7 @@
   
         <p>If you encounter any issues during the process or have further inquiries, feel free to contact our support team at <a href="mailto:papsi.seminar@gmail.com">papsi.seminar@gmail.com</a>. Thank you for your cooperation in maintaining the integrity of our certification process.</p>
   
-        <a href="https://forms.gle/oecq5GkcdbiXwnxEA" class="btn btn-primary">Verification Form</a>
+        <button type="button" class="btn btn-primary" onclick="openVerifyModal()">Verify Certificate</button>
       </div>
     </div>
   </div>
@@ -222,12 +279,12 @@
       <div class="card-body">
         <h3 class="card-title">Membership Verification</h3>
   
-        <p>Welcome to the PAPSI Membership Verification Form! This secure and convenient tool is designed to verify your PAPSI membership status. To proceed, please provide your complete name in the form below, and we'll process your request within the day:</p>
+        <p>Welcome to the PAPSI Membership Verification Form! This secure and convenient tool is designed to verify your PAPSI membership status. To proceed, please provide your PAPSI ID, and we'll process your request in a few a seconds:</p>
   
         <ol>
-          <li>1. Enter your full name as registered with PAPSI.</li>
-          <li>2. Submit the form, and we'll initiate the verification process.</li>
-          <li>3. Upon successful verification, we will send the result to your provided email address.</li>
+          <li>1. Enter your PAPSI ID.</li>
+          <li>2. Click verify, and we'll initiate the verification process.</li>
+          <li>3. Upon successful verification, you will see the results below.</li>
         </ol>
         <p> </p>
   
@@ -242,7 +299,7 @@
         <p>For your peace of mind, rest assured that the verification process is fully automated and carried out by our secure computer server. However, to receive an accurate result, please ensure the information you enter is correct before submitting the form.</p>
   
         <p>If you have any questions or encounter any issues during the process, please don't hesitate to contact our support team at <a href="mailto:papsi.seminar@gmail.com">papsi.seminar@gmail.com</a>. Thank you for being a valued member of PAPSI, and we appreciate your cooperation in using this verification service.</p>
-        <a href="https://forms.gle/yBYo91qdinKWBGgF7" class="btn btn-primary">Verification Form</a>
+        <button type="button" class="btn btn-primary" onclick="openMembershipVerifyModal()">Verify Membership</button>
       </div>
     </div>
   </div>
@@ -250,77 +307,6 @@
 
 <!-- /notice details -->
 
-<!-- footer -->
-<footer>
-  <!-- newsletter -->
-  <div class="newsletter">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-9 ml-auto bg-primary py-5 newsletter-block">
-          <h3 class="text-white">Subscribe Now</h3>
-          <form action="#">
-            <div class="input-wrapper">
-              <input type="email" class="form-control border-0" id="newsletter" name="newsletter" placeholder="Enter Your Email...">
-              <button type="submit" value="send" class="btn btn-primary">Join</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- footer content -->
-  <div class="footer bg-footer section border-bottom">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-4 col-sm-8 mb-5 mb-lg-0">
-          <!-- logo -->
-          <a class="logo-footer" href="index.html"><img class="img-fluid mb-4" src="images/logo.png" alt="logo"></a>
-          <ul class="list-unstyled">
-            <li class="mb-2">Office of the DLSU STC Vice Chancellor, De La Salle University, 2401 Taft Ave, Malate, Manila, 1004 Metro Manila</li>
-            <li class="mb-2">9:00am - 5:00pm</li>
-            <li class="mb-2">0966-165-2084</li>
-            <li class="mb-2">papsi.seminar@gmail.com</li>
-          </ul>
-        </div>
-        <!-- company -->
-        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
-          <h4 class="text-white mb-5">COMPANY</h4>
-          <ul class="list-unstyled">
-            <li class="mb-3"><a class="text-color" href="about.html">About Us</a></li>
-            <li class="mb-3"><a class="text-color" href="membership.html">Membership</a></li>
-            <li class="mb-3"><a class="text-color" href="certificate.html">Certificate</a></li>
-          </ul>
-        </div>
-        <!-- links -->
-        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
-          <h4 class="text-white mb-5">VERIFICATION</h4>
-          <ul class="list-unstyled">
-            <li class="mb-3"><a class="text-color" href="verification.html">By Certificate</a></li>
-            <li class="mb-3"><a class="text-color" href="verification.html">By Membership</a></li>
-          </ul>
-        </div>
-              <!-- support -->
-        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
-          <h4 class="text-white mb-5">SEARCH</h4>
-          <ul class="list-unstyled">
-            <li class="mb-3"><a class="text-color" href="searchmember.html">By Member</a></li>
-            <li class="mb-3"><a class="text-color" href="searchtraining.html">By Training</a></li>
-          </ul>
-        </div>
-        <!-- support -->
-        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-5 mb-md-0">
-          <h4 class="text-white mb-5">SERVICES</h4>
-          <ul class="list-unstyled">
-            <li class="mb-3"><a class="text-color" href="seminar.html">Seminar</a></li>
-            <li class="mb-3"><a class="text-color" href="webinar.html">Webinar</a></li>
-            <li class="mb-3"><a class="text-color" href="conference.html">Conference</a></li>
-            <li class="mb-3"><a class="text-color" href="training.html">Training Bundle</a></li>
-          </ul>
-        </div>
-
-      </div>
-    </div>
-  </div>
   <!-- copyright -->
   <div class="copyright py-4 bg-footer">
     <div class="container">
@@ -345,6 +331,26 @@
 </footer>
 <!-- /footer -->
 
+<!-- Certificate Verification Modal -->
+<div id="verifyModal" class="verify-modal hidden" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">
+  <div class="verify-modal-content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 id="verifyModalTitle" class="mb-0">Certificate Verification</h5>
+      <button class="verify-modal-close" aria-label="Close" onclick="closeVerifyModal()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label for="verifyCodeInput" class="font-weight-bold">Enter verification code</label>
+      <input id="verifyCodeInput" type="text" class="form-control" placeholder="Enter the certificate code here" />
+    </div>
+    <div class="d-flex justify-content-end mb-3">
+      <button class="btn btn-success mr-2" onclick="verifyCertificate()">Verify</button>
+      <button class="btn btn-secondary" onclick="closeVerifyModal()">Cancel</button>
+    </div>
+    <div id="verifyResult"></div>
+  </div>
+  
+</div>
+
 <!-- jQuery -->
 <script src="plugins/jQuery/jquery.min.js"></script>
 <!-- Bootstrap JS -->
@@ -363,6 +369,178 @@
 
 <!-- Main Script -->
 <script src="js/script.js"></script>
+
+<script>
+  function openVerifyModal(){
+    var modal = document.getElementById('verifyModal');
+    var input = document.getElementById('verifyCodeInput');
+    var result = document.getElementById('verifyResult');
+    if(result) result.innerHTML = '';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ try { input && input.focus(); } catch(e){} }, 0);
+  }
+  function closeVerifyModal(){
+    var modal = document.getElementById('verifyModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+  // Close when clicking overlay
+  (function(){
+    var modal = document.getElementById('verifyModal');
+    if(modal){
+      modal.addEventListener('click', function(e){ if(e.target === modal) closeVerifyModal(); });
+    }
+  })();
+  // Enter key submits
+  document.addEventListener('DOMContentLoaded', function(){
+    var input = document.getElementById('verifyCodeInput');
+    if(input){
+      input.addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter'){ ev.preventDefault(); verifyCertificate(); }
+      });
+    }
+    var mid = document.getElementById('membershipIdInput');
+    if(mid){
+      mid.addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter'){ ev.preventDefault(); verifyMembership(); }
+      });
+    }
+  });
+
+  async function verifyCertificate(){
+    var inputEl = document.getElementById('verifyCodeInput');
+    var resultEl = document.getElementById('verifyResult');
+    var code = (inputEl && inputEl.value || '').trim();
+    if(!code){ resultEl.innerHTML = '<div class="text-danger">Please enter the certificate code.</div>'; return; }
+    resultEl.innerHTML = '<div class="text-muted">Verifying… Please wait.</div>';
+
+    var base = 'https://script.google.com/macros/s/AKfycbxSvBt7qG2fz4w_y9P2CoV7RfJq0kvThANuCWsVRjJz5NaiqqidhgmHQJZneydAt2Yk/exec';
+    var params = new URLSearchParams({
+      ID: '1ECREzocUMLr9HY9AoLSzNAJDRhtuBi3peuu8IDx2Daw',
+      SH: 'Sheet1',
+      func: 'verify',
+      code: code
+    });
+    var url = base + '?' + params.toString();
+    try{
+      var res = await fetch(url, { method: 'GET' });
+      var text = await res.text();
+      try{
+        var data = JSON.parse(text);
+        var vCode = data.code || code;
+        var vName = data.name || '';
+        var vTraining = data.training || '';
+        resultEl.innerHTML = '<div class="p-3 rounded" style="background:#edf7ed;border:1px solid #c6e6c6;color:#166938;font-size:1rem">\
+          <div class="font-weight-bold">Certificate is valid</div>\
+          <div class="mt-1">Code: <span class="font-weight-bold">'+ vCode +'</span></div>\
+          <div class="mt-1">Name: <span class="font-weight-bold">'+ vName +'</span></div>\
+          <div class="mt-1">Training: <span class="font-weight-bold">'+ vTraining +'</span></div>\
+        </div>';
+        return;
+      } catch(_){
+        var errMsg = (text || '').trim() || 'Verification failed.';
+        resultEl.innerHTML = '<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">'+ errMsg +'</div>';
+        return;
+      }
+    } catch(err){
+      resultEl.innerHTML = '<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">'+ (err && err.message || 'Unable to verify at this time.') +'</div>';
+    }
+  }
+</script>
+
+<script>
+  function formatLongDate(val){
+    if(!val) return '';
+    var s = String(val).trim();
+    // Try native Date first (handles ISO and most mm/dd/yyyy)
+    var d = new Date(s);
+    if(!isNaN(d)){
+      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+    }
+    // Fallback: try simple mm/dd/yyyy or mm-dd-yyyy
+    var m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if(m){
+      var mm = parseInt(m[1],10) - 1;
+      var dd = parseInt(m[2],10);
+      var yyyy = parseInt(m[3],10);
+      if(yyyy < 100) yyyy = 2000 + yyyy; // basic century fix
+      var d2 = new Date(yyyy, mm, dd);
+      if(!isNaN(d2)){
+        var months2 = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        return months2[d2.getMonth()] + ' ' + d2.getDate() + ', ' + d2.getFullYear();
+      }
+    }
+    return s; // if unparseable, show as-is
+  }
+  function openMembershipVerifyModal(){
+    var modal = document.getElementById('membershipVerifyModal');
+    var input = document.getElementById('membershipIdInput');
+    var result = document.getElementById('membershipVerifyResult');
+    if(result) result.innerHTML = '';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ try { input && input.focus(); } catch(e){} }, 0);
+  }
+  function closeMembershipVerifyModal(){
+    var modal = document.getElementById('membershipVerifyModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+  // Close when clicking overlay for membership modal
+  (function(){
+    var modal = document.getElementById('membershipVerifyModal');
+    if(modal){
+      modal.addEventListener('click', function(e){ if(e.target === modal) closeMembershipVerifyModal(); });
+    }
+  })();
+  
+  // Placeholder verification (UI)
+  async function verifyMembership(){
+    var inputEl = document.getElementById('membershipIdInput');
+    var resultEl = document.getElementById('membershipVerifyResult');
+    var id = (inputEl && inputEl.value || '').trim();
+    if(!id){ resultEl.innerHTML = '<div class="text-danger">Please enter the PAPSI ID.</div>'; return; }
+    resultEl.innerHTML = '<div class="text-muted">Verifying… Please wait.</div>';
+
+    var base = 'https://script.google.com/macros/s/AKfycbydRAAaO83lKJpCpu7a48YlncAX9R5N1KvRx5LqMofd6Dd-O1S_Mnp9tGysVGFV7q6dZQ/exec';
+    var params = new URLSearchParams({ SH: 'Sheet1', func: 'verify', id: id });
+    var url = base + '?' + params.toString();
+    try {
+      var res = await fetch(url, { method: 'GET' });
+      var text = await res.text();
+
+      // Case 1 & 2: Known plain-text responses
+      var trimmed = (text || '').trim();
+      if (trimmed === 'Not yet a member' || trimmed === 'Error: Contact Admin') {
+        resultEl.innerHTML = '<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">' + trimmed + '</div>';
+        return;
+      }
+
+      // Case 3: JSON with { Name, ID, Date }
+      try {
+        var data = JSON.parse(text);
+        var name = data.Name || data.name || '';
+        var pid = data.ID || data.id || id;
+        var date = formatLongDate(data.Date || data.date || '');
+        resultEl.innerHTML = '<div class="p-3 rounded" style="background:#edf7ed;border:1px solid #c6e6c6;color:#166938;font-size:1rem">\
+          <div class="font-weight-bold">Membership is valid</div>\
+          <div class="mt-1">Name: <span class="font-weight-bold">' + name + '</span></div>\
+          <div class="mt-1">PAPSI ID: <span class="font-weight-bold">' + pid + '</span></div>\
+          <div class="mt-1">Expiration Date: <span class="font-weight-bold">' + date + '</span></div>\
+        </div>';
+        return;
+      } catch(_) {
+        // Unexpected response: show as error
+        resultEl.innerHTML = '<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">' + (trimmed || 'Verification failed.') + '</div>';
+        return;
+      }
+    } catch(err){
+      resultEl.innerHTML = '<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">' + (err && err.message || 'Unable to verify at this time.') + '</div>';
+    }
+  }
+</script>
 
 </body>
 </html>

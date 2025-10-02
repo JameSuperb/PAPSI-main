@@ -44,6 +44,15 @@
   <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
   <link rel="icon" href="images/favicon.png" type="image/x-icon">
 
+  <!-- Subtle placeholder styling for Suffix field -->
+  <style>
+    /* Make the suffix placeholder (e.g., "Jr., III") lighter/subtle */
+    #memberInfoModal #mi_suffix::placeholder { color: #adb5bd; opacity: 1; }
+    /* Edge/IE fallbacks */
+    #memberInfoModal #mi_suffix:-ms-input-placeholder { color: #adb5bd; }
+    #memberInfoModal #mi_suffix::-ms-input-placeholder { color: #adb5bd; }
+  </style>
+
 </head>
 
 <body>
@@ -214,29 +223,207 @@
           <!-- notice content -->
           <div>
             <h3 class="mb-4">Membership</h3>
-            <p>Fill out the Google Form below for us to process your membership request. The annual membership fee is Php 500.00. You will receive the payment procedures on your email after accomplishing the form.</p>
+            <p>The annual membership fee is Php 500.00. You will receive the payment procedures on your email after accomplishing the form.</p>
             
+            <!-- NEW: Membership Check -->
+            <div class="card border-0 shadow-sm mt-4">
+              <div class="card-body">
+                <h5 class="card-title mb-3">Start the membership process</h5>
+                <div class="form-row align-items-end">
+                  <div class="form-group col-md-8">
+                    <label for="membershipCheckEmail" class="mb-1">Email address</label>
+                    <input type="email" class="form-control" id="membershipCheckEmail" placeholder="you@example.com">
+                  </div>
+                  <div class="form-group col-md-4">
+                    <button id="membershipCheckBtn" class="btn btn-success btn-block">Check</button>
+                  </div>
+                </div>
+                <div id="membershipCheckResult" class="mt-2" aria-live="polite"></div>
+                <small class="text-muted d-block">Use the same email you used for PAPSI registration or trainings.</small>
+              </div>
+            </div>
+            <!-- /Membership Check -->
+
             <p> </p>
           </div>
         </div>
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfxxRXFrbIzbPZTuhPyDYkp-ivO5OI1D3EKHvG0GdBtTE0ZSg/viewform" 
-        width="100%" 
-        height="3700" 
-        frameborder="0" 
-        marginheight="0" 
-        marginwidth="0" 
-        style="border: 0; padding: 0;">Loading...
-</iframe>
-<p> </p>
-<p> </p>
-
-</script>
+        
       </div>
       
     </div>
   </div>
 </section>
 <!-- /notice details -->
+
+
+<!-- NEW: Member Information Modal -->
+<div class="modal fade" id="memberInfoModal" tabindex="-1" role="dialog" aria-labelledby="memberInfoTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content rounded-0 border-0">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="memberInfoTitle">Member Information</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" title="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body pt-0">
+        <form id="memberInfoForm">
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <label for="mi_title">Title</label>
+              <select class="form-control" id="mi_title" name="title" required>
+                <option value="">Select title…</option>
+                <option>Dr.</option>
+                <option>Ms.</option>
+                <option>Mr.</option>
+                <option>Mrs.</option>
+                <option>Ms.</option>
+                <option value="__other">Other…</option>
+              </select>
+              <input type="text" class="form-control mt-2 d-none" id="mi_title_other" placeholder="Please specify" aria-label="Other title">
+            </div>
+            <div class="form-group col-md-3">
+              <label for="mi_firstname">First name</label>
+              <input type="text" class="form-control" id="mi_firstname" name="firstname" required>
+            </div>
+            <div class="form-group col-md-2">
+              <label for="mi_middleinitial">Middle initial</label>
+              <input type="text" class="form-control" id="mi_middleinitial" name="middleinitial" maxlength="3">
+              <small class="form-text text-muted">Leave blank if not applicable.</small>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="mi_lastname">Last name</label>
+              <input type="text" class="form-control" id="mi_lastname" name="lastname" required>
+            </div>
+            <div class="form-group col-md-1">
+              <label for="mi_suffix">Suffix</label>
+              <input type="text" class="form-control" id="mi_suffix" name="suffix" placeholder="Jr., III">
+              <small class="form-text text-muted">Leave blank if not applicable.</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="mi_email">Email</label>
+              <input type="email" class="form-control" id="mi_email" name="email" required>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="mi_mobilenumber">Mobile number</label>
+              <input type="tel" class="form-control" id="mi_mobilenumber" name="mobilenumber" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="mi_specialization">Specialization</label>
+              <select class="form-control" id="mi_specialization" name="specialization" required>
+                <option value="">Select specialization…</option>
+                <option>Physics</option>
+                <option>Biology</option>
+                <option>Chemistry</option>
+                <option>Natural Science</option>
+                <option>Physical Science</option>
+                <option>General Science</option>
+                <option>Earth Science</option>
+                <option>Mathematics</option>
+                <option value="__other">Other…</option>
+              </select>
+              <input type="text" class="form-control mt-2 d-none" id="mi_specialization_other" placeholder="Please specify">
+            </div>
+            <div class="form-group col-md-6">
+              <label for="mi_school">School</label>
+              <input type="text" class="form-control" id="mi_school" name="school" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="mi_type">Type</label>
+              <select class="form-control" id="mi_type" name="type" required>
+                <option value="">Select type…</option>
+                <option>Private</option>
+                <option>Public</option>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="mi_position">Position</label>
+              <select class="form-control" id="mi_position" name="position" required>
+                <option value="">Select position…</option>
+                <option>Student</option>
+                <option>Teacher</option>
+                <option>Subject Teacher</option>
+                <option>Class Adviser</option>
+                <option>Homeroom Teacher</option>
+                <option>Master Teacher</option>
+                <option>Lead Teacher</option>
+                <option>Head Teacher</option>
+                <option>Assistant Principal/ Vice Principal</option>
+                <option>Principal</option>
+                <option>Instructor</option>
+                <option>Lecturer</option>
+                <option>Adjunct Instructor/ Adjunct Faculty</option>
+                <option>Teaching Assistant</option>
+                <option>Graduate Assistant</option>
+                <option>Assistant Professor</option>
+                <option>Associate Professor</option>
+                <option>Professor</option>
+                <option>Visiting Professor/ Visiting Lecturer</option>
+                <option>Clinical Instructor/ Clinical Professor</option>
+                <option>Research Professor</option>
+                <option>Extension Professor</option>
+                <option>Distinguished Professor</option>
+                <option>Endowed Chair/ Chair Professor</option>
+                <option>Professor Emeritus/ Emerita</option>
+                <option>Tutor</option>
+                <option>Trainer</option>
+                <option>Mentor Teacher</option>
+                <option>Subject Matter Expert</option>
+                <option>Faculty Specialist</option>
+                <option value="__other">Other…</option>
+              </select>
+              <input type="text" class="form-control mt-2 d-none" id="mi_position_other" placeholder="Please specify">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="mi_address">Address</label>
+            <textarea class="form-control" id="mi_address" name="address" rows="2" required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="mi_source">How did you hear about PAPSI? (source)</label>
+              <select class="form-control" id="mi_source" name="source" required>
+                <option value="">Select one…</option>
+                <option>From my colleague</option>
+                <option>School</option>
+                <option>Company</option>
+                <option>Website</option>
+                <option>Facebook Page</option>
+                <option>Text</option>
+                <option>Email</option>
+                <option>Advertisement</option>
+                <option value="__other">Other…</option>
+              </select>
+              <input type="text" class="form-control mt-2 d-none" id="mi_source_other" placeholder="Please specify">
+            </div>
+            <div class="form-group col-md-6">
+              <label for="mi_why">Why do you want to join?</label>
+              <input type="text" class="form-control" id="mi_why" name="why" required>
+            </div>
+          </div>
+
+          <div id="mi_infoNote" class="text-muted small mb-2"></div>
+          <div id="mi_error" class="alert alert-danger d-none"></div>
+        </form>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button id="memberInfoSubmitBtn" type="button" class="btn btn-success">Submit</button>
+      </div>
+    </div>
+  </div>
+  </div>
 
 
   <!-- copyright -->
@@ -283,6 +470,370 @@
 
 <!-- Main Script -->
 <script src="js/script.js"></script>
+
+<!-- NEW: Membership check logic (Web POST) -->
+<script>
+(function(){
+  var BTN = document.getElementById('membershipCheckBtn');
+  var EMAIL = document.getElementById('membershipCheckEmail');
+  var OUT = document.getElementById('membershipCheckResult');
+
+  var MODAL = $('#memberInfoModal');
+  var FORM = document.getElementById('memberInfoForm');
+  var fields = {
+    title: document.getElementById('mi_title'),
+    firstname: document.getElementById('mi_firstname'),
+    middleinitial: document.getElementById('mi_middleinitial'),
+    lastname: document.getElementById('mi_lastname'),
+    suffix: document.getElementById('mi_suffix'),
+    email: document.getElementById('mi_email'),
+    mobilenumber: document.getElementById('mi_mobilenumber'),
+    specialization: document.getElementById('mi_specialization'),
+    school: document.getElementById('mi_school'),
+    type: document.getElementById('mi_type'),
+    address: document.getElementById('mi_address'),
+    position: document.getElementById('mi_position'),
+    source: document.getElementById('mi_source'),
+    why: document.getElementById('mi_why')
+  };
+  var infoNote = document.getElementById('mi_infoNote');
+  var errBox = document.getElementById('mi_error');
+
+  var BASE = 'https://script.google.com/macros/s/AKfycbydRAAaO83lKJpCpu7a48YlncAX9R5N1KvRx5LqMofd6Dd-O1S_Mnp9tGysVGFV7q6dZQ/exec';
+
+  function isValidEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim());
+  }
+  function setPending(pending){
+    if (!BTN) return;
+    BTN.disabled = !!pending;
+    BTN.textContent = pending ? 'Checking…' : 'Check';
+  }
+  function showMsg(html, type){
+    if (!OUT) return;
+    var cls = type === 'error' ? 'alert alert-danger' :
+              type === 'warn'  ? 'alert alert-warning' :
+              type === 'ok'    ? 'alert alert-success' :
+                                 'alert alert-secondary';
+    OUT.className = cls;
+    OUT.innerHTML = html;
+  }
+  function fillField(input, value){
+    if (!input) return;
+    if (value === undefined || value === null) return;
+    input.value = String(value);
+  }
+  function openMemberInfoModal(data, email){
+    // Reset errors
+    if (errBox) { errBox.classList.add('d-none'); errBox.textContent = ''; }
+    // Clear fields
+    Object.keys(fields).forEach(function(k){ if (fields[k]) fields[k].value = ''; });
+    // Prefill email
+    fillField(fields.email, email || '');
+    // Ensure all "Other" inputs are hidden/reset before mapping
+    ;(function(){
+      ['mi_title_other','mi_specialization_other','mi_position_other','mi_source_other'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) { el.classList.add('d-none'); el.value = ''; }
+      });
+    })();
+    if (data && typeof data === 'object') {
+      // Map common keys (case-insensitive)
+      var map = function(o, keys){
+        for (var i=0;i<keys.length;i++){
+          var k = keys[i];
+          if (o[k] !== undefined && o[k] !== null && o[k] !== '') return o[k];
+        }
+        return '';
+      };
+      var o = data;
+      // Title handling: if value not in list, set select to Other and put the rest in the custom field
+      var titleVal = map(o, ['title','Title']);
+      var titleSel = document.getElementById('mi_title');
+      var titleOther = document.getElementById('mi_title_other');
+      if (titleSel) {
+        var known = ['Dr.','Ms.','Mr.','Mrs.','Ms.'];
+        if (titleVal && known.indexOf(titleVal) >= 0) {
+          titleSel.value = titleVal;
+          if (titleOther) { titleOther.classList.add('d-none'); titleOther.value = ''; }
+        } else if (titleVal) {
+          titleSel.value = '__other';
+          if (titleOther) { titleOther.classList.remove('d-none'); titleOther.value = titleVal; }
+        } else {
+          titleSel.value = '';
+          if (titleOther) { titleOther.classList.add('d-none'); titleOther.value = ''; }
+        }
+      }
+      fillField(fields.firstname,      map(o, ['firstname','firstName','FirstName','First','first']));
+      fillField(fields.middleinitial,  map(o, ['middleinitial','middle','Middle','MiddleInitial']));
+      fillField(fields.lastname,       map(o, ['lastname','lastName','LastName','Last','last']));
+      fillField(fields.suffix,         map(o, ['suffix','Suffix']));
+      fillField(fields.email,          map(o, ['email','Email']) || email);
+      fillField(fields.mobilenumber,   map(o, ['mobilenumber','mobile','Mobile','contact','Contact']));
+      // Specialization: select or other
+      (function(){
+        var spec = map(o, ['specialization','Specialization']);
+        var sel = document.getElementById('mi_specialization');
+        var other = document.getElementById('mi_specialization_other');
+        var known = ['Physics','Biology','Chemistry','Natural Science','Physical Science','General Science','Earth Science','Mathematics'];
+        if (sel) {
+          if (spec && known.indexOf(spec) >= 0) {
+            sel.value = spec;
+            if (other) { other.classList.add('d-none'); other.value = ''; }
+          } else if (spec) {
+            sel.value = '__other';
+            if (other) { other.classList.remove('d-none'); other.value = spec; }
+          } else {
+            sel.value = '';
+            if (other) { other.classList.add('d-none'); other.value = ''; }
+          }
+        }
+      })();
+      fillField(fields.school,         map(o, ['school','School','affiliation','Affiliation']));
+      fillField(fields.type,           map(o, ['type','Type']));
+      fillField(fields.address,        map(o, ['address','Address']));
+      // Position (maps old occupation/Occupation/position keys)
+      (function(){
+        var pos = map(o, ['position','Position','occupation','Occupation']);
+        var sel = document.getElementById('mi_position');
+        var other = document.getElementById('mi_position_other');
+        var known = [
+          'Lecturer','Adjunct Instructor/ Adjunct Faculty','Teaching Assistant','Graduate Assistant','Assistant Professor','Associate Professor','Professor','Visiting Professor/ Visiting Lecturer','Clinical Instructor/ Clinical Professor','Research Professor','Extension Professor','Distinguished Professor','Endowed Chair/ Chair Professor','Professor Emeritus/ Emerita','Tutor','Trainer','Mentor Teacher','Subject Matter Expert','Faculty Specialist'
+        ];
+        if (sel) {
+          if (pos && known.indexOf(pos) >= 0) {
+            sel.value = pos;
+            if (other) { other.classList.add('d-none'); other.value = ''; }
+          } else if (pos) {
+            sel.value = '__other';
+            if (other) { other.classList.remove('d-none'); other.value = pos; }
+          } else {
+            sel.value = '';
+            if (other) { other.classList.add('d-none'); other.value = ''; }
+          }
+        }
+      })();
+      // Source (select or other)
+      (function(){
+        var src = map(o, ['source','Source']);
+        var sel = document.getElementById('mi_source');
+        var other = document.getElementById('mi_source_other');
+        var known = ['From my colleague','School','Company','Website','Facebook Page','Text','Email','Advertisement'];
+        if (sel) {
+          if (src && known.indexOf(src) >= 0) {
+            sel.value = src;
+            if (other) { other.classList.add('d-none'); other.value = ''; }
+          } else if (src) {
+            sel.value = '__other';
+            if (other) { other.classList.remove('d-none'); other.value = src; }
+          } else {
+            sel.value = '';
+            if (other) { other.classList.add('d-none'); other.value = ''; }
+          }
+        }
+      })();
+      fillField(fields.why,            map(o, ['why','Why','reason','Reason']));
+      if (infoNote) infoNote.textContent = 'Loaded information found on file. Please review and update if needed.';
+    } else {
+      if (infoNote) infoNote.textContent = 'New member. Please complete the fields below.';
+    }
+    MODAL && MODAL.modal('show');
+  }
+
+  async function doCheck(){
+    var email = (EMAIL && EMAIL.value || '').trim();
+    if (OUT) { OUT.className = ''; OUT.textContent = ''; }
+    if (!isValidEmail(email)){
+      showMsg('Please enter a valid email address.', 'error');
+      EMAIL && EMAIL.focus();
+      return;
+    }
+    setPending(true);
+    try{
+      // Web POST to membershipcheck with email in query string
+      var url = BASE + '?SH=Sheet1&func=membershipcheck&email=' + encodeURIComponent(email);
+      var res = await fetch(url, { method: 'POST' });
+      var text = await res.text();
+      var trimmed = (text || '').trim();
+      if (/^new$/i.test(trimmed)){
+        openMemberInfoModal(null, email);
+        showMsg('New member detected. Please complete your information.', 'ok');
+        return;
+      }
+      // Try JSON
+      var data = null;
+      try { data = JSON.parse(text); } catch {}
+      if (data && typeof data === 'object'){
+        openMemberInfoModal(data, email);
+        showMsg('We found your information. Please review and update if needed.', 'ok');
+        return;
+      }
+      if (trimmed){
+        showMsg(trimmed, 'warn');
+      } else {
+        showMsg('Unexpected response. Please try again later.', 'error');
+      }
+    } catch (e){
+      showMsg((e && e.message) || 'Unable to check membership right now.', 'error');
+    } finally {
+      setPending(false);
+    }
+  }
+
+  BTN && BTN.addEventListener('click', doCheck);
+  EMAIL && EMAIL.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doCheck(); } });
+
+  // Submit: validate all required fields (except middle initial & suffix), POST to membershipadd
+  var submitBtn = document.getElementById('memberInfoSubmitBtn');
+  function setSubmitPending(p){ if (submitBtn){ submitBtn.disabled = !!p; submitBtn.textContent = p ? 'Submitting…' : 'Submit'; } }
+  submitBtn && submitBtn.addEventListener('click', async function(){
+    if (errBox) { errBox.classList.add('d-none'); errBox.textContent = ''; }
+    // Gather values
+    var titleSel = document.getElementById('mi_title');
+    var titleOther = document.getElementById('mi_title_other');
+    var firstname = (document.getElementById('mi_firstname')?.value || '').trim();
+    var middleinitial = (document.getElementById('mi_middleinitial')?.value || '').trim(); // optional
+    var lastname = (document.getElementById('mi_lastname')?.value || '').trim();
+    var suffix = (document.getElementById('mi_suffix')?.value || '').trim(); // optional
+    var emailVal = (document.getElementById('mi_email')?.value || '').trim();
+    var mobile = (document.getElementById('mi_mobilenumber')?.value || '').trim();
+    var specSel = document.getElementById('mi_specialization');
+    var specOther = document.getElementById('mi_specialization_other');
+    var school = (document.getElementById('mi_school')?.value || '').trim();
+    var typeVal = (document.getElementById('mi_type')?.value || '').trim();
+    var address = (document.getElementById('mi_address')?.value || '').trim();
+    var posSel = document.getElementById('mi_position');
+    var posOther = document.getElementById('mi_position_other');
+    var srcSel = document.getElementById('mi_source');
+    var srcOther = document.getElementById('mi_source_other');
+    var why = (document.getElementById('mi_why')?.value || '').trim();
+
+    var titleVal = (titleSel?.value === '__other') ? (titleOther?.value || '').trim() : (titleSel?.value || '').trim();
+    var specVal = (specSel?.value === '__other') ? (specOther?.value || '').trim() : (specSel?.value || '').trim();
+    var positionVal = (posSel?.value === '__other') ? (posOther?.value || '').trim() : (posSel?.value || '').trim();
+    var sourceVal = (srcSel?.value === '__other') ? (srcOther?.value || '').trim() : (srcSel?.value || '').trim();
+
+    // Validate required fields
+    var errs = [];
+    if (!titleVal) errs.push('Title');
+    if (!firstname) errs.push('First name');
+    if (!lastname) errs.push('Last name');
+    if (!emailVal || !isValidEmail(emailVal)) errs.push('Valid email');
+    if (!mobile) errs.push('Mobile number');
+    if (!specVal) errs.push('Specialization');
+    if (!school) errs.push('School');
+    if (!typeVal) errs.push('Type');
+    if (!address) errs.push('Address');
+    if (!positionVal) errs.push('Position');
+    if (!sourceVal) errs.push('Source');
+    if (!why) errs.push('Reason (Why)');
+    if (errs.length){
+      if (errBox){ errBox.textContent = 'Please complete: ' + errs.join(', ') + '.'; errBox.classList.remove('d-none'); }
+      return;
+    }
+
+    setSubmitPending(true);
+    try {
+      var addUrl = BASE + '?SH=Sheet1&func=membershipadd'
+        + '&title=' + encodeURIComponent(titleVal)
+        + '&firstname=' + encodeURIComponent(firstname)
+        + '&middleinitial=' + encodeURIComponent(middleinitial)
+        + '&lastname=' + encodeURIComponent(lastname)
+        + '&suffix=' + encodeURIComponent(suffix)
+        + '&email=' + encodeURIComponent(emailVal)
+        + '&mobilenumber=' + encodeURIComponent(mobile)
+        + '&specialization=' + encodeURIComponent(specVal)
+        + '&school=' + encodeURIComponent(school)
+        + '&type=' + encodeURIComponent(typeVal)
+        + '&address=' + encodeURIComponent(address)
+        + '&occupation=' + encodeURIComponent(positionVal)
+        + '&source=' + encodeURIComponent(sourceVal)
+        + '&why=' + encodeURIComponent(why);
+      var res = await fetch(addUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain; charset=UTF-8' } });
+      var text = await res.text();
+      var norm = (text || '').trim();
+      if (/^successful$/i.test(norm) || /successful/i.test(norm)) {
+        // Close modal and show success notice near the check box
+        MODAL && MODAL.modal('hide');
+        var msg = 'Membership request submitted successfully. Please check your email: <strong>' +
+                  (emailVal.replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})) +
+                  '</strong> for the confirmation email (subject: <em>PAPSI Membership Request</em>) from: <strong>papsi.seminar@gmail.com</strong>.';
+        showMsg(msg, 'ok');
+      } else {
+        if (errBox){ errBox.textContent = norm || 'Unsuccessful. There was an error.'; errBox.classList.remove('d-none'); }
+      }
+    } catch (e){
+      if (errBox){ errBox.textContent = (e && e.message) || 'Unsuccessful. There was an error.'; errBox.classList.remove('d-none'); }
+    } finally {
+      setSubmitPending(false);
+    }
+  });
+
+  // Toggle Other title input based on selection
+  (function(){
+    var titleSel = document.getElementById('mi_title');
+    var titleOther = document.getElementById('mi_title_other');
+    if (!titleSel || !titleOther) return;
+    titleSel.addEventListener('change', function(){
+      if (this.value === '__other') {
+        titleOther.classList.remove('d-none');
+        titleOther.focus();
+      } else {
+        titleOther.classList.add('d-none');
+        titleOther.value = '';
+      }
+    });
+  })();
+
+  // Toggle Other specialization input
+  (function(){
+    var sel = document.getElementById('mi_specialization');
+    var other = document.getElementById('mi_specialization_other');
+    if (!sel || !other) return;
+    sel.addEventListener('change', function(){
+      if (this.value === '__other') {
+        other.classList.remove('d-none');
+        other.focus();
+      } else {
+        other.classList.add('d-none');
+        other.value = '';
+      }
+    });
+  })();
+
+  // Toggle Other position input
+  (function(){
+    var sel = document.getElementById('mi_position');
+    var other = document.getElementById('mi_position_other');
+    if (!sel || !other) return;
+    sel.addEventListener('change', function(){
+      if (this.value === '__other') {
+        other.classList.remove('d-none');
+        other.focus();
+      } else {
+        other.classList.add('d-none');
+        other.value = '';
+      }
+    });
+  })();
+
+  // Toggle Other source input
+  (function(){
+    var sel = document.getElementById('mi_source');
+    var other = document.getElementById('mi_source_other');
+    if (!sel || !other) return;
+    sel.addEventListener('change', function(){
+      if (this.value === '__other') {
+        other.classList.remove('d-none');
+        other.focus();
+      } else {
+        other.classList.add('d-none');
+        other.value = '';
+      }
+    });
+  })();
+})();
+</script>
 
 </body>
 </html>

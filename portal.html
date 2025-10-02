@@ -295,6 +295,10 @@
                         <input id="authValidateEmail" type="email" placeholder="Enter your email address here" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" aria-describedby="authValidateStatus">
                     </div>
                     <div id="authValidateStatus" class="text-sm" role="status" aria-live="polite"></div>
+                        <!-- Subtle Renew CTA (hidden by default) -->
+                        <div id="authValidateRenewCta" class="hidden mt-2">
+                            <a href="membership.html" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green/60 focus:ring-offset-1 transition">Please renew your membership</a>
+                        </div>
                     <button id="authValidateBtn" class="w-full bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">Validate</button>
                 </section>
 
@@ -342,11 +346,34 @@
                         <input id="authLoginPassword" type="password" placeholder="Enter your password here" class="w-full border rounded px-3 py-2" aria-describedby="authLoginStatus">
                     </div>
                     <div id="authLoginStatus" class="text-sm" role="status" aria-live="polite"></div>
+                    <!-- Forgot Password helper (shown only on incorrect password) -->
+                    <div id="forgotPasswordRow" class="mt-1 hidden">
+                        <button id="forgotPasswordBtn" type="button" class="text-sm text-papsi-green hover:text-green-700 underline">
+                            Forgot Password? Receive it by Email
+                        </button>
+                    </div>
                     <div class="flex gap-2">
                         <button id="authLoginBtn" class="flex-1 bg-papsi-green text-white py-2 rounded hover:bg-green-700 transition-colors">Login</button>
                         <button id="authLoginBackBtn" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition-colors">Back</button>
                     </div>
                 </section>
+            </div>
+        </div>
+    </div>
+    <!-- Forgot Password Confirmation Modal -->
+    <div id="forgotPasswordModal" class="modal hidden z-[2100]">
+        <div class="modal-content max-w-md mx-auto p-6">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xl font-bold text-papsi-dark">Confirmation</h3>
+                <button onclick="closeForgotPasswordConfirm()" class="text-gray-400 hover:text-gray-600" aria-label="Close">
+                    <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+            </div>
+            <p class="text-gray-700 mb-4">Do you want to receive your password by your email address?</p>
+            <div id="forgotPwEmailLine" class="text-sm text-gray-600 -mt-2 mb-4">We will send to: <span id="forgotPwEmailText" class="font-medium text-papsi-dark break-all"></span></div>
+            <div class="flex gap-2 justify-end">
+                <button id="forgotPwYesBtn" type="button" class="bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors" onclick="sendPasswordEmail()">Yes</button>
+                <button type="button" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors" onclick="closeForgotPasswordConfirm()">Cancel</button>
             </div>
         </div>
     </div>
@@ -410,10 +437,12 @@
         const emailInput = document.getElementById('authValidateEmail');
         const statusEl = document.getElementById('authValidateStatus');
         const btn = document.getElementById('authValidateBtn');
+        const renewCta = document.getElementById('authValidateRenewCta');
         const email = String(emailInput?.value || '').trim();
 
     // Reset status
     setAuthStatus(statusEl, '');
+    if (renewCta) renewCta.classList.add('hidden');
 
         if (!isValidEmail(email)) {
             setAuthStatus(statusEl, 'Please enter a valid email address.', 'error');
@@ -434,6 +463,13 @@
             // Try JSON first (in case backend returns structured error/info)
             try {
                 const data = JSON.parse(text);
+                // Renew signal in structured response
+                const jmsg = (data?.message || data?.status || data?.result || '').toString();
+                if (/renew/i.test(jmsg)) {
+                    setAuthStatus(statusEl, '');
+                    if (renewCta) renewCta.classList.remove('hidden');
+                    return;
+                }
                 // If backend responds with a redirect hint in JSON (optional)
                 const next = (data?.next || data?.action || '').toString().toLowerCase();
                 if (next === 'register' || next === 'login') {
@@ -447,6 +483,11 @@
             }
 
             const normalized = text.trim().toLowerCase();
+            if (/renew/i.test(normalized)) {
+                setAuthStatus(statusEl, '');
+                if (renewCta) renewCta.classList.remove('hidden');
+                return;
+            }
             if (normalized === 'register' || normalized === 'login') {
                 routeAfterValidation(normalized, email);
                 return;
@@ -541,6 +582,13 @@
                 return copy;
             });
         }
+        // Normalize membership validity fields to consistent keys
+        if (out.Date && !out.date) out.date = out.Date;
+        if (out.Validity && !out.validity) out.validity = out.Validity;
+        if (out.Expiry && !out.expiry) out.expiry = out.Expiry;
+        if (out.Expiration && !out.expiration) out.expiration = out.Expiration;
+        // If primary date missing, coalesce from any available
+        if (!out.date) out.date = out.validity || out.expiry || out.expiration || out.Date || out.Validity || out.Expiry || out.Expiration || out.date;
         return out;
     }
 
@@ -548,7 +596,10 @@
         document.getElementById('authValidateBtn')?.addEventListener('click', handleAuthValidate);
         // Optional: Enter key submits on Validate page
         const vInput = document.getElementById('authValidateEmail');
-        if (vInput) vInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); handleAuthValidate(); } });
+        if (vInput) {
+            vInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); handleAuthValidate(); } });
+            vInput.addEventListener('input', function(){ try { document.getElementById('authValidateRenewCta')?.classList.add('hidden'); } catch {} });
+        }
     });
     // ===== End Phase 3 =====
     </script>
@@ -682,11 +733,13 @@
         const passEl = document.getElementById('authLoginPassword');
         const statusEl = document.getElementById('authLoginStatus');
         const btn = document.getElementById('authLoginBtn');
+        const forgotRow = document.getElementById('forgotPasswordRow');
 
         const email = String(emailEl?.value || '').trim();
         const password = String(passEl?.value || '');
 
-    setAuthStatus(statusEl, '');
+        setAuthStatus(statusEl, '');
+        if (forgotRow) forgotRow.classList.add('hidden');
 
         if (!isValidEmail(email)) {
             setAuthStatus(statusEl, 'Please enter a valid email.', 'error');
@@ -700,40 +753,57 @@
         }
 
         // Minimal UX lock
-    const prevText = btn?.textContent;
-    setPending(btn, true, 'Logging in…');
-    setAuthStatus(statusEl, 'Checking your credentials…', 'info');
+        const prevText = btn?.textContent;
+        setPending(btn, true, 'Logging in…');
+        setAuthStatus(statusEl, 'Checking your credentials…', 'info');
 
         try {
             const url = buildAuthUrl('login', { email, password });
             const res = await fetch(url, { method: 'GET' });
             const text = await res.text();
 
-            // Expect JSON profile on success
-            let profile = null;
+            // Try JSON first
             try {
                 const data = JSON.parse(text);
-                profile = normalizeServerProfile(data?.profile || data || null);
-            } catch (_) { setAuthStatus(statusEl, text || 'Invalid credentials.', 'error'); return; }
-
-            if (!profile || typeof profile !== 'object') {
-                setAuthStatus(statusEl, 'Login failed. Please try again.', 'error');
+                const profile = normalizeServerProfile(data?.profile || data || null);
+                if (profile && typeof profile === 'object') {
+                    // Block expired membership before granting access
+                    if (!isMembershipActive(profile)) {
+                        setAuthStatus(statusEl, '');
+                        gateExpiredMembership(profile);
+                        return;
+                    }
+                    try { localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile)); } catch {}
+                    try { window.PAPSI_PROFILE = profile; } catch {}
+                    try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
+                    const overlay = document.getElementById('authOverlay');
+                    if (overlay) overlay.classList.add('hidden');
+                    if (passEl) passEl.value = '';
+                    setAuthStatus(statusEl, '');
+                    if (forgotRow) forgotRow.classList.add('hidden');
+                    return;
+                }
+                const msg = (data?.message || data?.status || data?.result || '').toString();
+                if (/renew/i.test(msg)) { renderRenewStatus(statusEl, msg || 'Please renew your membership.'); return; }
+                if (/incorrect password/i.test(msg)) {
+                    setAuthStatus(statusEl, 'Incorrect password.', 'error');
+                    if (forgotRow) forgotRow.classList.remove('hidden');
+                    return;
+                }
+                setAuthStatus(statusEl, msg || 'Login failed. Please try again.', 'error');
+                return;
+            } catch (_) {
+                // Plain text handling
+                const norm = (text || '').trim();
+                if (/renew/i.test(norm)) { renderRenewStatus(statusEl, norm || 'Please renew your membership.'); return; }
+                if (/incorrect password/i.test(norm)) {
+                    setAuthStatus(statusEl, 'Incorrect password.', 'error');
+                    if (forgotRow) forgotRow.classList.remove('hidden');
+                    return;
+                }
+                setAuthStatus(statusEl, norm || 'Invalid credentials.', 'error');
                 return;
             }
-
-            // Persist session and hydrate
-            try {
-                localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile));
-            } catch {}
-            // Expose and hydrate profile UI if available
-            try { window.PAPSI_PROFILE = profile; } catch {}
-            try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
-
-            // Close overlay and clear sensitive inputs
-            const overlay = document.getElementById('authOverlay');
-            if (overlay) overlay.classList.add('hidden');
-            if (passEl) passEl.value = '';
-            setAuthStatus(statusEl, '');
         } catch (err) {
             setAuthStatus(statusEl, err?.message || 'Unable to login right now.', 'error');
         } finally {
@@ -747,6 +817,78 @@
         if (passEl) passEl.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); handleAuthLogin(); } });
     });
     // ===== End Phase 5 =====
+    </script>
+    <script>
+    // ===== Forgot Password Flow =====
+    document.addEventListener('DOMContentLoaded', function() {
+        const fpBtn = document.getElementById('forgotPasswordBtn');
+        if (fpBtn) fpBtn.addEventListener('click', openForgotPasswordConfirm);
+        // Hide forgot row when editing inputs
+        ['authLoginEmail','authLoginPassword'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => {
+                const row = document.getElementById('forgotPasswordRow');
+                if (row) row.classList.add('hidden');
+            });
+        });
+    });
+
+    function openForgotPasswordConfirm() {
+        const email = String(document.getElementById('authLoginEmail')?.value || '').trim();
+        if (!isValidEmail(email)) {
+            try { showToast('Please enter a valid email first.', 'error'); } catch { alert('Please enter a valid email first.'); }
+            return;
+        }
+        const modal = document.getElementById('forgotPasswordModal');
+        if (!modal) return;
+        // Populate the email line for reassurance
+        try {
+            const line = document.getElementById('forgotPwEmailText');
+            if (line) line.textContent = email;
+        } catch {}
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        // Close on overlay click
+        function onOverlay(e){ if (e.target === modal) { closeForgotPasswordConfirm(); modal.removeEventListener('click', onOverlay); } }
+        modal.addEventListener('click', onOverlay);
+    }
+
+    function closeForgotPasswordConfirm() {
+        const modal = document.getElementById('forgotPasswordModal');
+        if (modal) modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Esc to close
+    document.addEventListener('keydown', function(e){
+        const modal = document.getElementById('forgotPasswordModal');
+        if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') closeForgotPasswordConfirm();
+    });
+
+    async function sendPasswordEmail() {
+        const email = String(document.getElementById('authLoginEmail')?.value || '').trim();
+        if (!isValidEmail(email)) {
+            try { showToast('Please enter a valid email first.', 'error'); } catch { alert('Please enter a valid email first.'); }
+            return;
+        }
+        const yesBtn = document.getElementById('forgotPwYesBtn');
+        const prev = yesBtn?.textContent;
+        setPending(yesBtn, true, 'Sending…');
+        try {
+            const url = buildAuthUrl('password', { email });
+            const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain; charset=UTF-8' } });
+            const text = await res.text();
+            try { showToast(text || 'Password will be sent if the email exists.', res.ok ? 'success' : 'error', 5000); } catch {}
+            closeForgotPasswordConfirm();
+            const row = document.getElementById('forgotPasswordRow');
+            if (row) row.classList.add('hidden');
+        } catch (err) {
+            try { showToast(err?.message || 'Unable to send password right now.', 'error'); } catch {}
+        } finally {
+            setPending(yesBtn, false, prev || 'Yes');
+        }
+    }
+    // ===== End Forgot Password Flow =====
     </script>
     <script>
     // ===== Header Refresh (re-fetch profile via login endpoint) =====
@@ -774,14 +916,35 @@
             const url = buildAuthUrl('login', { email, password });
             const res = await fetch(url, { method: 'GET' });
             const text = await res.text();
+            // Handle plain-text Renew first
+            const normText = (text || '').trim();
+            if (/renew/i.test(normText)) {
+                // Treat as expired membership and gate
+                gateExpiredMembership(saved || { email });
+                try { showToast('Membership renewal required. Please renew to continue.', 'error'); } catch {}
+                return;
+            }
             let profile = null;
             try {
                 const data = JSON.parse(text);
+                // If server sends a JSON message indicating Renew, gate
+                const msg = (data?.message || data?.status || data?.result || '').toString();
+                if (/renew/i.test(msg)) {
+                    gateExpiredMembership(saved || { email });
+                    try { showToast('Membership renewal required. Please renew to continue.', 'error'); } catch {}
+                    return;
+                }
                 profile = normalizeServerProfile(data?.profile || data || null);
             } catch {
                 throw new Error(text || 'Failed to refresh profile.');
             }
             if (!profile || typeof profile !== 'object') throw new Error('Invalid profile data.');
+            // Gate expired memberships on refresh
+            if (!isMembershipActive(profile)) {
+                gateExpiredMembership(profile);
+                try { showToast('Membership has expired. Please renew to continue.', 'error'); } catch {}
+                return;
+            }
             try { localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile)); } catch {}
             try { window.PAPSI_PROFILE = profile; } catch {}
             try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
@@ -864,6 +1027,11 @@
                 try {
                     const profile = JSON.parse(saved);
                     if (profile && typeof profile === 'object') {
+                        // Gate expired memberships on restore
+                        if (!isMembershipActive(profile)) {
+                            gateExpiredMembership(profile);
+                            return;
+                        }
                         window.PAPSI_PROFILE = profile;
                         if (typeof setProfile === 'function') setProfile(profile);
                         const overlay = document.getElementById('authOverlay');
@@ -890,6 +1058,153 @@
         const color = type === 'error' ? 'text-red-600' : (type === 'success' ? 'text-green-700' : 'text-gray-600');
         el.classList.add(color);
         el.innerHTML = escapeHtml(String(message));
+    }
+    // Flexible date parser to handle ISO, US/EU numeric, and textual month formats
+    // Returns a Date object on success, or null on failure.
+    function parseFlexDate(input) {
+        if (input instanceof Date && !isNaN(input)) return new Date(input.getTime());
+        if (typeof input === 'number') {
+            // Treat 10 or 13-digit numbers as epoch (seconds or ms)
+            const s = String(input);
+            const n = s.length === 10 ? Number(input) * 1000 : Number(input);
+            const d = new Date(n);
+            return isNaN(d) ? null : d;
+        }
+        const raw = String(input || '').trim();
+        if (!raw) return null;
+        // Quick native parse first (handles ISO and many common forms)
+        const native = new Date(raw);
+        if (!isNaN(native)) return native;
+
+        // Normalize: remove commas and ordinal suffixes (1st -> 1)
+        let s = raw.replace(/,/g, ' ').replace(/\b(\d{1,2})(st|nd|rd|th)\b/gi, '$1').replace(/\s+/g, ' ').trim();
+        // Month names map
+        const MON = {
+            jan: 1, january: 1,
+            feb: 2, february: 2,
+            mar: 3, march: 3,
+            apr: 4, april: 4,
+            may: 5,
+            jun: 6, june: 6,
+            jul: 7, july: 7,
+            aug: 8, august: 8,
+            sep: 9, sept: 9, september: 9,
+            oct: 10, october: 10,
+            nov: 11, november: 11,
+            dec: 12, december: 12
+        };
+        const toInt = (v) => { const n = Number(v); return Number.isFinite(n) ? n : NaN; };
+        const twoDigitYear = (y) => {
+            const yy = Number(y);
+            if (!Number.isFinite(yy)) return NaN;
+            if (yy < 70) return 2000 + yy; // 00-69 => 2000-2069
+            if (yy < 100) return 1900 + yy; // 70-99 => 1970-1999
+            return yy;
+        };
+        const makeDate = (y, m, d) => {
+            const dt = new Date(y, m - 1, d);
+            return (dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d) ? dt : null;
+        };
+        const lastDay = (y, m) => new Date(y, m, 0).getDate(); // m is 1-based
+
+        // 1) YYYY-MM-DD (or / .) possibly with time ignored
+        {
+            const m = s.match(/^(\d{4})[\/.\-](\d{1,2})[\/.\-](\d{1,2})(?:\b|\s|T).*$/);
+            if (m) {
+                const y = toInt(m[1]); const mo = toInt(m[2]); const da = toInt(m[3]);
+                const dt = makeDate(y, mo, da);
+                if (dt) return dt;
+            }
+        }
+        // 2) DD-MM-YYYY or MM-DD-YYYY (ambiguous). Prefer MM-DD-YYYY by default.
+        {
+            const m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);
+            if (m) {
+                const a = toInt(m[1]), b = toInt(m[2]);
+                let y = toInt(m[3]); y = y < 100 ? twoDigitYear(y) : y;
+                // Heuristics
+                if (a > 12 && b <= 12) { // D-M-Y
+                    const dt = makeDate(y, b, a);
+                    if (dt) return dt;
+                } else if (b > 12 && a <= 12) { // M-D-Y
+                    const dt = makeDate(y, a, b);
+                    if (dt) return dt;
+                } else {
+                    // Ambiguous: try M/D/Y then D/M/Y
+                    let dt = makeDate(y, a, b);
+                    if (dt) return dt;
+                    dt = makeDate(y, b, a);
+                    if (dt) return dt;
+                }
+            }
+        }
+        // 3) Month name formats
+        {
+            // D Mon YYYY
+            let m = s.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{2,4})$/);
+            if (m) {
+                const da = toInt(m[1]);
+                const mo = MON[m[2].toLowerCase()];
+                let y = toInt(m[3]); y = y < 100 ? twoDigitYear(y) : y;
+                if (mo) {
+                    const dt = makeDate(y, mo, da);
+                    if (dt) return dt;
+                }
+            }
+            // Mon D YYYY
+            m = s.match(/^([A-Za-z]+)\s+(\d{1,2})\s+(\d{2,4})$/);
+            if (m) {
+                const mo = MON[m[1].toLowerCase()];
+                const da = toInt(m[2]);
+                let y = toInt(m[3]); y = y < 100 ? twoDigitYear(y) : y;
+                if (mo) {
+                    const dt = makeDate(y, mo, da);
+                    if (dt) return dt;
+                }
+            }
+            // Mon YYYY (assume last day of the month)
+            m = s.match(/^([A-Za-z]+)\s+(\d{4})$/);
+            if (m) {
+                const mo = MON[m[1].toLowerCase()];
+                const y = toInt(m[2]);
+                if (mo) {
+                    const da = lastDay(y, mo);
+                    const dt = makeDate(y, mo, da);
+                    if (dt) return dt;
+                }
+            }
+        }
+        // 4) MM/YYYY or YYYY/MM (assume last day of month)
+        {
+            let m = s.match(/^(\d{1,2})[\/.\-](\d{4})$/);
+            if (m) {
+                const mo = toInt(m[1]); const y = toInt(m[2]);
+                const da = lastDay(y, mo);
+                const dt = makeDate(y, mo, da);
+                if (dt) return dt;
+            }
+            m = s.match(/^(\d{4})[\/.\-](\d{1,2})$/);
+            if (m) {
+                const y = toInt(m[1]); const mo = toInt(m[2]);
+                const da = lastDay(y, mo);
+                const dt = makeDate(y, mo, da);
+                if (dt) return dt;
+            }
+        }
+        // 5) Fallback failed
+        return null;
+    }
+    // Render a subtle CTA for membership renewal
+    function renderRenewStatus(el, message) {
+        if (!el) return;
+        const safeMsg = escapeHtml(String(message || 'Your membership requires renewal.'));
+        el.classList.remove('text-red-600','text-green-700','text-gray-600');
+        el.innerHTML = `
+            <div class="text-red-600 font-medium">${safeMsg}</div>
+            <div class="mt-2">
+                <a href="membership.html" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-papsi-green/60 focus:ring-offset-1 transition">Please renew your membership</a>
+            </div>
+        `;
     }
     function setPending(btn, isPending, text) {
         if (!btn) return;
@@ -942,6 +1257,65 @@
             if (el) el.innerHTML = '';
         });
     }
+    // ===== Membership Expiry Helpers (NEW) =====
+    function getMembershipExpiry(profile) {
+        if (!profile || typeof profile !== 'object') return null;
+        const keys = ['date', 'validity', 'expiry', 'expiration'];
+        for (const k of keys) {
+            const v = profile[k];
+            if (v) {
+                const d = parseFlexDate(v);
+                if (d && !isNaN(d)) {
+                    // inclusive until end-of-day
+                    d.setHours(23,59,59,999);
+                    return d;
+                }
+            }
+        }
+        return null;
+    }
+    function isMembershipActive(profile) {
+        const exp = getMembershipExpiry(profile);
+        if (!exp) return true; // no date provided, assume active
+        return new Date() <= exp;
+    }
+    function gateExpiredMembership(profile) {
+        // Drop any stored session
+        try { localStorage.removeItem('PAPSI_PROFILE'); } catch {}
+        try { window.PAPSI_PROFILE = null; } catch {}
+        try { if (typeof setProfile === 'function') setProfile(null); } catch {}
+
+        // Show overlay at Validate (no email prefill)
+        const overlay = document.getElementById('authOverlay');
+        if (overlay) overlay.classList.remove('hidden');
+        showAuthPage('validate');
+
+        // Inject renewal guidance and relogin button
+        const vStatus = document.getElementById('authValidateStatus');
+        if (vStatus) {
+            vStatus.classList.remove('text-red-600','text-green-700','text-gray-600');
+            vStatus.innerHTML = `
+                <div class="text-red-600 font-medium">Your PAPSI membership has expired.</div>
+                <div class="mt-1 text-gray-700">Please renew your membership to continue.</div>
+                <div class="mt-2">
+                    <a href="membership.html" class="text-papsi-green underline hover:text-green-700">Renew now at membership.html</a>
+                </div>
+                <div class="mt-2 text-xs text-gray-600">Tip: Please complete the renewal first before re‑logging in.</div>
+                <div class="mt-3">
+                    <button id="expiredReloginBtn" type="button" class="px-3 py-1.5 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 text-sm">Re‑login</button>
+                </div>
+            `;
+            setTimeout(() => {
+                document.getElementById('expiredReloginBtn')?.addEventListener('click', () => {
+                    showAuthPage('login');
+                });
+            }, 0);
+        }
+
+        // Hide logout (no active session)
+        try { document.getElementById('logoutBtn')?.classList.add('hidden'); } catch {}
+    }
+    // ===== End Membership Expiry Helpers =====
     // Clear inline errors when user edits inputs
     document.addEventListener('DOMContentLoaded', function() {
         const pairs = [
@@ -1032,7 +1406,7 @@
                 </div>
             </div>
 
-            <!-- Announcements -->
+                        
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <h3 class="text-xl font-bold text-papsi-dark mb-4">📢 PAPSI Announcements</h3>
                 <div id="announcementsContainer" class="space-y-6">
@@ -4572,7 +4946,10 @@ function audioRegisterNow() {
             const homeInitEl = document.getElementById('homeWelcomeInitials');
             const homeNameEl = document.getElementById('homeWelcomeName');
             if (idEl && p.id) idEl.textContent = `PAPSI ID: ${p.id}`;
-            if (validityEl && p.date) validityEl.textContent = formatValidity(p.date);
+            if (validityEl) {
+                const validitySrc = p.date || p.validity || p.expiry || p.expiration || p.Date || p.Validity || p.Expiry || p.Expiration;
+                validityEl.textContent = validitySrc ? formatValidity(validitySrc) : '';
+            }
             if (nameEl) nameEl.textContent = buildFullName(p);
             if (avatarEl) avatarEl.textContent = buildInitials(p);
             if (headerInitEl) headerInitEl.textContent = buildInitials(p);
@@ -4744,17 +5121,17 @@ function audioRegisterNow() {
             return inits || 'MM';
         }
         function formatValidity(dateStr) {
-            // Accepts ISO (YYYY-MM-DD), MM/DD/YYYY, or Date string; outputs like "until Dec 12, 2025"
+            // Parses a wide range of formats and outputs like "until Dec 12, 2025"
             try {
-                const d = new Date(dateStr);
-                if (isNaN(d.getTime())) return String(dateStr);
+                const d = parseFlexDate(dateStr);
+                if (!d || isNaN(d.getTime())) return String(dateStr);
                 const fmt = d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
                 return `until ${fmt}`;
             } catch { return String(dateStr); }
         }
         function normalizeDateInput(dateStr) {
             if (!dateStr) return '';
-            const d = new Date(dateStr);
+            const d = parseFlexDate(dateStr) || new Date(dateStr);
             if (isNaN(d.getTime())) return '';
             const y = d.getFullYear();
             const m = String(d.getMonth() + 1).padStart(2, '0');

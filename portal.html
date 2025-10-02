@@ -892,7 +892,8 @@
     </script>
     <script>
     // ===== Header Refresh (re-fetch profile via login endpoint) =====
-    async function handleRefreshProfile() {
+    async function handleRefreshProfile(options = {}) {
+        const silent = !!options.silent;
         const btn = document.getElementById('refreshBtn');
         let saved = null;
         try { saved = JSON.parse(localStorage.getItem('PAPSI_PROFILE') || 'null'); } catch {}
@@ -900,18 +901,20 @@
         const password = saved?.password ? String(saved.password) : '';
 
         if (!email || !isValidEmail(email) || !password || password.length < 8) {
-            // Cannot refresh silently: route to Login
-            const overlay = document.getElementById('authOverlay');
-            if (overlay) overlay.classList.remove('hidden');
-            showAuthPage('login');
-            const le = document.getElementById('authLoginEmail');
-            if (le) le.value = email || '';
-            try { showToast('Please log in to refresh your profile.', 'info'); } catch {}
+            // If silent, skip; if manual, route to Login
+            if (!silent) {
+                const overlay = document.getElementById('authOverlay');
+                if (overlay) overlay.classList.remove('hidden');
+                showAuthPage('login');
+                const le = document.getElementById('authLoginEmail');
+                if (le) le.value = email || '';
+                try { showToast('Please log in to refresh your profile.', 'info'); } catch {}
+            }
             return;
         }
 
         const prevText = btn?.textContent;
-        setPending(btn, true, 'Refreshing…');
+        if (!silent) setPending(btn, true, 'Refreshing…');
         try {
             const url = buildAuthUrl('login', { email, password });
             const res = await fetch(url, { method: 'GET' });
@@ -921,7 +924,7 @@
             if (/renew/i.test(normText)) {
                 // Treat as expired membership and gate
                 gateExpiredMembership(saved || { email });
-                try { showToast('Membership renewal required. Please renew to continue.', 'error'); } catch {}
+                if (!silent) { try { showToast('Membership renewal required. Please renew to continue.', 'error'); } catch {} }
                 return;
             }
             let profile = null;
@@ -931,7 +934,7 @@
                 const msg = (data?.message || data?.status || data?.result || '').toString();
                 if (/renew/i.test(msg)) {
                     gateExpiredMembership(saved || { email });
-                    try { showToast('Membership renewal required. Please renew to continue.', 'error'); } catch {}
+                    if (!silent) { try { showToast('Membership renewal required. Please renew to continue.', 'error'); } catch {} }
                     return;
                 }
                 profile = normalizeServerProfile(data?.profile || data || null);
@@ -942,7 +945,7 @@
             // Gate expired memberships on refresh
             if (!isMembershipActive(profile)) {
                 gateExpiredMembership(profile);
-                try { showToast('Membership has expired. Please renew to continue.', 'error'); } catch {}
+                if (!silent) { try { showToast('Membership has expired. Please renew to continue.', 'error'); } catch {} }
                 return;
             }
             try { localStorage.setItem('PAPSI_PROFILE', JSON.stringify(profile)); } catch {}
@@ -950,11 +953,11 @@
             try { if (typeof setProfile === 'function') setProfile(profile); } catch {}
             // show logout if hidden
             try { document.getElementById('logoutBtn')?.classList.remove('hidden'); } catch {}
-            try { showToast('Profile refreshed.', 'success'); } catch {}
+            if (!silent) { try { showToast('Profile refreshed.', 'success'); } catch {} }
         } catch (err) {
-            try { showToast(err?.message || 'Unable to refresh profile. Please log in again.', 'error'); } catch {}
+            if (!silent) { try { showToast(err?.message || 'Unable to refresh profile. Please log in again.', 'error'); } catch {} }
         } finally {
-            setPending(btn, false, prevText || 'Refresh');
+            if (!silent) setPending(btn, false, prevText || 'Refresh');
         }
     }
 
@@ -1038,6 +1041,8 @@
                         if (overlay) overlay.classList.add('hidden');
                         // Show logout button on successful session
                         try { document.getElementById('logoutBtn')?.classList.remove('hidden'); } catch {}
+                        // Auto-refresh profile silently on load/reload
+                        setTimeout(() => { try { handleRefreshProfile({ silent: true }); } catch {} }, 150);
                         return; // already gated in
                     }
                 } catch { /* ignore parse error and fall through to show overlay */ }

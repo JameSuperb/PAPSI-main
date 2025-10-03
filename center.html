@@ -47,9 +47,35 @@
 		@keyframes cartBarIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 		@keyframes cartAddedPulse { 0% { transform: scale(.985); box-shadow:0 0 0 0 rgba(22,105,56,0.45); } 35% { transform: scale(1); box-shadow:0 0 0 10px rgba(22,105,56,0); } 100% { transform: scale(1); box-shadow:0 0 0 0 rgba(22,105,56,0); } }
 		.added-banner-animate { animation: cartAddedPulse 1.8s ease-out 1; }
+
+		/* Promo banner: respect reduced motion */
+		@media (prefers-reduced-motion: reduce) {
+			.animate-pulse { animation: none !important; }
+		}
 	</style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+	<!-- Promo Banner -->
+	<div id="promoBanner" class="fixed top-0 left-0 right-0 z-[1200] hidden">
+		<div class="mx-auto max-w-6xl px-4">
+			<div class="bg-papsi-green text-white rounded-b-lg shadow flex flex-col md:flex-row md:items-center md:justify-between gap-2 p-3">
+				<div class="flex items-center gap-3">
+					<div class="hidden md:block h-2 w-2 rounded-full bg-white/70 animate-pulse"></div>
+					<div class="text-sm md:text-base leading-snug">
+						<span class="font-semibold">PAPSIPROMO</span>
+						<span class="opacity-90">— Get 30% off on trainings. Limited time.</span>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<button id="promoCopyBtn" type="button" class="text-xs md:text-sm px-3 py-1.5 rounded bg-white/15 hover:bg-white/25">Copy code</button>
+					<button id="promoApplyBtn" type="button" class="text-xs md:text-sm px-3 py-1.5 rounded bg-white text-papsi-green font-semibold hover:bg-gray-100">Apply now</button>
+					<button id="promoDismissBtn" type="button" class="ml-1 text-white/80 hover:text-white text-lg leading-none" aria-label="Dismiss">&times;</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="promoSpacer" class="h-0"></div>
+	<!-- End of Promo Banner -->
 	<div class="max-w-6xl mx-auto px-4 py-6">
 		<!-- Page Title with logo placed above the white container -->
 		<div class="flex items-center gap-3 mb-4">
@@ -992,6 +1018,48 @@
 
 		// Init
 		document.addEventListener('DOMContentLoaded', function(){
+			// Promo banner logic
+			(function(){
+				var BANNER_KEY = 'PAPSI_PROMO_DISMISSED_UNTIL';
+				var CODE = 'PAPSIPROMO';
+				var now = Date.now();
+				var dismissedUntil = 0;
+				try { dismissedUntil = parseInt(localStorage.getItem(BANNER_KEY)||'0', 10) || 0; } catch(e){}
+				var banner = document.getElementById('promoBanner');
+				var spacer = document.getElementById('promoSpacer');
+				function showBanner(){ if(banner){ banner.classList.remove('hidden'); } if(spacer){ spacer.className='h-14'; } }
+				function hideBanner(){ if(banner){ banner.classList.add('hidden'); } if(spacer){ spacer.className='h-0'; } }
+				if(now > dismissedUntil){ showBanner(); } else { hideBanner(); }
+				// Copy button
+				var copyBtn = document.getElementById('promoCopyBtn');
+				if(copyBtn){ copyBtn.addEventListener('click', function(){
+					try {
+						navigator.clipboard.writeText(CODE).then(function(){ showToast('Copied code: '+CODE, 'success', 2500); }).catch(function(){
+							// Fallback
+							var ta = document.createElement('textarea'); ta.value = CODE; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); showToast('Copied code: '+CODE, 'success', 2500); }catch(err){ showToast('Promo code: '+CODE, 'info', 3000); } finally { document.body.removeChild(ta); }
+						});
+					} catch(err){ showToast('Promo code: '+CODE, 'info', 3000); }
+				}); }
+				// Apply button
+				var applyBtn = document.getElementById('promoApplyBtn');
+				if(applyBtn){ applyBtn.addEventListener('click', function(){
+					// Open cart, prefill voucher input, and validate
+					openCart();
+					setTimeout(function(){
+						var input = document.getElementById('voucherInput');
+						if(input){ input.value = CODE; }
+						try { validateVoucher(); } catch(e) {}
+					}, 50);
+				}); }
+				// Dismiss button
+				var dismissBtn = document.getElementById('promoDismissBtn');
+				if(dismissBtn){ dismissBtn.addEventListener('click', function(){
+					var until = Date.now() + 24*60*60*1000; // 24 hours
+					try { localStorage.setItem(BANNER_KEY, String(until)); } catch(e){}
+					hideBanner();
+				}); }
+			})();
+
 			// Toggle drawer on mobile/desktop
 			var tBtn = document.getElementById('trainingFiltersMobileBtn'); if(tBtn){ tBtn.addEventListener('click', function(){ var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth; if(w>=768){ var drawer=document.getElementById('trainingFiltersDrawer'); if(drawer){ try{ drawer.scrollIntoView({behavior:'smooth', block:'start'});}catch(e){} } } else { toggleDrawer(); } }); }
 			// Stats toggle

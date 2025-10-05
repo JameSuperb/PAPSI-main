@@ -864,7 +864,12 @@
 				var school = String((document.getElementById('checkoutSchool')||{}).value||'').trim();
 				var type = String((document.getElementById('checkoutType')||{}).value||'').trim();
 				var address = String((document.getElementById('checkoutAddress')||{}).value||'').trim();
-				var fullname = [title, firstname, middleinitial, lastname, suffix].filter(function(x){return x;}).join(' ').replace(/\s+/g,' ').trim();
+				// Build fullname without title; include middleinitial/suffix only if provided
+				var fullname = [firstname, middleinitial, lastname, suffix]
+					.filter(function(x){ return x && String(x).trim(); })
+					.join(' ')
+					.replace(/\s+/g,' ')
+					.trim();
 				if(!email){ showToast('Please enter your email.','error',4000); return; }
 				// Build trainings
 				var selected=[]; for(var i=0;i<cartCourses.length;i++){ var cid=cartCourses[i]; var c=findCourse(cid); if(c) selected.push(c); }

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PAPSI Admin</title>
+	<style>
+		:root {
+			--green:#166938; --green-2:#0f5a30; --bg:#f7f7f7; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+			--warn:#b45309; --error:#b91c1c; --ok:#065f46;
+		}
+		html,body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+		a { color:var(--green); text-decoration:none; }
+		.container { max-width:1100px; margin:0 auto; padding:16px; }
+		.topbar { position:sticky; top:0; z-index:10; background:linear-gradient(90deg,var(--green),var(--green-2)); color:#fff; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+		.topbar .wrap { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; }
+		.brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px; }
+		.badge { font-size:12px; padding:2px 8px; border-radius:999px; background:#ffffff22; }
+		.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; box-shadow:0 8px 20px rgba(0,0,0,.03); }
+		.grid { display:grid; gap:16px; }
+		@media (min-width: 880px) { .grid-2 { grid-template-columns: 1.2fr .8fr; } }
+		.row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+		.field { flex:1 1 220px; min-width:220px; }
+		label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+		input, select, textarea, button { font:inherit; }
+		input[type="text"], input[type="email"], input[type="password"], select, textarea {
+			width:100%; box-sizing:border-box; background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 12px; outline:none;
+		}
+		textarea { min-height:84px; }
+		input:focus, select:focus, textarea:focus { border-color:#9fd3b6; box-shadow:0 0 0 3px #9fd3b633; }
+		.btn { background:var(--green); color:#fff; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; }
+		.btn.secondary { background:#e5e7eb; color:#111827; }
+		.btn.ghost { background:#ffffff; color:var(--green); border:1px solid #d1d5db; }
+		.btn:disabled { opacity:.6; cursor:not-allowed; }
+		.actions { display:flex; gap:8px; flex-wrap:wrap; }
+		.status { font-size:13px; margin-top:6px; }
+		.status.info { color:#374151; }
+		.status.ok { color:var(--ok); }
+		.status.warn { color:var(--warn); }
+		.status.error { color:var(--error); }
+		.kv { display:grid; grid-template-columns: 180px 1fr; gap:4px 10px; }
+		.kv div { padding:4px 0; border-bottom:1px dashed #e5e7eb; }
+		.title { font-size:18px; font-weight:700; }
+		.subtle { color:var(--muted); font-size:12px; }
+		.chip { display:inline-block; border:1px solid #d1d5db; border-radius:999px; padding:2px 8px; font-size:12px; color:#374151; background:#fff; }
+		.pill-ok { background:#ecfdf5; color:#065f46; border-color:#bbf7d0; }
+		.pill-warn { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+		.toast { position:fixed; right:12px; bottom:12px; background:#111827; color:#fff; padding:10px 12px; border-radius:8px; font-size:14px; opacity:0; transform:translateY(8px); transition:all .2s; z-index:9999; }
+		.toast.show { opacity:1; transform:translateY(0); }
+		.gate { display:flex; align-items:center; justify-content:center; min-height:48vh; }
+		.hidden { display:none !important; }
+	</style>
+	<meta name="robots" content="noindex, nofollow" />
+	<meta name="referrer" content="no-referrer" />
+	<link rel="icon" href="images/favicon.png" />
+	<link rel="canonical" href="adminjames.html" />
+	<meta name="theme-color" content="#166938" />
+	<meta name="description" content="PAPSI Admin Tools" />
+	<meta property="og:title" content="PAPSI Admin" />
+	<meta property="og:description" content="Member tools and quick actions" />
+	<meta property="og:type" content="website" />
+	<meta property="og:image" content="images/logo.png" />
+	<meta property="og:url" content="adminjames.html" />
+</head>
+<body>
+	<div class="topbar">
+		<div class="wrap">
+			<div class="brand">
+				<img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/papsilogo_1.png" alt="PAPSI" height="28" />
+				<div>PAPSI Admin</div>
+				<span class="badge">beta</span>
+			</div>
+			<div class="actions">
+				<button id="adminLogoutBtn" class="btn ghost hidden" type="button">Logout</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Gate (simple access key for now) -->
+	<div id="adminGate" class="container gate">
+		<div class="card" style="max-width:520px; width:100%;">
+					<div class="title">Administrator Access</div>
+					<div class="subtle" style="margin-top:4px;">Enter your admin email address to continue.</div>
+			<div class="row" style="margin-top:14px;">
+				<div class="field">
+							<label for="adminEmail">Admin email</label>
+							<input id="adminEmail" type="email" placeholder="you@organization.org" autocomplete="email" />
+				</div>
+			</div>
+					<div id="adminPwRow" class="row hidden" style="margin-top:10px;">
+						<div class="field">
+							<label for="adminPassword">Password</label>
+							<input id="adminPassword" type="password" placeholder="Enter your password" autocomplete="current-password" />
+						</div>
+					</div>
+			<div class="actions" style="margin-top:10px;">
+						<button id="adminLoginBtn" class="btn" type="button">Continue</button>
+				<div id="adminGateStatus" class="status"></div>
+			</div>
+			
+		</div>
+	</div>
+
+	<!-- App -->
+	<div id="adminApp" class="container hidden">
+		<div class="grid grid-2">
+			<div class="card">
+				<div class="title">Members</div>
+				<div class="subtle" style="margin-top:2px;">Search a member by email, view status, and take quick actions.</div>
+				<div class="row" style="margin-top:12px;">
+					<div class="field">
+						<label for="memEmail">Email address</label>
+						<input id="memEmail" type="email" placeholder="you@example.com" />
+					</div>
+					<button id="memCheckBtn" class="btn" type="button">Check membership</button>
+					<button id="memCopyBtn" class="btn secondary" type="button">Copy email</button>
+				</div>
+				<div id="memStatus" class="status info"></div>
+
+				<div id="memResultCard" class="card" style="margin-top:14px; background:#fafafa;" hidden>
+					<div style="display:flex; align-items:center; gap:8px; justify-content:space-between;">
+						<div style="display:flex; align-items:center; gap:10px;">
+							<span id="memBadge" class="chip pill-ok">Active</span>
+							<span id="memValidity" class="subtle"></span>
+						</div>
+						<div class="actions">
+							<button id="memSendPwBtn" class="btn ghost" type="button" title="Send password email">Send password</button>
+							<button id="memOpenMemberPageBtn" class="btn ghost" type="button" title="Open Membership page">Open membership page</button>
+						</div>
+					</div>
+					<div class="kv" style="margin-top:10px;">
+						<div class="subtle">Name</div><div id="kvName">—</div>
+						<div class="subtle">Email</div><div id="kvEmail">—</div>
+						<div class="subtle">Mobile</div><div id="kvMobile">—</div>
+						<div class="subtle">School</div><div id="kvSchool">—</div>
+						<div class="subtle">Specialization</div><div id="kvSpec">—</div>
+						<div class="subtle">Position</div><div id="kvPos">—</div>
+						<div class="subtle">Address</div><div id="kvAddr">—</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="title">Tools</div>
+				<div class="subtle" style="margin-top:2px;">Quick utilities for admins.</div>
+				<div class="row" style="margin-top:12px;">
+					<button id="toolExportBtn" class="btn ghost" type="button">Export visible profile JSON</button>
+				</div>
+				<pre id="jsonOut" style="margin-top:12px; background:#0b1020; color:#d1e7ff; padding:10px; border-radius:8px; max-height:280px; overflow:auto; font-size:12px;"></pre>
+			</div>
+		</div>
+	</div>
+
+	<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+	<script>
+		// Config
+		const SCRIPT_BASE = 'https://script.google.com/macros/s/AKfycbydRAAaO83lKJpCpu7a48YlncAX9R5N1KvRx5LqMofd6Dd-O1S_Mnp9tGysVGFV7q6dZQ/exec';
+		const SHEET = 'Sheet1';
+		// Demo admin key verifier: replace ADMIN_AUTH_URL with your Apps Script admin auth
+		const ADMIN_AUTH_URL = null; // e.g., `${SCRIPT_BASE}?SH=${SHEET}&func=adminlogin&email=...`
+		const ADMIN_SESSION_KEY = 'PAPSI_ADMIN_ACTIVE';
+		const ADMIN_EMAIL_KEY = 'PAPSI_ADMIN_EMAIL';
+		let ADMIN_FLOW_STEP = 'email'; // 'email' | 'password'
+
+		// Utils
+		function showToast(msg, type='info', ms=2600){
+			const t = document.getElementById('toast'); if (!t) return;
+			t.textContent = msg;
+			t.style.background = (type==='error'?'#991b1b': type==='success'?'#065f46': '#111827');
+			t.classList.add('show');
+			clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), ms);
+		}
+		function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+		function setPending(btn, on, labelOn){
+			if (!btn) return;
+			if (!btn._orig) btn._orig = btn.textContent;
+			btn.disabled = !!on; btn.textContent = on ? (labelOn || 'Working…') : btn._orig;
+		}
+		function parseFlexDate(val){
+			if (!val) return null;
+			if (val instanceof Date) return isNaN(val) ? null : val;
+			if (typeof val === 'number') { const d = new Date(val); return isNaN(d)?null:d; }
+			let s = String(val).trim();
+			if (!s) return null;
+			s = s.replace(/(\d+)(st|nd|rd|th)/gi,'$1').replace(/,/g,'');
+			// ISO or yyyy-mm-dd
+			if (/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/.test(s)) { const d = new Date(s); return isNaN(d)?null:d; }
+			// dd/mm/yyyy or mm/dd/yyyy -> assume dd/mm if first > 12
+			if (/^\d{1,2}[/]\d{1,2}[/]\d{2,4}$/.test(s)){
+				const [a,b,c] = s.split('/').map(x=>parseInt(x,10));
+				const y = c<100 ? (c>=70?1900+c:2000+c) : c;
+				const mmFirst = !(a>12);
+				const m = (mmFirst?a:b)-1, d = mmFirst?b:a;
+				const dt = new Date(y, m, d);
+				return isNaN(dt)?null:dt;
+			}
+			// 05 Feb 2026 or Feb 05 2026
+			const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+			const m1 = s.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{2,4})$/);
+			const m2 = s.match(/^([A-Za-z]+)\s+(\d{1,2})\s+(\d{2,4})$/);
+			let y,m,d;
+			if (m1){ d=parseInt(m1[1],10); m=months[m1[2].slice(0,3).toLowerCase()]; y=parseInt(m1[3],10); }
+			if (m2){ d=parseInt(m2[2],10); m=months[m2[1].slice(0,3).toLowerCase()]; y=parseInt(m2[3],10); }
+			if (m!==undefined){ if (y<100) y = y>=70?1900+y:2000+y; const dt=new Date(y,m,d); return isNaN(dt)?null:dt; }
+			const dt = new Date(s); return isNaN(dt)?null:dt;
+		}
+		function formatValidity(val){
+			const d = parseFlexDate(val); if (!d) return '';
+			const fmt = d.toLocaleDateString('en-US',{month:'short', day:'2-digit', year:'numeric'});
+			return 'until ' + fmt;
+		}
+		function isMembershipActive(profile){
+			const v = profile?.date || profile?.validity || profile?.expiry || profile?.expiration || profile?.Date || profile?.Validity || profile?.Expiry || profile?.Expiration;
+			const d = parseFlexDate(v); if (!d) return true;
+			d.setHours(23,59,59,999);
+			return new Date() <= d;
+		}
+
+		// Auth (simple key; replace with server verification)
+				function showPasswordStep(){
+					const row = document.getElementById('adminPwRow');
+					const btn = document.getElementById('adminLoginBtn');
+					if (row) row.classList.remove('hidden');
+					if (btn) btn.textContent = 'Sign in';
+					ADMIN_FLOW_STEP = 'password';
+					setTimeout(()=>{ try{ document.getElementById('adminPassword')?.focus(); }catch(e){} }, 0);
+				}
+
+				function resetAdminGateToEmail(){
+					ADMIN_FLOW_STEP = 'email';
+					try { sessionStorage.removeItem(ADMIN_EMAIL_KEY); } catch(e){}
+					const row = document.getElementById('adminPwRow'); if (row) row.classList.add('hidden');
+					const btn = document.getElementById('adminLoginBtn'); if (btn) btn.textContent = 'Continue';
+					const emailInput = document.getElementById('adminEmail'); if (emailInput) emailInput.value = '';
+					const passInput = document.getElementById('adminPassword'); if (passInput) passInput.value = '';
+					setTimeout(()=>{ try{ emailInput?.focus(); }catch(e){} }, 0);
+				}
+
+				async function adminLogin(){
+					const emailInput = document.getElementById('adminEmail');
+					const passInput = document.getElementById('adminPassword');
+					const status = document.getElementById('adminGateStatus');
+					const btn = document.getElementById('adminLoginBtn');
+					status.textContent = '';
+
+					const email = String(emailInput?.value || '').trim();
+					if (!isValidEmail(email)){ status.textContent = 'Please enter a valid admin email.'; status.className = 'status error'; emailInput?.focus(); return; }
+
+					if (ADMIN_FLOW_STEP === 'email'){
+						setPending(btn, true, 'Verifying…');
+						try{
+							// Step 1: POST validate expecting reply 'login'
+							const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=validate&email=${encodeURIComponent(email)}`;
+							const res = await fetch(url, { method:'POST' });
+							const text = (await res.text() || '').trim();
+							if (text.toLowerCase() === 'login'){
+								status.textContent = 'Email recognized. Please enter your password.';
+								status.className = 'status info';
+								sessionStorage.setItem(ADMIN_EMAIL_KEY, email);
+								showPasswordStep();
+								return;
+							}
+							// Any other response: Access Denied
+							status.textContent = 'Access Denied';
+							status.className = 'status error';
+							resetAdminGateToEmail();
+						} catch(e){
+							status.textContent = e?.message || 'Unable to reach server.';
+							status.className = 'status error';
+						} finally {
+							setPending(btn, false);
+						}
+						return;
+					}
+
+					// ADMIN_FLOW_STEP === 'password'
+					const password = String(passInput?.value || '').trim();
+					if (!password){ status.textContent = 'Please enter your password.'; status.className = 'status error'; passInput?.focus(); return; }
+					setPending(btn, true, 'Signing in…');
+					try{
+						const loginUrl = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+						const res = await fetch(loginUrl, { method:'POST' });
+						const text = (await res.text() || '').trim();
+						// Require a JSON response; access is allowed only if JSON.id contains 'Admin'
+						let j;
+						try { j = JSON.parse(text); } catch(e) { throw new Error('Access Denied'); }
+						const idStr = j && j.id ? String(j.id) : '';
+						if (!idStr || !/admin/i.test(idStr)) throw new Error('Access Denied');
+						sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+						sessionStorage.setItem(ADMIN_EMAIL_KEY, email);
+						document.getElementById('adminGate').classList.add('hidden');
+						document.getElementById('adminApp').classList.remove('hidden');
+						document.getElementById('adminLogoutBtn').classList.remove('hidden');
+						showToast('Welcome, ' + email,'success');
+					} catch(e){
+						status.textContent = e?.message || 'Login failed';
+						status.className = 'status error';
+						if (/Access Denied/i.test(status.textContent)) resetAdminGateToEmail();
+					} finally {
+						setPending(btn, false);
+					}
+				}
+		function adminLogout(){
+			sessionStorage.removeItem(ADMIN_SESSION_KEY);
+				sessionStorage.removeItem(ADMIN_EMAIL_KEY);
+			document.getElementById('adminApp').classList.add('hidden');
+			document.getElementById('adminGate').classList.remove('hidden');
+			document.getElementById('adminLogoutBtn').classList.add('hidden');
+			showToast('Logged out','info');
+				// Reset gate
+				ADMIN_FLOW_STEP = 'email';
+				document.getElementById('adminPwRow')?.classList.add('hidden');
+				const btn = document.getElementById('adminLoginBtn'); if (btn) btn.textContent = 'Continue';
+				const status = document.getElementById('adminGateStatus'); if (status) status.textContent = '';
+		}
+
+		// Membership check (POST)
+		async function membershipCheck(email){
+			const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=membershipcheck&email=${encodeURIComponent(email)}`;
+			const res = await fetch(url, { method:'POST' });
+			const text = await res.text();
+			if (/^\s*new\s*$/i.test(text)) return 'NEW';
+			try { return JSON.parse(text); } catch { return text; }
+		}
+
+		async function handleMembershipCheck(){
+			const emailEl = document.getElementById('memEmail');
+			const status = document.getElementById('memStatus');
+			const btn = document.getElementById('memCheckBtn');
+			const jsonOut = document.getElementById('jsonOut');
+			const card = document.getElementById('memResultCard');
+			status.textContent = ''; status.className = 'status info';
+			jsonOut.textContent = '';
+			card.hidden = true;
+
+			const email = String(emailEl?.value || '').trim();
+			if (!isValidEmail(email)){ status.textContent = 'Enter a valid email.'; status.className = 'status error'; emailEl?.focus(); return; }
+
+			setPending(btn, true, 'Checking…'); status.textContent = 'Checking membership…';
+			try{
+				const data = await membershipCheck(email);
+				if (data === 'NEW'){
+					status.innerHTML = 'No existing record. <a href="membership.html" target="_blank" rel="noopener">Proceed to membership registration</a>.';
+					status.className = 'status warn';
+					showToast('No record found. Ask member to register.', 'info');
+					return;
+				}
+				if (typeof data === 'string'){
+					status.textContent = data || 'Unexpected response.';
+					status.className = 'status warn';
+					return;
+				}
+
+				// JSON profile
+				jsonOut.textContent = JSON.stringify(data, null, 2);
+				const p = data.profile || data;
+
+				// Fill card
+				document.getElementById('kvName').textContent = [p.title,p.firstname,p.middleinitial,p.lastname,p.suffix].filter(Boolean).join(' ').replace(/\s+/g,' ');
+				document.getElementById('kvEmail').textContent = p.email || email;
+				document.getElementById('kvMobile').textContent = p.mobilenumber || p.mobile || '';
+				document.getElementById('kvSchool').textContent = p.school || '';
+				document.getElementById('kvSpec').textContent = p.specialization || '';
+				document.getElementById('kvPos').textContent = p.position || p.occupation || '';
+				document.getElementById('kvAddr').textContent = p.address || '';
+
+				const validitySrc = p.date || p.validity || p.expiry || p.expiration || p.Date || p.Validity || p.Expiry || p.Expiration;
+				const active = isMembershipActive(p);
+				const badge = document.getElementById('memBadge');
+				const valEl = document.getElementById('memValidity');
+				badge.textContent = active ? 'Active' : 'Expired';
+				badge.className = 'chip ' + (active ? 'pill-ok' : 'pill-warn');
+				valEl.textContent = validitySrc ? formatValidity(validitySrc) : '';
+				card.hidden = false;
+
+				status.textContent = active ? 'Member is active.' : 'Membership expired. Consider sending a renewal notice.';
+				status.className = 'status ' + (active ? 'ok' : 'warn');
+			} catch(e){
+				status.textContent = e?.message || 'Unable to check membership right now.';
+				status.className = 'status error';
+			} finally {
+				setPending(btn, false);
+			}
+		}
+
+		async function handleSendPassword(){
+			const email = String(document.getElementById('memEmail')?.value || '').trim();
+			if (!isValidEmail(email)){ showToast('Enter a valid email','error'); return; }
+			const btn = document.getElementById('memSendPwBtn');
+			setPending(btn, true, 'Sending…');
+			try{
+				const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=password&email=${encodeURIComponent(email)}`;
+				const res = await fetch(url, {
+					method:'POST',
+					headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
+					body: JSON.stringify({ email })
+				});
+				const text = await res.text();
+				showToast(text || 'Password email sent (if account exists).','success', 3500);
+			} catch(e){
+				showToast(e?.message || 'Failed to send password email.','error');
+			} finally {
+				setPending(btn, false);
+			}
+		}
+
+		// Export JSON currently shown
+		function handleExportJSON(){
+			const pre = document.getElementById('jsonOut');
+			if (!pre?.textContent){ showToast('Nothing to export','info'); return; }
+			const blob = new Blob([pre.textContent], { type:'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url; a.download = 'member.json';
+			document.body.appendChild(a); a.click(); a.remove();
+			URL.revokeObjectURL(url);
+		}
+
+		// Wire up
+		document.getElementById('adminLoginBtn').addEventListener('click', adminLogin);
+		document.getElementById('adminLogoutBtn').addEventListener('click', adminLogout);
+		document.getElementById('memCheckBtn').addEventListener('click', handleMembershipCheck);
+		document.getElementById('memCopyBtn').addEventListener('click', () => {
+			const email = document.getElementById('memEmail')?.value || '';
+			if (!email) return;
+			try { navigator.clipboard.writeText(email); showToast('Copied email','success'); } catch(e){ showToast(email,'info'); }
+		});
+		document.getElementById('memSendPwBtn').addEventListener('click', handleSendPassword);
+		document.getElementById('memOpenMemberPageBtn').addEventListener('click', ()=> window.open('membership.html','_blank','noopener'));
+
+		document.getElementById('toolExportBtn').addEventListener('click', handleExportJSON);
+
+		// Auto open app if session exists
+			(function init(){
+			if (sessionStorage.getItem(ADMIN_SESSION_KEY) === '1'){
+				document.getElementById('adminGate').classList.add('hidden');
+				document.getElementById('adminApp').classList.remove('hidden');
+				document.getElementById('adminLogoutBtn').classList.remove('hidden');
+			}
+					// Enter to submit on key
+					document.getElementById('adminEmail').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
+					document.getElementById('adminPassword').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
+			document.getElementById('memEmail').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); handleMembershipCheck(); } });
+		})();
+	</script>
+</body>
+</html>

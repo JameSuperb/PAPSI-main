@@ -45,10 +45,25 @@
 		.chip { display:inline-block; border:1px solid #d1d5db; border-radius:999px; padding:2px 8px; font-size:12px; color:#374151; background:#fff; }
 		.pill-ok { background:#ecfdf5; color:#065f46; border-color:#bbf7d0; }
 		.pill-warn { background:#fffbeb; color:#92400e; border-color:#fde68a; }
-		.toast { position:fixed; right:12px; bottom:12px; background:#111827; color:#fff; padding:10px 12px; border-radius:8px; font-size:14px; opacity:0; transform:translateY(8px); transition:all .2s; z-index:9999; }
+		.toast { position:fixed; right:12px; top:12px; background:#111827; color:#fff; padding:10px 12px; border-radius:8px; font-size:14px; opacity:0; transform:translateY(-8px); transition:all .2s; z-index:9999; }
 		.toast.show { opacity:1; transform:translateY(0); }
 		.gate { display:flex; align-items:center; justify-content:center; min-height:48vh; }
 		.hidden { display:none !important; }
+
+		/* Action cards */
+		.action-card { cursor:pointer; display:flex; align-items:center; gap:12px; padding:16px; border-radius:12px; border:1px solid var(--line); background:var(--card); box-shadow:0 8px 20px rgba(0,0,0,.03); outline:none; }
+		.action-card:hover { box-shadow:0 10px 28px rgba(0,0,0,.06); transform: translateY(-1px); }
+		.action-icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--green); color:#fff; font-weight:700; }
+		.action-title { font-weight:700; }
+		.action-sub { color:var(--muted); font-size:12px; }
+
+		/* Modal */
+		.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50; }
+		.modal-backdrop.show { display:flex; }
+		.modal { background:#fff; border:1px solid var(--line); border-radius:12px; width:min(520px, calc(100% - 32px)); padding:16px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+		.modal .modal-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+		.modal .close-x { border:none; background:transparent; font-size:18px; line-height:1; cursor:pointer; color:#6b7280; padding:6px; border-radius:6px; }
+		.modal .close-x:hover { background:#f3f4f6; color:#374151; }
 	</style>
 	<meta name="robots" content="noindex, nofollow" />
 	<meta name="referrer" content="no-referrer" />
@@ -103,6 +118,43 @@
 
 	<!-- App -->
 	<div id="adminApp" class="container hidden">
+		<!-- IDs card (moved to top) -->
+		<div class="card" id="idsCard" style="margin-bottom:16px;">
+			<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+				<div>
+					<div class="title">IDs</div>
+					<div class="subtle" style="margin-top:2px;">View and manage PAPSI ID and Invoice Number</div>
+				</div>
+				<div class="actions">
+					<button id="btnGetIds" class="btn ghost" type="button">Get IDs</button>
+					<button id="btnUpdateIds" class="btn" type="button">Update IDs</button>
+				</div>
+			</div>
+			<div class="kv" style="margin-top:12px;">
+				<div class="subtle">PAPSI ID</div>
+				<div><input id="papsiIdField" type="text" placeholder="e.g., PAPSI-2025-000123" /></div>
+				<div class="subtle">Invoice Number</div>
+				<div><input id="invoiceNoField" type="text" placeholder="e.g., INV-2025-000456" /></div>
+			</div>
+		</div>
+
+		<!-- Quick actions (Membership below IDs) -->
+		<div class="grid grid-2" style="margin-bottom:16px;">
+			<div id="btnMembershipRequests" class="action-card" role="button" tabindex="0" aria-label="Open Membership Requests">
+				<div class="action-icon" aria-hidden="true">M</div>
+				<div>
+					<div class="action-title">Membership Request (Website)</div>
+					<div class="action-sub">Review and process membership requests</div>
+				</div>
+			</div>
+			<div id="btnTrainingRequests" class="action-card" role="button" tabindex="0" aria-label="Open Training Requests">
+				<div class="action-icon" aria-hidden="true">T</div>
+				<div>
+					<div class="action-title">Training Request (Website)</div>
+					<div class="action-sub">Review and process training registrations</div>
+				</div>
+			</div>
+		</div>
 		<div class="grid grid-2">
 			<div class="card">
 				<div class="title">Members</div>
@@ -149,9 +201,119 @@
 				<pre id="jsonOut" style="margin-top:12px; background:#0b1020; color:#d1e7ff; padding:10px; border-radius:8px; max-height:280px; overflow:auto; font-size:12px;"></pre>
 			</div>
 		</div>
+
 	</div>
 
 	<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+	<!-- Update IDs Modal -->
+	<div id="idsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="idsModalTitle">
+		<div class="modal">
+			<div class="title" id="idsModalTitle">Update IDs</div>
+			<div class="row" style="margin-top:12px;">
+				<div class="field">
+					<label for="papsiIdInput">PAPSI ID</label>
+					<input id="papsiIdInput" type="text" placeholder="e.g., PAPSI-2025-000123" />
+				</div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field">
+					<label for="invoiceNoInput">Invoice Number</label>
+					<input id="invoiceNoInput" type="text" placeholder="e.g., INV-2025-000456" />
+				</div>
+			</div>
+			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
+				<button id="idsCancelBtn" class="btn secondary" type="button">Cancel</button>
+				<button id="idsSaveBtn" class="btn" type="button">Save</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Membership Request Modal -->
+	<div id="memReqModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="memReqTitle">
+		<div class="modal">
+			<div class="modal-head">
+				<div class="title" id="memReqTitle">Membership Request to Master List</div>
+				<button type="button" class="close-x" id="memReqCloseBtn" aria-label="Close">×</button>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="mrRowNumber">RowNumber</label><input id="mrRowNumber" type="text" /></div>
+				<div class="field"><label for="mrTotalFee">TotalFee</label><input id="mrTotalFee" type="text" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="mrInvoiceDate">InvoiceDate</label><input id="mrInvoiceDate" type="text" placeholder="e.g., 2025-10-05" /></div>
+				<div class="field"><label for="mrInvoiceNumber">InvoiceNumber</label><input id="mrInvoiceNumber" type="text" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="mrPapsiID">PapsiID</label><input id="mrPapsiID" type="text" /></div>
+				<div class="field"><label for="mrMemStartDate">MemStartDate</label><input id="mrMemStartDate" type="text" placeholder="e.g., 2025-10-05" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="mrMembEndDate">MembEndDate</label><input id="mrMembEndDate" type="text" placeholder="e.g., 2026-10-04" /></div>
+			</div>
+			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
+				<button id="memReqCancelBtn" class="btn secondary" type="button">Cancel</button>
+				<button id="memReqSubmitBtn" class="btn" type="button">Submit</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Training Request Modal -->
+	<div id="trainingReqModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="trainingReqTitle">
+		<div class="modal">
+			<div class="modal-head">
+				<div class="title" id="trainingReqTitle">Training Request (Website)</div>
+				<button type="button" class="close-x" id="trainingReqCloseBtn" aria-label="Close">×</button>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="trRowNumber">RowNumber</label><input id="trRowNumber" type="text" /></div>
+				<div class="field"><label for="trWebinarRow">WebinarRow</label><input id="trWebinarRow" type="text" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="trMemFee">MemFee</label><input id="trMemFee" type="number" step="1" min="0" /></div>
+				<div class="field"><label for="trRegFee">RegFee</label><input id="trRegFee" type="number" step="1" min="0" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="trTotalFee">TotalFee</label><input id="trTotalFee" type="number" step="1" min="0" /></div>
+				<div class="field"><label for="trInvoiceDate">InvoiceDate</label><input id="trInvoiceDate" type="text" placeholder="MM/DD/YYYY" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="trInvoiceNumber">InvoiceNumber</label><input id="trInvoiceNumber" type="text" /></div>
+				<div class="field"><label for="trPapsiID">PapsiID</label><input id="trPapsiID" type="text" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="trMemStartDate">MemStartDate</label><input id="trMemStartDate" type="text" placeholder="MM/DD/YYYY" /></div>
+				<div class="field"><label for="trMemEndDate">MemEndDate</label><input id="trMemEndDate" type="text" placeholder="M/DD/YYYY" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="trDate1">Date1</label><input id="trDate1" type="text" placeholder="MM/DD/YYYY" /></div>
+				<div class="field"><label for="trDate2">Date2</label><input id="trDate2" type="text" placeholder="MM/DD/YYYY" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="trCode">Code</label><input id="trCode" type="text" /></div>
+				<div class="field"><label for="trHour">Hour</label><input id="trHour" type="text" /></div>
+			</div>
+			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
+				<button id="trainingReqCancelBtn" class="btn secondary" type="button">Cancel</button>
+				<button id="trainingReqSubmitBtn" class="btn" type="button">Submit</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Confirmation Modal -->
+	<div id="confirmModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+		<div class="modal">
+			<div class="modal-head">
+				<div class="title" id="confirmTitle">Confirm</div>
+				<button type="button" class="close-x" id="confirmCloseBtn" aria-label="Close">×</button>
+			</div>
+			<div id="confirmMessage" style="margin-top:8px;">Are you sure?</div>
+			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
+				<button id="confirmNoBtn" class="btn secondary" type="button">No</button>
+				<button id="confirmYesBtn" class="btn" type="button">Yes</button>
+			</div>
+		</div>
+	</div>
 
 	<script>
 		// Config
@@ -162,12 +324,22 @@
 		const ADMIN_SESSION_KEY = 'PAPSI_ADMIN_ACTIVE';
 		const ADMIN_EMAIL_KEY = 'PAPSI_ADMIN_EMAIL';
 		let ADMIN_FLOW_STEP = 'email'; // 'email' | 'password'
+		const IDS_SESSION_KEY = 'PAPSI_IDS';
+		const ADMIN_PROFILE_KEY = 'PAPSI_ADMIN_PROFILE';
+		// IDs endpoint (Get)
+		const IDS_GET_URL = 'https://script.google.com/macros/s/AKfycbzqiw4j1ibbbNIEYp_VIwXIQqI4feO3lpseMSGtGG9UeyznBDqaeuzx-pvO0QNCHUEU/exec?func=idget';
+		// IDs endpoint (Write)
+		const IDS_WRITE_BASE = 'https://script.google.com/macros/s/AKfycbzqiw4j1ibbbNIEYp_VIwXIQqI4feO3lpseMSGtGG9UeyznBDqaeuzx-pvO0QNCHUEU/exec?func=idwrite';
 
 		// Utils
-		function showToast(msg, type='info', ms=2600){
+		function showToast(msg, type='info', ms=2600, position='top-right'){
 			const t = document.getElementById('toast'); if (!t) return;
 			t.textContent = msg;
 			t.style.background = (type==='error'?'#991b1b': type==='success'?'#065f46': '#111827');
+			// position handling
+			t.style.top = t.style.bottom = t.style.left = t.style.right = 'auto';
+			if (position.includes('top')){ t.style.top = '12px'; } else { t.style.bottom = '12px'; }
+			if (position.includes('left')){ t.style.left = '12px'; } else { t.style.right = '12px'; }
 			t.classList.add('show');
 			clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), ms);
 		}
@@ -177,6 +349,11 @@
 			if (!btn._orig) btn._orig = btn.textContent;
 			btn.disabled = !!on; btn.textContent = on ? (labelOn || 'Working…') : btn._orig;
 		}
+		// localStorage helpers for persistent login
+		function safeLS(){ try { return window.localStorage; } catch(e){ return null; } }
+		function lsGet(k){ try { return safeLS()?.getItem(k) ?? null; } catch(e){ return null; } }
+		function lsSet(k,v){ try { safeLS()?.setItem(k, v); } catch(e){} }
+		function lsRemove(k){ try { safeLS()?.removeItem(k); } catch(e){} }
 		function parseFlexDate(val){
 			if (!val) return null;
 			if (val instanceof Date) return isNaN(val) ? null : val;
@@ -210,11 +387,259 @@
 			const fmt = d.toLocaleDateString('en-US',{month:'short', day:'2-digit', year:'numeric'});
 			return 'until ' + fmt;
 		}
+		// Format date to MM/DD/YYYY (pad month if padMonth=true; otherwise single-digit month)
+		function fmtMDY(date, padMonth=true){
+			const d = date instanceof Date ? date : new Date(date);
+			if (isNaN(d)) return '';
+			const m = d.getMonth()+1; const day = d.getDate(); const y = d.getFullYear();
+			const mm = padMonth ? String(m).padStart(2,'0') : String(m);
+			return `${mm}/${String(day).padStart(2,'0')}/${y}`;
+		}
 		function isMembershipActive(profile){
 			const v = profile?.date || profile?.validity || profile?.expiry || profile?.expiration || profile?.Date || profile?.Validity || profile?.Expiry || profile?.Expiration;
 			const d = parseFlexDate(v); if (!d) return true;
 			d.setHours(23,59,59,999);
 			return new Date() <= d;
+		}
+
+		// Training helpers for date/code formats
+		function ordinalSuffix(n){
+			const s = ['th','st','nd','rd'];
+			const v = n % 100;
+			return s[(v-20)%10] || s[v] || s[0];
+		}
+		function formatDate1Long(d){
+			// MMMM D, YYYY e.g., October 5, 2025
+			const dt = d instanceof Date ? d : new Date(d);
+			if (isNaN(dt)) return '';
+			return dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+		}
+		function formatDate2Phrase(d){
+			// Dth day of MMMM, YYYY e.g., 5th day of October, 2025
+			const dt = d instanceof Date ? d : new Date(d);
+			if (isNaN(dt)) return '';
+			const day = dt.getDate();
+			const month = dt.toLocaleString('en-US', { month: 'long' });
+			const year = dt.getFullYear();
+			return `${day}${ordinalSuffix(day)} day of ${month}, ${year}`;
+		}
+		function generateTrainingCode(){
+			// Three letters + six digits e.g., CMC102349
+			const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			let partA = '';
+			for (let i=0;i<3;i++){ partA += letters[Math.floor(Math.random()*letters.length)]; }
+			const partB = String(Math.floor(Math.random()*1_000_000)).padStart(6,'0');
+			return partA + partB;
+		}
+
+		// IDs helpers (UX only)
+		function loadIds(){
+			try{ const raw = sessionStorage.getItem(IDS_SESSION_KEY); return raw ? JSON.parse(raw) : {}; } catch(e){ return {}; }
+		}
+		function saveIds(ids){
+			try{ sessionStorage.setItem(IDS_SESSION_KEY, JSON.stringify(ids || {})); } catch(e){}
+		}
+		function renderIds(ids){
+			const pidEl = document.getElementById('papsiIdField');
+			const invEl = document.getElementById('invoiceNoField');
+			if (pidEl) pidEl.value = ids?.papsiId || '';
+			if (invEl) invEl.value = ids?.invoiceNo || '';
+		}
+		function incrementIdString(s){
+			const str = String(s ?? '');
+			const m = str.match(/(\d+)(?!.*\d)/);
+			if (!m) return str;
+			const num = m[1];
+			const inc = String(parseInt(num, 10) + 1).padStart(num.length, '0');
+			return str.slice(0, m.index) + inc + str.slice(m.index + num.length);
+		}
+		function generateSampleIds(){
+			const now = new Date();
+			const y = now.getFullYear();
+			const seed = (now.getMonth()+1)*100000 + now.getDate()*1000 + now.getHours()*10 + Math.floor(Math.random()*10);
+			const seq = String(seed).padStart(6,'0');
+			return { papsiId: `PAPSI-${y}-${seq}`, invoiceNo: `INV-${y}-${seq}` };
+		}
+		function parseIdsResponse(raw){
+			if (raw == null) return {};
+			let text = typeof raw === 'string' ? raw.trim() : '';
+			// Try JSON first
+			try {
+				const j = typeof raw === 'string' ? JSON.parse(text) : raw;
+				if (j && typeof j === 'object'){
+					// Normalize keys case-insensitively
+					const entries = Object.entries(j).reduce((acc,[k,v])=>{ acc[String(k).toLowerCase()] = v; return acc; },{});
+					const pid = entries['papsiid'] || entries['papsi_id'] || entries['papsi'] || entries['papsi id'] || entries['id'] || entries['memberid'];
+					const inv = entries['invoiceno'] || entries['invoice_no'] || entries['invoice'] || entries['invoice number'] || entries['invoicenumber'] || entries['invoicenum'] || entries['or'] || entries['ornumber'];
+					return { papsiId: pid ? String(pid) : '', invoiceNo: inv ? String(inv) : '' };
+				}
+			} catch {}
+			// If JSON array
+			try {
+				const arr = JSON.parse(text);
+				if (Array.isArray(arr) && arr.length >= 2){
+					return { papsiId: String(arr[0] ?? ''), invoiceNo: String(arr[1] ?? '') };
+				}
+			} catch {}
+			// Fallback: parse delimited text
+			if (text){
+				// Look for labeled pairs like PAPSI: X, INVOICE: Y
+				const rePid = /papsi\s*id\s*[:=-]\s*([^\n,|]+)/i;
+				const reInv = /invoice\s*(?:no|number|num)?\s*[:=-]\s*([^\n,|]+)/i;
+				const m1 = text.match(rePid);
+				const m2 = text.match(reInv);
+				if (m1 || m2){ return { papsiId: m1 ? m1[1].trim() : '', invoiceNo: m2 ? m2[1].trim() : '' }; }
+				// Split by newline/pipe/comma
+				const parts = text.split(/\r?\n|\|/).join(',').split(',').map(s=>s.trim()).filter(Boolean);
+				if (parts.length >= 2){ return { papsiId: parts[0], invoiceNo: parts[1] }; }
+			}
+			return {};
+		}
+		function openIdsModal(){
+			const modal = document.getElementById('idsModal');
+			const pInput = document.getElementById('papsiIdInput');
+			const iInput = document.getElementById('invoiceNoInput');
+			const ids = loadIds();
+			pInput.value = ids.papsiId || '';
+			iInput.value = ids.invoiceNo || '';
+			modal.classList.add('show');
+			setTimeout(()=> pInput.focus(), 0);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeIdsModal(); } if (e.key==='Enter'){ e.preventDefault(); saveFromModal(); } }
+			modal.addEventListener('keydown', onKey);
+			modal._onKey = onKey;
+		}
+		function closeIdsModal(){
+			const modal = document.getElementById('idsModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey = null; }
+			modal.classList.remove('show');
+		}
+		function saveFromModal(){
+			const p = String(document.getElementById('papsiIdInput').value||'').trim();
+			const i = String(document.getElementById('invoiceNoInput').value||'').trim();
+			const ids = { papsiId: p, invoiceNo: i };
+			saveIds(ids); renderIds(ids); closeIdsModal(); showToast('IDs updated (local only)','success');
+		}
+
+		// Membership Request modal helpers
+		function openMemReqModal(){
+			const modal = document.getElementById('memReqModal');
+			// Prefill invoice/papsi from current fields if present
+			const pid = document.getElementById('papsiIdField')?.value || '';
+			const inv = document.getElementById('invoiceNoField')?.value || '';
+			const nextPid = incrementIdString(pid);
+			const nextInv = incrementIdString(inv);
+			document.getElementById('mrPapsiID').value = nextPid;
+			document.getElementById('mrInvoiceNumber').value = nextInv;
+			// Prefill dates and fee
+			const today = new Date();
+			document.getElementById('mrInvoiceDate').value = fmtMDY(today, true); // MM/DD/YYYY
+			document.getElementById('mrMemStartDate').value = fmtMDY(today, true); // MM/DD/YYYY
+			const nextYear = new Date(today.getFullYear()+1, today.getMonth(), today.getDate());
+			document.getElementById('mrMembEndDate').value = fmtMDY(nextYear, false); // M/DD/YYYY (month not padded)
+			document.getElementById('mrTotalFee').value = '500';
+			modal.classList.add('show');
+			setTimeout(()=> document.getElementById('mrRowNumber').focus(), 0);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeMemReqModal(); } }
+			modal.addEventListener('keydown', onKey);
+			modal._onKey = onKey;
+		}
+		function closeMemReqModal(){
+			const modal = document.getElementById('memReqModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey = null; }
+			modal.classList.remove('show');
+		}
+		async function submitMemReq(){
+			const payload = {
+				RowNumber: document.getElementById('mrRowNumber').value.trim(),
+				TotalFee: document.getElementById('mrTotalFee').value.trim(),
+				InvoiceDate: document.getElementById('mrInvoiceDate').value.trim(),
+				InvoiceNumber: document.getElementById('mrInvoiceNumber').value.trim(),
+				PapsiID: document.getElementById('mrPapsiID').value.trim(),
+				MemStartDate: document.getElementById('mrMemStartDate').value.trim(),
+				MembEndDate: document.getElementById('mrMembEndDate').value.trim()
+			};
+			// Confirmation then submit to webhook
+			openConfirm('Are you ready to submit the membership request to master list?', async () => {
+				const yesBtn = document.getElementById('confirmYesBtn');
+				const noBtn = document.getElementById('confirmNoBtn');
+				if (yesBtn) { yesBtn.disabled = true; yesBtn.textContent = 'Submitting…'; }
+				if (noBtn) noBtn.disabled = true;
+				try{
+					const base = 'https://hook.eu1.make.com/68xrav0c4mfcgqb6decumt95ekn8bia3';
+					const qs = `?RowNumber=${encodeURIComponent(payload.RowNumber)}&TotalFee=${encodeURIComponent(payload.TotalFee)}&InvoiceDate=${encodeURIComponent(payload.InvoiceDate)}&InvoiceNumber=${encodeURIComponent(payload.InvoiceNumber)}&PapsiID=${encodeURIComponent(payload.PapsiID)}&MemStartDate=${encodeURIComponent(payload.MemStartDate)}&MembEndDate=${encodeURIComponent(payload.MembEndDate)}`;
+					const res = await fetch(base + qs, { method:'POST' });
+					const text = await res.text();
+					closeConfirm();
+					closeMemReqModal();
+					showToast(text || 'Submitted', 'success', 3500, 'top-right');
+					// After successful submission, update IDs via Apps Script idwrite
+					// If any field is empty, use the present value from Get IDs (session), then fallback to the current dashboard fields
+					try{
+						const current = loadIds() || {};
+						const fieldP = String(document.getElementById('papsiIdField')?.value || '').trim();
+						const fieldI = String(document.getElementById('invoiceNoField')?.value || '').trim();
+						const finalP = (payload.PapsiID && payload.PapsiID.trim()) || current.papsiId || fieldP;
+						const finalI = (payload.InvoiceNumber && payload.InvoiceNumber.trim()) || current.invoiceNo || fieldI;
+						if (!finalP && !finalI){
+							showToast('IDs not updated: missing PapsiID and InvoiceNumber', 'info', 3000, 'top-right');
+						} else {
+							const writeUrl = IDS_WRITE_BASE + '&PapsiID=' + encodeURIComponent(finalP) + '&InvoiceNum=' + encodeURIComponent(finalI);
+							const res2 = await fetch(writeUrl, { method:'POST' });
+							const msg = await res2.text();
+							// Sync UI and session values
+							const ids = { papsiId: finalP, invoiceNo: finalI };
+							saveIds(ids); renderIds(ids);
+							showToast(msg || 'IDs updated', 'success', 3000, 'top-right');
+						}
+					} catch(e2){
+							showToast(e2?.message || 'Failed to update IDs', 'error', 3000, 'top-right');
+					}
+				} catch(e){
+					closeConfirm();
+					showToast(e?.message || 'Submission failed', 'error', 3500, 'top-right');
+				}
+			});
+		}
+
+		// Confirm modal helpers
+		function openConfirm(message, onYes){
+			const modal = document.getElementById('confirmModal');
+			const msgEl = document.getElementById('confirmMessage');
+			const yesBtn = document.getElementById('confirmYesBtn');
+			const noBtn = document.getElementById('confirmNoBtn');
+			const closeBtn = document.getElementById('confirmCloseBtn');
+			if (msgEl) msgEl.textContent = message || 'Are you sure?';
+			// Reset buttons to default state on open
+			if (yesBtn){ if (!yesBtn._orig) yesBtn._orig = yesBtn.textContent; yesBtn.textContent = yesBtn._orig || 'Yes'; yesBtn.disabled = false; }
+			if (noBtn){ if (!noBtn._orig) noBtn._orig = noBtn.textContent; noBtn.textContent = noBtn._orig || 'No'; noBtn.disabled = false; }
+			modal.classList.add('show');
+			// Clean existing listeners
+			[yesBtn,noBtn,closeBtn].forEach(el=>{ if (el && el._fn){ el.removeEventListener('click', el._fn); el._fn=null; } });
+			// Attach
+			yesBtn._fn = async ()=>{ try { await onYes?.(); } catch {} };
+			noBtn._fn = ()=> closeConfirm();
+			closeBtn._fn = ()=> closeConfirm();
+			yesBtn.addEventListener('click', yesBtn._fn);
+			noBtn.addEventListener('click', noBtn._fn);
+			closeBtn.addEventListener('click', closeBtn._fn);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeConfirm(); } }
+			modal.addEventListener('keydown', onKey); modal._onKey = onKey;
+			modal.addEventListener('click', function onBack(e){ if (e.target===e.currentTarget){ closeConfirm(); modal.removeEventListener('click', onBack); } });
+		}
+		function closeConfirm(){
+			const modal = document.getElementById('confirmModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey = null; }
+			const yesBtn = document.getElementById('confirmYesBtn');
+			const noBtn = document.getElementById('confirmNoBtn');
+			const closeBtn = document.getElementById('confirmCloseBtn');
+			[yesBtn,noBtn,closeBtn].forEach(el=>{ if (el && el._fn){ el.removeEventListener('click', el._fn); el._fn=null; } });
+			// Restore buttons to defaults when closing
+			if (yesBtn){ yesBtn.disabled = false; if (yesBtn._orig) yesBtn.textContent = yesBtn._orig; else yesBtn.textContent = 'Yes'; }
+			if (noBtn){ noBtn.disabled = false; if (noBtn._orig) noBtn.textContent = noBtn._orig; else noBtn.textContent = 'No'; }
+			modal.classList.remove('show');
 		}
 
 		// Auth (simple key; replace with server verification)
@@ -230,6 +655,7 @@
 				function resetAdminGateToEmail(){
 					ADMIN_FLOW_STEP = 'email';
 					try { sessionStorage.removeItem(ADMIN_EMAIL_KEY); } catch(e){}
+					lsRemove(ADMIN_EMAIL_KEY);
 					const row = document.getElementById('adminPwRow'); if (row) row.classList.add('hidden');
 					const btn = document.getElementById('adminLoginBtn'); if (btn) btn.textContent = 'Continue';
 					const emailInput = document.getElementById('adminEmail'); if (emailInput) emailInput.value = '';
@@ -255,9 +681,8 @@
 							const res = await fetch(url, { method:'POST' });
 							const text = (await res.text() || '').trim();
 							if (text.toLowerCase() === 'login'){
-								status.textContent = 'Email recognized. Please enter your password.';
-								status.className = 'status info';
-								sessionStorage.setItem(ADMIN_EMAIL_KEY, email);
+							status.textContent = 'Email recognized. Please enter your password.';
+							status.className = 'status info';
 								showPasswordStep();
 								return;
 							}
@@ -287,8 +712,10 @@
 						try { j = JSON.parse(text); } catch(e) { throw new Error('Access Denied'); }
 						const idStr = j && j.id ? String(j.id) : '';
 						if (!idStr || !/admin/i.test(idStr)) throw new Error('Access Denied');
-						sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
-						sessionStorage.setItem(ADMIN_EMAIL_KEY, email);
+						// Persist login across refresh/visits until explicit logout
+						lsSet(ADMIN_SESSION_KEY, '1');
+						lsSet(ADMIN_EMAIL_KEY, email);
+						try { lsSet(ADMIN_PROFILE_KEY, JSON.stringify(j)); } catch(e){}
 						document.getElementById('adminGate').classList.add('hidden');
 						document.getElementById('adminApp').classList.remove('hidden');
 						document.getElementById('adminLogoutBtn').classList.remove('hidden');
@@ -302,8 +729,12 @@
 					}
 				}
 		function adminLogout(){
-			sessionStorage.removeItem(ADMIN_SESSION_KEY);
-				sessionStorage.removeItem(ADMIN_EMAIL_KEY);
+			// Clear any session/local keys
+			try { sessionStorage.removeItem(ADMIN_SESSION_KEY); } catch(e){}
+			try { sessionStorage.removeItem(ADMIN_EMAIL_KEY); } catch(e){}
+			lsRemove(ADMIN_SESSION_KEY);
+			lsRemove(ADMIN_EMAIL_KEY);
+			lsRemove(ADMIN_PROFILE_KEY);
 			document.getElementById('adminApp').classList.add('hidden');
 			document.getElementById('adminGate').classList.remove('hidden');
 			document.getElementById('adminLogoutBtn').classList.add('hidden');
@@ -420,6 +851,15 @@
 		// Wire up
 		document.getElementById('adminLoginBtn').addEventListener('click', adminLogin);
 		document.getElementById('adminLogoutBtn').addEventListener('click', adminLogout);
+		// Action cards
+		function activateButtonCard(el, onClick){
+			if(!el) return;
+			el.addEventListener('click', onClick);
+			el.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); onClick(); } });
+		}
+		// Open Membership Request modal
+		activateButtonCard(document.getElementById('btnMembershipRequests'), openMemReqModal);
+		activateButtonCard(document.getElementById('btnTrainingRequests'), openTrainingReqModal);
 		document.getElementById('memCheckBtn').addEventListener('click', handleMembershipCheck);
 		document.getElementById('memCopyBtn').addEventListener('click', () => {
 			const email = document.getElementById('memEmail')?.value || '';
@@ -431,9 +871,172 @@
 
 		document.getElementById('toolExportBtn').addEventListener('click', handleExportJSON);
 
+		// IDs events
+		document.getElementById('btnGetIds').addEventListener('click', async ()=>{
+			const btn = document.getElementById('btnGetIds');
+			setPending(btn, true, 'Fetching…');
+			try{
+				const res = await fetch(IDS_GET_URL, { method:'POST' });
+				const text = await res.text();
+				const parsed = parseIdsResponse(text);
+				let ids = parsed;
+				// If nothing parsed, fallback to stored or sample
+				if (!ids.papsiId && !ids.invoiceNo){ ids = loadIds(); }
+				if (!ids.papsiId && !ids.invoiceNo){ ids = generateSampleIds(); }
+				saveIds(ids);
+				renderIds(ids);
+				showToast('IDs loaded', 'success');
+			} catch(e){
+				showToast(e?.message || 'Failed to get IDs','error');
+			} finally {
+				setPending(btn, false);
+			}
+		});
+		document.getElementById('btnUpdateIds').addEventListener('click', async ()=>{
+			const btn = document.getElementById('btnUpdateIds');
+			const p = String(document.getElementById('papsiIdField')?.value || '').trim();
+			const i = String(document.getElementById('invoiceNoField')?.value || '').trim();
+			if (!p && !i){ showToast('Nothing to update','info'); return; }
+			setPending(btn, true, 'Updating…');
+			try{
+				const url = IDS_WRITE_BASE + '&PapsiID=' + encodeURIComponent(p) + '&InvoiceNum=' + encodeURIComponent(i);
+				const res = await fetch(url, { method:'POST' });
+				const text = await res.text();
+				// Save locally on success-ish reply
+				const ids = { papsiId: p, invoiceNo: i };
+				saveIds(ids);
+				showToast(text || 'IDs updated','success');
+			} catch(e){
+				showToast(e?.message || 'Failed to update IDs','error');
+			} finally {
+				setPending(btn, false);
+			}
+		});
+		document.getElementById('idsCancelBtn')?.addEventListener('click', closeIdsModal);
+		document.getElementById('idsSaveBtn')?.addEventListener('click', saveFromModal);
+
+		// Membership Request modal events
+		document.getElementById('memReqCloseBtn').addEventListener('click', closeMemReqModal);
+		document.getElementById('memReqCancelBtn').addEventListener('click', closeMemReqModal);
+		document.getElementById('memReqSubmitBtn').addEventListener('click', submitMemReq);
+		document.getElementById('memReqModal').addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeMemReqModal(); });
+
+		// Training Request modal logic
+		function prefillTrainingTotals(){
+			const mem = parseFloat(document.getElementById('trMemFee').value||'0')||0;
+			const reg = parseFloat(document.getElementById('trRegFee').value||'0')||0;
+			document.getElementById('trTotalFee').value = String(Math.round(mem+reg));
+		}
+		function openTrainingReqModal(){
+			const modal = document.getElementById('trainingReqModal');
+			// Prefill from dashboard
+			const pid = document.getElementById('papsiIdField')?.value || '';
+			const inv = document.getElementById('invoiceNoField')?.value || '';
+			document.getElementById('trPapsiID').value = pid;
+			document.getElementById('trInvoiceNumber').value = inv;
+			const today = new Date();
+			document.getElementById('trInvoiceDate').value = fmtMDY(today, true);
+			document.getElementById('trMemStartDate').value = fmtMDY(today, true);
+			const nextYear = new Date(today.getFullYear()+1, today.getMonth(), today.getDate());
+			document.getElementById('trMemEndDate').value = fmtMDY(nextYear, false);
+			// Date1 and Date2 prefill per request
+			document.getElementById('trDate1').value = formatDate1Long(today); // October 5, 2025
+			document.getElementById('trDate2').value = formatDate2Phrase(today); // 5th day of October, 2025
+			// Default fees and auto-calc
+			document.getElementById('trMemFee').value = '0';
+			document.getElementById('trRegFee').value = '0';
+			prefillTrainingTotals();
+			// Code and Hour prefill
+			document.getElementById('trCode').value = generateTrainingCode(); // e.g., CMC102349
+			document.getElementById('trHour').value = '2-hour';
+			// Clear other optionals
+			['trRowNumber','trWebinarRow'].forEach(id=>{ const el = document.getElementById(id); if (el) el.value = ''; });
+			modal.classList.add('show');
+			setTimeout(()=> document.getElementById('trRowNumber').focus(), 0);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeTrainingReqModal(); } }
+			modal.addEventListener('keydown', onKey); modal._onKey = onKey;
+		}
+		function closeTrainingReqModal(){
+			const modal = document.getElementById('trainingReqModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey=null; }
+			modal.classList.remove('show');
+		}
+		async function submitTrainingReq(){
+			const payload = {
+				RowNumber: document.getElementById('trRowNumber').value.trim(),
+				WebinarRow: document.getElementById('trWebinarRow').value.trim(),
+				MemFee: document.getElementById('trMemFee').value.trim(),
+				RegFee: document.getElementById('trRegFee').value.trim(),
+				TotalFee: document.getElementById('trTotalFee').value.trim(),
+				InvoiceDate: document.getElementById('trInvoiceDate').value.trim(),
+				InvoiceNumber: document.getElementById('trInvoiceNumber').value.trim(),
+				PapsiID: document.getElementById('trPapsiID').value.trim(),
+				MemStartDate: document.getElementById('trMemStartDate').value.trim(),
+				MemEndDate: document.getElementById('trMemEndDate').value.trim(),
+				Date1: document.getElementById('trDate1').value.trim(),
+				Date2: document.getElementById('trDate2').value.trim(),
+				Code: document.getElementById('trCode').value.trim(),
+				Hour: document.getElementById('trHour').value.trim()
+			};
+			openConfirm('Submit this training request?', async ()=>{
+				const yesBtn = document.getElementById('confirmYesBtn');
+				const noBtn = document.getElementById('confirmNoBtn');
+				if (yesBtn) { yesBtn.disabled = true; yesBtn.textContent = 'Submitting…'; }
+				if (noBtn) noBtn.disabled = true;
+				try{
+					const base = 'https://hook.eu1.make.com/p9aokk5rhilkrhnj3hcppewc8h5kreu8';
+					const qs = `?RowNumber=${encodeURIComponent(payload.RowNumber)}&WebinarRow=${encodeURIComponent(payload.WebinarRow)}&MemFee=${encodeURIComponent(payload.MemFee)}&RegFee=${encodeURIComponent(payload.RegFee)}&TotalFee=${encodeURIComponent(payload.TotalFee)}&InvoiceDate=${encodeURIComponent(payload.InvoiceDate)}&InvoiceNumber=${encodeURIComponent(payload.InvoiceNumber)}&PapsiID=${encodeURIComponent(payload.PapsiID)}&MemStartDate=${encodeURIComponent(payload.MemStartDate)}&MemEndDate=${encodeURIComponent(payload.MemEndDate)}&Date1=${encodeURIComponent(payload.Date1)}&Date2=${encodeURIComponent(payload.Date2)}&Code=${encodeURIComponent(payload.Code)}&Hour=${encodeURIComponent(payload.Hour)}`;
+					const res = await fetch(base + qs, { method:'POST' });
+					const text = await res.text();
+					closeConfirm();
+					closeTrainingReqModal();
+					showToast(text || 'Submitted', 'success', 3500, 'top-right');
+					// After successful submission, update IDs on dashboard; if a field is empty, do not overwrite it
+					try{
+						const stored = loadIds() || {};
+						const fieldP = String(document.getElementById('papsiIdField')?.value || '').trim();
+						const fieldI = String(document.getElementById('invoiceNoField')?.value || '').trim();
+						const baseP = stored.papsiId || fieldP;
+						const baseI = stored.invoiceNo || fieldI;
+						const hasP = !!(payload.PapsiID && payload.PapsiID.trim());
+						const hasI = !!(payload.InvoiceNumber && payload.InvoiceNumber.trim());
+						if (hasP || hasI){
+							const finalP = hasP ? payload.PapsiID : baseP;
+							const finalI = hasI ? payload.InvoiceNumber : baseI;
+							// Update UI/session first so it reflects immediately
+							const merged = { papsiId: finalP || '', invoiceNo: finalI || '' };
+							saveIds(merged); renderIds(merged);
+							// Persist to Apps Script only if both values are present to avoid clearing
+							if (finalP && finalI){
+								const writeUrl = IDS_WRITE_BASE + '&PapsiID=' + encodeURIComponent(finalP) + '&InvoiceNum=' + encodeURIComponent(finalI);
+								const r2 = await fetch(writeUrl, { method:'POST' });
+								const msg2 = await r2.text();
+								showToast(msg2 || 'IDs synchronized', 'success', 3000, 'top-right');
+							} else {
+								showToast('IDs updated locally', 'info', 2200, 'top-right');
+							}
+						}
+					} catch(e3){ /* non-fatal */ }
+				} catch(e){
+					closeConfirm();
+					showToast(e?.message || 'Submission failed', 'error', 3500, 'top-right');
+				}
+			});
+		}
+		// Fee auto-calc events
+		document.getElementById('trMemFee')?.addEventListener('input', prefillTrainingTotals);
+		document.getElementById('trRegFee')?.addEventListener('input', prefillTrainingTotals);
+
+		// Training modal events
+		document.getElementById('trainingReqSubmitBtn').addEventListener('click', submitTrainingReq);
+		document.getElementById('trainingReqCancelBtn').addEventListener('click', closeTrainingReqModal);
+		document.getElementById('trainingReqCloseBtn').addEventListener('click', closeTrainingReqModal);
+		document.getElementById('trainingReqModal').addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeTrainingReqModal(); });
+
 		// Auto open app if session exists
 			(function init(){
-			if (sessionStorage.getItem(ADMIN_SESSION_KEY) === '1'){
+			if (lsGet(ADMIN_SESSION_KEY) === '1'){
 				document.getElementById('adminGate').classList.add('hidden');
 				document.getElementById('adminApp').classList.remove('hidden');
 				document.getElementById('adminLogoutBtn').classList.remove('hidden');
@@ -442,6 +1045,8 @@
 					document.getElementById('adminEmail').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
 					document.getElementById('adminPassword').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
 			document.getElementById('memEmail').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); handleMembershipCheck(); } });
+			// Render IDs from session on load
+			renderIds(loadIds());
 		})();
 	</script>
 </body>

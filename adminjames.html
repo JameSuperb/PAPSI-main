@@ -932,8 +932,9 @@
 			// Prefill from dashboard
 			const pid = document.getElementById('papsiIdField')?.value || '';
 			const inv = document.getElementById('invoiceNoField')?.value || '';
-			document.getElementById('trPapsiID').value = pid;
-			document.getElementById('trInvoiceNumber').value = inv;
+			// Use current IDs + 1 unit
+			document.getElementById('trPapsiID').value = pid ? incrementIdString(pid) : '';
+			document.getElementById('trInvoiceNumber').value = inv ? incrementIdString(inv) : '';
 			const today = new Date();
 			document.getElementById('trInvoiceDate').value = fmtMDY(today, true);
 			document.getElementById('trMemStartDate').value = fmtMDY(today, true);

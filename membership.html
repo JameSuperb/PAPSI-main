@@ -732,6 +732,12 @@
       return;
     }
 
+    // Normalize name parts to UPPERCASE before submission
+    firstname = firstname.toUpperCase();
+    middleinitial = middleinitial.toUpperCase();
+    lastname = lastname.toUpperCase();
+    suffix = suffix.toUpperCase();
+
     setSubmitPending(true);
     try {
       var addUrl = BASE + '?SH=Sheet1&func=membershipadd'

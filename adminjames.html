@@ -282,18 +282,47 @@
 				<div class="field"><label for="trPapsiID">PapsiID</label><input id="trPapsiID" type="text" /></div>
 			</div>
 			<div class="row" style="margin-top:10px;">
-				<div class="field"><label for="trMemStartDate">MemStartDate</label><input id="trMemStartDate" type="text" placeholder="MM/DD/YYYY" /></div>
-				<div class="field"><label for="trMemEndDate">MemEndDate</label><input id="trMemEndDate" type="text" placeholder="M/DD/YYYY" /></div>
+				<div class="field">
+					<label for="trMemStartDate">MemStartDate</label>
+					<div style="display:flex; gap:6px; align-items:center;">
+						<input id="trMemStartDate" type="text" placeholder="MM/DD/YYYY" />
+						<button id="trMemStartDateBtn" type="button" class="btn ghost" title="Pick date">📅</button>
+						<input id="trMemStartDatePicker" type="date" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;" aria-hidden="true" tabindex="-1" />
+					</div>
+				</div>
+				<div class="field">
+					<label for="trMemEndDate">MemEndDate</label>
+					<div style="display:flex; gap:6px; align-items:center;">
+						<input id="trMemEndDate" type="text" placeholder="M/DD/YYYY" />
+						<button id="trMemEndDateBtn" type="button" class="btn ghost" title="Pick date">📅</button>
+						<input id="trMemEndDatePicker" type="date" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;" aria-hidden="true" tabindex="-1" />
+					</div>
+				</div>
 			</div>
 			<div class="row" style="margin-top:10px;">
-				<div class="field"><label for="trDate1">Date1</label><input id="trDate1" type="text" placeholder="MM/DD/YYYY" /></div>
-				<div class="field"><label for="trDate2">Date2</label><input id="trDate2" type="text" placeholder="MM/DD/YYYY" /></div>
+				<div class="field">
+					<label for="trDate1">Date1</label>
+					<div style="display:flex; gap:6px; align-items:center;">
+						<input id="trDate1" type="text" placeholder="MM/DD/YYYY" />
+						<button id="trDate1Btn" type="button" class="btn ghost" title="Pick date">📅</button>
+						<input id="trDate1Picker" type="date" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;" aria-hidden="true" tabindex="-1" />
+					</div>
+				</div>
+				<div class="field">
+					<label for="trDate2">Date2</label>
+					<div style="display:flex; gap:6px; align-items:center;">
+						<input id="trDate2" type="text" placeholder="MM/DD/YYYY" />
+						<button id="trDate2Btn" type="button" class="btn ghost" title="Pick date">📅</button>
+						<input id="trDate2Picker" type="date" style="position:absolute; left:-9999px; width:0; height:0; opacity:0;" aria-hidden="true" tabindex="-1" />
+					</div>
+				</div>
 			</div>
 			<div class="row" style="margin-top:10px;">
 				<div class="field"><label for="trCode">Code</label><input id="trCode" type="text" /></div>
 				<div class="field"><label for="trHour">Hour</label><input id="trHour" type="text" /></div>
 			</div>
 			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
+				<button id="trainingReqClearBtn" class="btn ghost" type="button" title="Clear selected fields">Clear</button>
 				<button id="trainingReqCancelBtn" class="btn secondary" type="button">Cancel</button>
 				<button id="trainingReqSubmitBtn" class="btn" type="button">Submit</button>
 			</div>
@@ -361,6 +390,17 @@
 			let s = String(val).trim();
 			if (!s) return null;
 			s = s.replace(/(\d+)(st|nd|rd|th)/gi,'$1').replace(/,/g,'');
+			// Handle "D day of Month YYYY" e.g., 5th day of October, 2025
+			{
+				const m = s.match(/^(\d{1,2})\s+day\s+of\s+([A-Za-z]+)\s+(\d{2,4})$/i);
+				if (m){
+					const day = parseInt(m[1],10);
+					const mo = m[2].slice(0,3).toLowerCase();
+					const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+					let year = parseInt(m[3],10); if (year<100) year = year>=70?1900+year:2000+year;
+					if (months[mo] !== undefined){ const dt=new Date(year, months[mo], day); return isNaN(dt)?null:dt; }
+				}
+			}
 			// ISO or yyyy-mm-dd
 			if (/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/.test(s)) { const d = new Date(s); return isNaN(d)?null:d; }
 			// dd/mm/yyyy or mm/dd/yyyy -> assume dd/mm if first > 12
@@ -394,6 +434,15 @@
 			const m = d.getMonth()+1; const day = d.getDate(); const y = d.getFullYear();
 			const mm = padMonth ? String(m).padStart(2,'0') : String(m);
 			return `${mm}/${String(day).padStart(2,'0')}/${y}`;
+		}
+		// Format date to YYYY-MM-DD for <input type="date"> to avoid timezone shifts
+		function fmtYMD(date){
+			const d = date instanceof Date ? date : new Date(date);
+			if (isNaN(d)) return '';
+			const y = d.getFullYear();
+			const m = String(d.getMonth()+1).padStart(2,'0');
+			const day = String(d.getDate()).padStart(2,'0');
+			return `${y}-${m}-${day}`;
 		}
 		function isMembershipActive(profile){
 			const v = profile?.date || profile?.validity || profile?.expiry || profile?.expiration || profile?.Date || profile?.Validity || profile?.Expiry || profile?.Expiration;
@@ -956,6 +1005,21 @@
 			setTimeout(()=> document.getElementById('trRowNumber').focus(), 0);
 			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeTrainingReqModal(); } }
 			modal.addEventListener('keydown', onKey); modal._onKey = onKey;
+			// Initialize date pickers' default to current values
+			try{
+				const d1 = parseFlexDate(document.getElementById('trDate1').value);
+				const d2 = parseFlexDate(document.getElementById('trDate2').value);
+				const dS = parseFlexDate(document.getElementById('trMemStartDate').value);
+				const dE = parseFlexDate(document.getElementById('trMemEndDate').value);
+				const d1p = document.getElementById('trDate1Picker');
+				const d2p = document.getElementById('trDate2Picker');
+				const dSp = document.getElementById('trMemStartDatePicker');
+				const dEp = document.getElementById('trMemEndDatePicker');
+				if (d1p && d1){ d1p.value = fmtYMD(d1); }
+				if (d2p && d2){ d2p.value = fmtYMD(d2); }
+				if (dSp && dS){ dSp.value = fmtYMD(dS); }
+				if (dEp && dE){ dEp.value = fmtYMD(dE); }
+			} catch(e){}
 		}
 		function closeTrainingReqModal(){
 			const modal = document.getElementById('trainingReqModal');
@@ -1034,6 +1098,72 @@
 		document.getElementById('trainingReqCancelBtn').addEventListener('click', closeTrainingReqModal);
 		document.getElementById('trainingReqCloseBtn').addEventListener('click', closeTrainingReqModal);
 		document.getElementById('trainingReqModal').addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeTrainingReqModal(); });
+		document.getElementById('trainingReqClearBtn').addEventListener('click', ()=>{
+			// Empty specific fields
+			document.getElementById('trInvoiceNumber').value = '';
+			document.getElementById('trPapsiID').value = '';
+			document.getElementById('trInvoiceDate').value = '';
+			document.getElementById('trMemStartDate').value = '';
+			document.getElementById('trMemEndDate').value = '';
+			// Reset associated hidden pickers to avoid stale selection
+			const ip = document.getElementById('trInvoiceDatePicker'); if (ip) ip.value = '';
+			const sp = document.getElementById('trMemStartDatePicker'); if (sp) sp.value = '';
+			const ep = document.getElementById('trMemEndDatePicker'); if (ep) ep.value = '';
+			showToast('Cleared InvoiceNumber, PapsiID, InvoiceDate, MemStartDate, MemEndDate','info', 2200, 'top-right');
+		});
+
+		// Date picker wiring for Date1 and Date2
+		function openDatePicker(btnId, pickerId, inputId, formatter){
+			const btn = document.getElementById(btnId);
+			const picker = document.getElementById(pickerId);
+			const input = document.getElementById(inputId);
+			if (!btn || !picker || !input) return;
+			btn.addEventListener('click', (ev)=>{
+				// Set default date to the date encoded in the textbox
+				const d = parseFlexDate(input.value) || new Date();
+				try { picker.value = fmtYMD(d); } catch(e){}
+				// Temporarily make the picker focusable and near the button
+				const prev = picker.getAttribute('style') || '';
+				try {
+					const rect = btn.getBoundingClientRect();
+					picker.style.position = 'fixed';
+					picker.style.left = Math.max(0, rect.left) + 'px';
+					picker.style.top = Math.max(0, rect.bottom + 6) + 'px';
+					picker.style.width = '200px';
+					picker.style.height = '28px';
+					picker.style.opacity = '0.001';
+					picker.style.pointerEvents = 'auto';
+					picker.focus();
+					if (typeof picker.showPicker === 'function') {
+						picker.showPicker();
+					} else {
+						picker.click();
+					}
+				} catch(e) {
+					// best-effort fallback
+					try { picker.click(); } catch(_) {}
+				}
+				// Restore style after a tick
+				setTimeout(()=>{ picker.setAttribute('style', prev); }, 500);
+			});
+			picker.addEventListener('change', ()=>{
+				// Parse from YYYY-MM-DD as local date
+				let d;
+				if (picker.value){
+					const [yy,mm,dd] = picker.value.split('-').map(Number);
+					d = new Date(yy, (mm||1)-1, dd||1);
+				} else {
+					d = null;
+				}
+				if (!d || isNaN(d)) return;
+				input.value = formatter(d);
+			});
+		}
+		openDatePicker('trDate1Btn','trDate1Picker','trDate1', formatDate1Long);
+		openDatePicker('trDate2Btn','trDate2Picker','trDate2', formatDate2Phrase);
+		// Mem dates: Start uses MM/DD/YYYY; End uses M/DD/YYYY
+		openDatePicker('trMemStartDateBtn','trMemStartDatePicker','trMemStartDate', (d)=> fmtMDY(d, true));
+		openDatePicker('trMemEndDateBtn','trMemEndDatePicker','trMemEndDate', (d)=> fmtMDY(d, false));
 
 		// Auto open app if session exists
 			(function init(){

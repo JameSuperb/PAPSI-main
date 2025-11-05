@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastery in Science: Hands-on Workshop - Participant Information</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: inherit;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #0f172a;
+      background: #ffffff;
+      min-height: 100%;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      color: #006241;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+    }
+
+    p, li {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    a {
+      color: #1e40af;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    a:hover {
+      color: #1e3a8a;
+      text-decoration: underline;
+    }
+
+    a:focus {
+      outline: 2px solid #1e40af;
+      outline-offset: 2px;
+    }
+
+    /* Sticky Header */
+    header {
+      position: sticky;
+      top: 0;
+      background: #006241;
+      color: white;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-placeholder {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #006241;
+      font-size: 0.75rem;
+    }
+
+    .header-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    nav {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      padding: 0.25rem 0;
+      border-bottom: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    nav a:hover {
+      text-decoration: none;
+      border-bottom-color: white;
+    }
+
+    nav a:focus {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+
+    /* Mobile menu toggle */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: 2px solid white;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .menu-toggle:focus {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      nav {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      nav.active {
+        display: flex;
+      }
+
+      .header-content {
+        align-items: flex-start;
+      }
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #006241 0%, #004d33 100%);
+      color: white;
+      padding: 4rem 1.5rem;
+      text-align: center;
+    }
+
+    .hero-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: white;
+    }
+
+    .hero-subtitle {
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.95;
+    }
+
+    .hero-logos {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .logo-box {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #006241;
+      font-weight: 600;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.875rem 2rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #006241;
+    }
+
+    .btn-primary:hover {
+      background: #f1f5f9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .btn:focus {
+      outline: 3px solid white;
+      outline-offset: 2px;
+    }
+
+    .hero-subtext {
+      font-size: 0.9375rem;
+      opacity: 0.9;
+      margin-top: 1.5rem;
+    }
+
+    /* Hero meta lines */
+    .hero-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      align-items: center;
+      font-size: 1.05rem;
+    }
+  .hero-details .detail { opacity: 0.98; display: flex; align-items: center; gap: 0.5rem; }
+  .hero-details .icon { font-size: 1.15rem; line-height: 1; }
+    .hero-details .detail strong { color: #ffffff; }
+
+    /* Section Styles */
+    section {
+      padding: 4rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    section:nth-child(even) {
+      background: #f1f5f9;
+    }
+
+    .section-intro {
+      font-size: 1.0625rem;
+      color: #475569;
+      margin-bottom: 2rem;
+    }
+
+    /* Partner Card (compact) */
+    .partner-section { background: transparent; }
+    .partner-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .partner-badge {
+      display: inline-block;
+      background: #fde68a;
+      color: #0f172a;
+      font-weight: 700;
+      padding: 0.375rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+    }
+    .partner-copy { color: #334155; font-size: 1rem; }
+    .partner-logo-wrap {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem auto 0;
+      box-shadow: 0 0 0 6px #ffffff;
+    }
+    .partner-logo {
+      max-width: 85%;
+      max-height: 85%;
+      object-fit: contain;
+      border-radius: 0;
+      display: block;
+    }
+    @media (max-width: 640px) { .partner-logo-wrap { width: 100px; height: 100px; } }
+    .btn-partner { background: #006241; color: #ffffff; margin-top: 1rem; }
+    .btn-partner:hover { background: #004d33; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 98, 65, 0.3); }
+
+    /* Speakers Section */
+    .speakers { background: #1f5f49; color: #ffffff; }
+    .speakers h2 { color: #ffffff; }
+    .speaker-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; align-items: start; }
+    .speaker-card { text-align: center; }
+    .track-badge { display: inline-block; background: #fde68a; color: #0f172a; font-weight: 800; padding: 0.4rem 0.9rem; border-radius: 999px; margin-bottom: 0.75rem; letter-spacing: 0.3px; }
+  .speaker-photo-wrap { width: 200px; height: auto; border-radius: 0; background: transparent; display: block; margin: 0.5rem auto 0.75rem; box-shadow: none; overflow: visible; }
+  .speaker-photo { width: 100%; height: auto; object-fit: contain; border-radius: 0; display: block; }
+    .speaker-name { color: #ffffff; margin-bottom: 0.25rem; }
+    .speaker-meta { color: rgba(255,255,255,0.95); font-size: 0.9375rem; line-height: 1.35; }
+    .topic-label { font-style: italic; color: rgba(255,255,255,0.9); margin-top: 0.5rem; margin-bottom: 0.25rem; }
+    .topic-pill { display: inline-block; background: #ffffff; color: #0f172a; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 700; font-size: 0.9375rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    /* Map Section */
+    .venue-image {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin: 1rem 0 1.5rem;
+    }
+    .map-container {
+      margin: 2rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .map-container iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+    }
+
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .info-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      display: flex;
+      gap: 1rem;
+    }
+
+    .info-card-icon {
+      font-size: 1.5rem;
+      color: #006241;
+      flex-shrink: 0;
+    }
+
+    .info-card-content h3 {
+      font-size: 1.0625rem;
+      margin-bottom: 0.5rem;
+      color: #0f172a;
+    }
+
+    .info-card-content p {
+      font-size: 0.9375rem;
+      color: #475569;
+      margin: 0;
+    }
+
+    .btn-map {
+      background: #1e40af;
+      color: white;
+      margin-top: 1.5rem;
+    }
+
+    .btn-map:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    /* Checklist */
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .checklist-item {
+      background: white;
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .checklist-icon {
+      color: #006241;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .btn-print {
+      background: #006241;
+      color: white;
+      margin-top: 1.5rem;
+    }
+
+    .btn-print:hover {
+      background: #004d33;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 98, 65, 0.3);
+    }
+
+    /* Rules List */
+    .rules-list {
+      counter-reset: rule-counter;
+      list-style: none;
+      margin: 2rem 0;
+    }
+
+    .rules-list li {
+      counter-increment: rule-counter;
+      background: white;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      border-left: 4px solid #006241;
+      position: relative;
+      padding-left: 3.5rem;
+    }
+
+    .rules-list li::before {
+      content: counter(rule-counter);
+      position: absolute;
+      left: 1.25rem;
+      top: 1.25rem;
+      background: #006241;
+      color: white;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+
+    .info-note {
+      background: #dbeafe;
+      border-left: 4px solid #1e40af;
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      margin-top: 2rem;
+      font-size: 0.9375rem;
+      color: #1e3a8a;
+    }
+
+    /* Program Table */
+    .program-table {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin: 2rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #006241;
+      color: white;
+    }
+
+    th {
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    tbody tr:hover {
+      background: #f1f5f9;
+    }
+
+    @media (max-width: 640px) {
+      .program-table {
+        box-shadow: none;
+      }
+
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+      }
+
+      td {
+        padding: 0.75rem 1rem;
+        border: none;
+        position: relative;
+        padding-left: 40%;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 1rem;
+        font-weight: 600;
+        color: #006241;
+      }
+    }
+
+    /* Contacts */
+    .contact-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .contact-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .contact-card h3 {
+      color: #006241;
+      margin-bottom: 1rem;
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9375rem;
+    }
+
+    .contact-icon {
+      color: #1e40af;
+      font-size: 1.125rem;
+      flex-shrink: 0;
+    }
+
+    /* Team Section */
+    .team { background: #1f5f49; color: #ffffff; }
+    .team h2 { color: #ffffff; }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; align-items: start; justify-items: center; }
+    .team-member { text-align: center; }
+    .team-photo-wrap { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; background: #ffffff; box-shadow: 0 0 0 6px rgba(255,255,255,0.9); margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center; }
+    .team-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .team-name { font-weight: 700; color: #ffffff; margin-bottom: 0.25rem; }
+    .team-role { color: rgba(255,255,255,0.95); font-size: 0.9375rem; }
+
+    /* Back to Top Button */
+    .back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #006241;
+      color: white;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s;
+      border: none;
+      font-size: 1.5rem;
+      z-index: 90;
+    }
+
+    .back-to-top:hover {
+      background: #004d33;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-to-top:focus {
+      outline: 3px solid #1e40af;
+      outline-offset: 2px;
+    }
+
+    .back-to-top.visible {
+      display: flex;
+    }
+
+    /* Responsive Typography */
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    @media print {
+      header, .back-to-top, .btn {
+        display: none;
+      }
+
+      section {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <header role="banner">
+   <div class="header-content">
+    <div class="header-logo">
+     <div class="logo-placeholder">
+      PAPSI
+     </div><span class="header-title">Mastery in Science</span>
+    </div><button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false">Menu</button>
+    <nav role="navigation" id="mainNav" aria-label="Main navigation"><a href="#map">Map</a> <a href="#rules">Rules &amp; Guidelines</a> <a href="#program">Program</a> <a href="#team">Team</a>
+   </div>
+  </header>
+  <main>
+   <section class="hero" id="home">
+    <div class="hero-content">
+     <h1 id="eventTitle">Mastery in Science: Hands-on Workshop</h1>
+     <p class="hero-subtitle" id="eventSubtitle">Face-to-Face Training</p>
+  <div class="hero-details" aria-label="Event details">
+   <div class="detail"><span class="icon" aria-hidden="true">📅</span><strong>Date:</strong> Saturday, November 8, 2025</div>
+   <div class="detail"><span class="icon" aria-hidden="true">⏰</span><strong>Time:</strong> 8:00 AM – 4:30 PM</div>
+   <div class="detail"><span class="icon" aria-hidden="true">📍</span><strong>Venue:</strong> St. Joseph Building, De La Salle University, Taft Avenue, Manila</div>
+  </div>
+     
+    </div>
+  </section>
+   <section id="partner" class="partner-section" aria-labelledby="partnerBadge">
+    <div class="partner-card">
+     <span id="partnerBadge" class="partner-badge">Industry Partner</span>
+     <p class="partner-copy">ScienceStar Corporation — the Global Science Education Partner<br>(Exclusive Distributor) of PASCO Science</p>
+     <div class="partner-logo-wrap">
+       <img class="partner-logo" src="images/sciencestarlogo.jpg" alt="ScienceStar Corporation logo" loading="lazy" decoding="async">
+     </div>
+  <a class="btn btn-partner" href="https://sciencestar.ph/" target="_blank" rel="noopener noreferrer">Learn More</a>
+    </div>
+   </section>
+     <section id="speakers" class="speakers" aria-labelledby="speakersHeading">
+      <h2 id="speakersHeading">Topics &amp; Speakers</h2>
+      <div class="speaker-grid">
+        <div class="speaker-card">
+          <span class="track-badge">BIOLOGY</span>
+          <div class="speaker-photo-wrap">
+            <img class="speaker-photo" src="images/professors/drmacarmenlagman.png" alt="Dr. Ma. Carmen Lagman" loading="lazy" decoding="async">
+          </div>
+          <h3 class="speaker-name">Dr. Ma. Carmen Lagman</h3>
+          <p class="speaker-meta">Full Professor, Dept. of Biology<br>De La Salle University Manila</p>
+          <p class="topic-label">Topic:</p>
+          <div class="topic-pill">“Ecology and Local Biodiversity”</div>
+        </div>
+        <div class="speaker-card">
+          <span class="track-badge">CHEMISTRY</span>
+          <div class="speaker-photo-wrap">
+            <img class="speaker-photo" src="images/professors/drdavidpenaloza.png" alt="Dr. David Penaloza" loading="lazy" decoding="async">
+          </div>
+          <h3 class="speaker-name">Dr. David Penaloza</h3>
+          <p class="speaker-meta">Full Professor, Dept. of Chemistry<br>De La Salle University Manila</p>
+          <p class="topic-label">Topic:</p>
+          <div class="topic-pill">“Chemical Kinetics”</div>
+        </div>
+        <div class="speaker-card">
+          <span class="track-badge">PHYSICS</span>
+          <div class="speaker-photo-wrap">
+            <img class="speaker-photo" src="images/professors/drjamessalveoolarve.png" alt="Dr. James Salveo Olarve" loading="lazy" decoding="async">
+          </div>
+          <h3 class="speaker-name">Dr. James Salveo Olarve</h3>
+          <p class="speaker-meta">Asst. Professorial Lecturer,<br>Dept. of Physics, DLSU Manila</p>
+          <p class="topic-label">Topic:</p>
+          <div class="topic-pill">“Electric Circuits and Logic Gates”</div>
+        </div>
+      </div>
+     </section>
+   <section id="map">
+    <h2 id="venueHeading">Venue Map — De La Salle University Manila</h2>
+    <img
+      class="venue-image"
+      src="images/DLSU%20Map.png"
+      alt="Campus map of De La Salle University Manila highlighting venue area"
+      loading="lazy"
+      decoding="async"
+      onerror="this.style.display='none'"
+    />
+    <p class="section-intro" id="venueSubtext">Please enter at Gate 2 (in front of Henry Sy Hall) and get your event ID. Then proceed to the Registration at Room 405, 4th floor, St. Joseph Hall.</p>
+    <div class="map-container"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.4489234567!2d120.99358!3d14.56472!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9f3b2f3b2f3%3A0x3b2f3b2f3b2f3b2f!2sDe%20La%20Salle%20University!5e0!3m2!1sen!2sph!4v1234567890" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="De La Salle University Manila location map" aria-label="Interactive map showing De La Salle University Manila location"> </iframe>
+  </div><a href="https://www.google.com/maps/place/De+La+Salle+University+Manila/@14.5647222,120.9935833,17z/data=!4m6!3m5!1s0x3397c97ed286459b:0x5927068d997eae2a!8m2!3d14.5647642!4d120.9931652!16zL20vMDFycjMx?entry=ttu&amp;g_ep=EgoyMDI1MTAyOS4yIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="btn btn-map">Open in Google Maps</a>
+      </div>
+    <div class="info-cards">
+     <div class="info-card">
+      <div class="info-card-icon">
+       📍
+      </div>
+      <div class="info-card-content">
+       <h3>Registration Area</h3>
+       <p>Get your ID at Gate 2 in front of Henry Sy Hall (opens 7:30 AM), then proceed to Room 405, St. Joseph Hall</p>
+      </div>
+     </div>
+     <div class="info-card">
+      <div class="info-card-icon">
+       🚗
+      </div>
+      <div class="info-card-content">
+       <h3>Parking</h3>
+       <p>Limited slots (contact us if you need a car parking); consider public transport</p>
+      </div>
+     </div>
+     <div class="info-card">
+      <div class="info-card-icon">
+       🆔
+      </div>
+      <div class="info-card-content">
+       <h3>Verification</h3>
+       <p>Bring ID and digital confirmation (email confirmation of payment) for verification</p>
+      </div>
+     </div>
+       </section>
+   <section id="bring">
+    <h2 id="bringHeading">Things to Prepare / Bring</h2>
+    <div class="checklist">
+     <div class="checklist-item"><span class="checklist-icon">✓</span> <span>Valid ID (verification)</span>
+     </div>
+     <div class="checklist-item"><span class="checklist-icon">✓</span> <span>Email Confirmation of Payment</span>
+     </div>
+     <div class="checklist-item"><span class="checklist-icon">✓</span> <span>Notebook and pen</span>
+     </div>
+     <div class="checklist-item"><span class="checklist-icon">✓</span> <span>Reusable water bottle</span>
+     </div>
+     <div class="checklist-item"><span class="checklist-icon">✓</span> <span>Optional: Jacket (for air-conditioned rooms)</span>
+     </div>
+     <div class="checklist-item"><span class="checklist-icon">✓</span> <span>Optional: Laptop for data entry activities</span>
+     </div>
+  </div>
+   </section>
+   <section id="rules">
+    <h2 id="rulesHeading">Rules &amp; Guidelines</h2>
+    <p class="section-intro" id="rulesIntro">For everyone's safety and a smooth program, please observe the following.</p>
+    <ol class="rules-list">
+     <li>Observe lab safety protocols at all times.</li>
+     <li>Follow your assigned room (Physics, Chemistry, Biology, or Sciencestar Class).</li>
+     <li>Wear your ID and lanyard inside the campus.</li>
+     <li>Keep labs clean; dispose of waste properly.</li>
+     <li>Handle equipment carefully; report issues immediately.</li>
+     <li>Certificates are issued in the afternoon after completing all sessions.</li>
+    </ol>
+    <div class="info-note"><strong>Note:</strong> Final reminders will be announced during opening remarks.
+    </div>
+   </section>
+   <section id="program">
+    <h2 id="programHeading">Program of the Event — November 8, 2025</h2>
+    <div class="program-table">
+  <table>
+   <thead>
+    <tr>
+     <th>Time</th>
+     <th>Activity</th>
+     <th>Group A (Room)</th>
+     <th>Group B (Room)</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td data-label="Time">7:30 – 8:00 AM</td>
+     <td data-label="Activity">Registration and Check-in</td>
+     <td data-label="Group A (Room)">SJ405</td>
+     <td data-label="Group B (Room)">SJ405</td>
+    </tr>
+    <tr>
+     <td data-label="Time">8:00 – 8:30 AM</td>
+     <td data-label="Activity">Opening Program and Welcome Remarks</td>
+     <td data-label="Group A (Room)">SJ404</td>
+     <td data-label="Group B (Room)">SJ404</td>
+    </tr>
+    <tr>
+     <td data-label="Time">8:30 – 8:45 AM</td>
+     <td data-label="Activity">Morning Snacks</td>
+     <td data-label="Group A (Room)">SJ406</td>
+     <td data-label="Group B (Room)">SJ405</td>
+    </tr>
+    <tr>
+     <td data-label="Time">8:45 – 10:15 AM</td>
+     <td data-label="Activity">Workshop Session 1</td>
+     <td data-label="Group A (Room)">SJ411</td>
+     <td data-label="Group B (Room)">SJ412</td>
+    </tr>
+    <tr>
+     <td data-label="Time">10:15 – 10:30 AM</td>
+     <td data-label="Activity">Brain Break</td>
+     <td data-label="Group A (Room)">-</td>
+     <td data-label="Group B (Room)">-</td>
+    </tr>
+    <tr>
+     <td data-label="Time">10:30 – 12:00 NN</td>
+     <td data-label="Activity">Workshop Session 2</td>
+     <td data-label="Group A (Room)">SJ412</td>
+     <td data-label="Group B (Room)">SJ411</td>
+    </tr>
+    <tr>
+     <td data-label="Time">12:00 – 12:30 PM</td>
+     <td data-label="Activity">Lunch Break</td>
+     <td data-label="Group A (Room)">SJ406</td>
+     <td data-label="Group B (Room)">SJ406</td>
+    </tr>
+    <tr>
+     <td data-label="Time">12:30 – 2:00 PM</td>
+     <td data-label="Activity">Workshop Session 3</td>
+     <td data-label="Group A (Room)">SJ404</td>
+     <td data-label="Group B (Room)">SJ403</td>
+    </tr>
+    <tr>
+     <td data-label="Time">2:00 – 2:15 PM</td>
+     <td data-label="Activity">Afternoon Snacks</td>
+     <td data-label="Group A (Room)">SJ406</td>
+     <td data-label="Group B (Room)">SJ406</td>
+    </tr>
+    <tr>
+     <td data-label="Time">2:30 – 4:00 PM</td>
+     <td data-label="Activity">Workshop Session 4</td>
+     <td data-label="Group A (Room)">SJ403</td>
+     <td data-label="Group B (Room)">SJ404</td>
+    </tr>
+    <tr>
+     <td data-label="Time">4:00 – 4:30 PM</td>
+     <td data-label="Activity">Giving of Certificates</td>
+     <td data-label="Group A (Room)">SJ405</td>
+     <td data-label="Group B (Room)">SJ405</td>
+    </tr>
+   </tbody>
+  </table>
+    </div>
+    <div class="info-note"><strong>Note:</strong> Schedule may adjust slightly based on lab availability.
+    </div>
+   </section>
+   <section id="contacts">
+    <h2 id="contactsHeading">Contact Persons</h2>
+    <h3 id="contactsSubheading">PAPSI Training Team</h3>
+    <div class="contact-cards">
+     <div class="contact-card">
+      <h3>Dr. Gil Nonato Santos</h3>
+      <div class="contact-info">
+       <div class="contact-item"><span class="contact-icon">📧</span> <a href="mailto:gil.santos@dlsu.edu.ph">gil.santos@dlsu.edu.ph</a>
+       </div>
+        </div>
+     </div>
+     <div class="contact-card">
+      <h3>Dr. James Salveo Olarve</h3>
+      <div class="contact-info">
+       <div class="contact-item"><span class="contact-icon">📧</span> <a href="mailto:james.olarve@dlsu.edu.ph">james.olarve@dlsu.edu.ph</a>
+       </div>
+      </div>
+     </div>
+     <div class="contact-card">
+      <h3>Mrs. Verna Lyza Olarves</h3>
+      <div class="contact-info">
+       <div class="contact-item"><span class="contact-icon">📧</span> <a href="mailto:papsi.seminar@gmail.com">papsi.seminar@gmail.com</a>
+       </div>
+       <div class="contact-item"><span class="contact-icon">📱</span> <span>+63 966 165 2084</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section>
+    <section id="team" class="team" aria-labelledby="teamHeading">
+      <h2 id="teamHeading">Team</h2>
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="team-photo-wrap">
+            <img class="team-photo" src="images/professors/sirnoni-0.png" alt="Dr. Gil Nonato Santos" loading="lazy" decoding="async">
+          </div>
+          <div class="team-name">Dr. Gil Nonato Santos</div>
+          <div class="team-role">PAPSI Convenor</div>
+        </div>
+
+        <div class="team-member">
+          <div class="team-photo-wrap">
+            <img class="team-photo" src="images/professors/drjamessalveoolarve.png" alt="Dr. James Salveo Olarve" loading="lazy" decoding="async">
+          </div>
+          <div class="team-name">Dr. James Salveo Olarve</div>
+          <div class="team-role">PAPSI Training Specialist</div>
+        </div>
+
+        <div class="team-member">
+          <div class="team-photo-wrap">
+            <img class="team-photo" src="images/professors/Vhea.png" alt="Mrs. Verna Lyza Olarve" loading="lazy" decoding="async">
+          </div>
+          <div class="team-name">Mrs. Verna Lyza Olarve</div>
+          <div class="team-role">PAPSI Secretariat</div>
+        </div>
+      </div>
+    </section>
+  </main><button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
+  <script>
+    const defaultConfig = {
+      event_title: "Mastery in Science: Hands-on Workshop",
+      event_subtitle: "Face-to-Face Training for Educators — November 8, 2025 — De La Salle University, Manila",
+      hero_subtext: "Show this page at the gate if needed for quick reference.",
+      venue_heading: "Venue Map — De La Salle University Manila",
+      venue_subtext: "Main Campus, 2401 Taft Ave, Malate, Manila. Please use the designated gate and proceed to the Registration Area.",
+      bring_heading: "Things to Prepare / Bring",
+      rules_heading: "Rules & Guidelines",
+      rules_intro: "For everyone's safety and a smooth program, please observe the following.",
+      program_heading: "Program of the Event — November 8, 2025",
+      contacts_heading: "Contact Persons",
+      contacts_subheading: "PAPSI Training Team"
+    };
+
+    async function onConfigChange(config) {
+      const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+      setText('eventTitle', config.event_title || defaultConfig.event_title);
+      setText('eventSubtitle', config.event_subtitle || defaultConfig.event_subtitle);
+      // heroSubtext was removed from the layout; guard in case of future re-add
+      setText('heroSubtext', config.hero_subtext || defaultConfig.hero_subtext);
+      setText('venueHeading', config.venue_heading || defaultConfig.venue_heading);
+      setText('venueSubtext', config.venue_subtext || defaultConfig.venue_subtext);
+      setText('bringHeading', config.bring_heading || defaultConfig.bring_heading);
+      setText('rulesHeading', config.rules_heading || defaultConfig.rules_heading);
+      setText('rulesIntro', config.rules_intro || defaultConfig.rules_intro);
+      setText('programHeading', config.program_heading || defaultConfig.program_heading);
+      setText('contactsHeading', config.contacts_heading || defaultConfig.contacts_heading);
+      setText('contactsSubheading', config.contacts_subheading || defaultConfig.contacts_subheading);
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["event_title", config.event_title || defaultConfig.event_title],
+        ["event_subtitle", config.event_subtitle || defaultConfig.event_subtitle],
+        ["hero_subtext", config.hero_subtext || defaultConfig.hero_subtext],
+        ["venue_heading", config.venue_heading || defaultConfig.venue_heading],
+        ["venue_subtext", config.venue_subtext || defaultConfig.venue_subtext],
+        ["bring_heading", config.bring_heading || defaultConfig.bring_heading],
+        ["rules_heading", config.rules_heading || defaultConfig.rules_heading],
+        ["rules_intro", config.rules_intro || defaultConfig.rules_intro],
+        ["program_heading", config.program_heading || defaultConfig.program_heading],
+        ["contacts_heading", config.contacts_heading || defaultConfig.contacts_heading],
+        ["contacts_subheading", config.contacts_subheading || defaultConfig.contacts_subheading]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    menuToggle.addEventListener('click', () => {
+      const isActive = mainNav.classList.toggle('active');
+      menuToggle.setAttribute('aria-expanded', isActive);
+    });
+
+    // Close menu when clicking a nav link
+    mainNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mainNav.classList.remove('active');
+        menuToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Back to top button
+    const backToTop = document.getElementById('backToTop');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+    });
+
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9993c5c6c0428d09',t:'MTc2MjI1NTc1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

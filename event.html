@@ -360,6 +360,25 @@
     .speaker-meta { color: rgba(255,255,255,0.95); font-size: 0.9375rem; line-height: 1.35; }
     .topic-label { font-style: italic; color: rgba(255,255,255,0.9); margin-top: 0.5rem; margin-bottom: 0.25rem; }
     .topic-pill { display: inline-block; background: #ffffff; color: #0f172a; padding: 0.5rem 0.75rem; border-radius: 6px; font-weight: 700; font-size: 0.9375rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .speaker-actions { display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.75rem; flex-wrap: wrap; }
+  .btn-outline-light { background: transparent; color: #ffffff; border: 2px solid #ffffff; }
+  .btn-outline-light:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
+
+  /* Info Modal */
+  .info-modal { position: fixed; inset: 0; display: none; z-index: 1100; }
+  .info-modal.open { display: block; }
+  .info-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+  .info-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(560px, 92vw); max-height: 84vh; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; }
+  .info-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #006241; color: #ffffff; }
+  .info-title { font-size: 1rem; font-weight: 700; }
+  .info-close { background: rgba(255,255,255,0.95); color: #0f172a; border: none; width: 36px; height: 36px; border-radius: 8px; font-size: 22px; font-weight: 700; cursor: pointer; }
+  .info-close:hover { background: #ffffff; }
+  .info-content { padding: 1rem 1.25rem; overflow: auto; color: #0f172a; }
+  /* Add comfortable spacing between consecutive paragraphs in info modal */
+  .info-content p + p { margin-top: 0.75rem; }
+  .info-footer { padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 0.5rem; }
+  .btn-primary-green { background: #006241; color: #ffffff; }
+  .btn-primary-green:hover { background: #004d33; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 98, 65, 0.3); }
 
     /* Map Section */
     .venue-image {
@@ -766,16 +785,45 @@
           <p class="speaker-meta">Full Professor, Dept. of Biology<br>De La Salle University Manila</p>
           <p class="topic-label">Topic:</p>
           <div class="topic-pill">“Ecology and Local Biodiversity”</div>
+          <div class="speaker-actions">
+            <button type="button" class="btn btn-outline-light info-trigger" data-speaker="biology" data-kind="speaker">About Speaker</button>
+            <button type="button" class="btn btn-outline-light info-trigger" data-speaker="biology" data-kind="topic">About Topic</button>
+          </div>
+          <div class="speaker-info" data-speaker="biology" hidden>
+            <p>Dr. Ma. Carmen Ablan Lagman is a scientist and professor with over 25 years of experience leading multidisciplinary, multi-site, and multi-country research-for-development initiatives. She specializes in population genetics and molecular ecology, applying these fields to strengthen conservation, fisheries, aquaculture management, and more recently, agriculture.</p>
+            <p>In 2009, she established the Practical Genomics Laboratory (PGL) at De La Salle University, where she leads research teams that integrate genomics, image analysis, biochemical profiling, GIS mapping, and mobile computing. PGL develops research protocols, innovative products, training programs, and policy recommendations to address pressing issues in marine fisheries, aquaculture, and agriculture.</p>
+            <p>Dr. Lagman has spearheaded and contributed to major international collaborations. She led the Population Interdependencies in the South China Sea Ecosystem (PISCES) project, which involved partners from Malaysia, Indonesia, the Philippines, Vietnam, Thailand, Taiwan, and the Solomon Islands. She also helped develop the Genetically Improved Farmed Tilapia (GIFT) breeding procedures and strains, served as a member of the Connectivity Working Group of the Coral Reef Targeted Research and Capacity Building Program under UNU-INWEH, and participated in system-wide discussions on genetic resources with the World Bank and CGIAR.</p>
+            <p>Her leadership and impact have been recognized globally. She was awarded the 2023 Distinguished Humphrey Fellowship (Harvard Kennedy School of Government &amp; NC State University) and the 2018 Newton-Agham Leadership in Innovation Fellowship (Royal Academy of Engineering UK &amp; Asian Institute of Management). Other honors include the 2020 Filipino Faces of Biotechnology Award (Department of Agriculture), the St. John Baptist de La Salle Pillar of Excellence Award, the 2015 Outstanding Research and Development Award (DOST-PCIEERD), and the 2013–2014 Fulbright Philippine Agriculture Visiting Scholarship (Oregon State University).</p>
+          </div>
+          <div class="topic-info" data-speaker="biology" hidden>
+            <p>The development choices we make today must still allow us to feed ourselves, breathe clean air, and drink safe water tomorrow. Even as we build cities, expand agriculture, intensify fisheries, and increase production and consumption, our mountains, rivers, seas, oceans and their associated habitats must continue to function effectively. Our ecosystems must remain viable so that we can continue to harvest trees and fish, and culture crops, seafood, and livestock—not just for ourselves, but for the generations who will follow.</p>
+            <p>For this to be possible, our students need to understand that human survival is directly linked to our ability to maintain biodiversity—variation in genes, species, and habitats. They must recognize how human activity places stress on natural systems, and how these stresses can disrupt the delicate balance that makes our current life-support systems possible.</p>
+            <p>The core concepts we need to communicate are simple but powerful: natural selection, food webs, and how diversity promotes stability in ecosystems. If students grasp these principles deeply, they will understand why the loss of biodiversity is not just a scientific concern—it is a threat to human survival.</p>
+          </div>
         </div>
         <div class="speaker-card">
           <span class="track-badge">CHEMISTRY</span>
           <div class="speaker-photo-wrap">
-            <img class="speaker-photo" src="images/professors/drdavidpenaloza.png" alt="Dr. David Penaloza" loading="lazy" decoding="async">
+            <img class="speaker-photo" src="images/professors/drdavidpenaloza.png" alt="Dr. David P. Peñaloza Jr." loading="lazy" decoding="async">
           </div>
-          <h3 class="speaker-name">Dr. David Penaloza</h3>
+          <h3 class="speaker-name">Dr. David P. Peñaloza Jr.</h3>
           <p class="speaker-meta">Full Professor, Dept. of Chemistry<br>De La Salle University Manila</p>
           <p class="topic-label">Topic:</p>
           <div class="topic-pill">“Chemical Kinetics”</div>
+          <div class="speaker-actions">
+            <button type="button" class="btn btn-outline-light info-trigger" data-speaker="chemistry" data-kind="speaker">About Speaker</button>
+            <button type="button" class="btn btn-outline-light info-trigger" data-speaker="chemistry" data-kind="topic">About Topic</button>
+          </div>
+          <div class="speaker-info" data-speaker="chemistry" hidden>
+            <p>David P. Peñaloza Jr. earned his Bachelor of Science in Chemistry from Central Luzon State University in the Philippines before embarking on a remarkable academic journey.</p>
+            <p>Pursuing his passion for polymer chemistry, he obtained his Ph.D. from the University of Connecticut in the USA, supported by the Ford Foundation International Fellowship Program (Ford-IFP) and the UCONN Teaching Assistantship Program, completing his studies in 2011. Under the guidance of Prof. Thomas A. P. Seery, his doctoral research focused on the preparation and characterization of clay-based polymer nanocomposites through innovative surface-initiated polymerization techniques.</p>
+            <p>Continuing his pursuit of excellence, David ventured to Kyushu University in Japan for a postdoctoral position, collaborating with Prof. Keiji Tanaka on cutting-edge structure–property relation studies of self-assembled systems. Within a year, his dedication and contributions led to a well-deserved promotion to specially appointed research assistant professor.</p>
+            <p>In 2013, David broadened his academic horizons further by joining Keimyung University in South Korea as an assistant professor. Subsequently, in 2015, he returned to the Philippines and joined De La Salle University (DLSU), where he is now a professor.</p>
+            <p>He has received numerous distinctions, including the Ford Foundation International Fellowship Program (IFP) scholarship (2005–2008), the Global Center of Excellence (GCoE) Postdoctoral Fellowship from the Japanese Government (2011–2012), and the Philippines' NRCP Achievement Award (2023). His contributions to polymer and materials science are also recognized by his inclusion in the 2023 Asian Scientist 100 list, published by Asian Scientist Magazine.</p>
+          </div>
+          <div class="topic-info" data-speaker="chemistry" hidden>
+            <p>Chemical Kinetics discusses reaction rates and the factors that affect them.</p>
+          </div>
         </div>
         <div class="speaker-card">
           <span class="track-badge">PHYSICS</span>
@@ -786,6 +834,20 @@
           <p class="speaker-meta">Asst. Professorial Lecturer,<br>Dept. of Physics, DLSU Manila</p>
           <p class="topic-label">Topic:</p>
           <div class="topic-pill">“Electric Circuits and Logic Gates”</div>
+          <div class="speaker-actions">
+            <button type="button" class="btn btn-outline-light info-trigger" data-speaker="physics" data-kind="speaker">About Speaker</button>
+            <button type="button" class="btn btn-outline-light info-trigger" data-speaker="physics" data-kind="topic">About Topic</button>
+          </div>
+          <div class="speaker-info" data-speaker="physics" hidden>
+            <p>Dr. James Salveo Olarve is an experimental physicist and a dedicated educator. He completed his Bachelor of Secondary Education major in Physics at Camarines Sur Polytechnic Colleges — Naga City in 2007, and obtained a Doctor of Philosophy (Straight) major in Physics from De La Salle University Manila in 2022.</p>
+            <p>He was a DOST-SEI scholar from his college years through his doctorate. His outstanding research was recognized with an Outstanding Dissertation Award, and he has published articles related to biosensors in Trends in Food and Science Technology by Elsevier, a highly reputable international journal.</p>
+            <p>With ten years of teaching experience, he currently serves as an Assistant Professorial Lecturer in the Department of Physics at De La Salle University Manila, handling college physics classes. Moreover, he worked for four years as a Research Project Assistant at the iNano Research Facility, DLSU Manila, on various research projects about gas and liquid nano-sensors funded by DOST.</p>
+            <p>His fields of interest are nanomaterials and biosensors.</p>
+          </div>
+          <div class="topic-info" data-speaker="physics" hidden>
+            <p>This workshop introduces participants to the fascinating world of electric circuits and logic gates through hands-on exploration and practical applications. Beginning with the basics of voltage, current, resistance, and Ohm’s Law, participants will construct simple, series, and parallel circuits to visualize how electricity flows and behaves.</p>
+            <p>The session progresses to transistor-based gates, illustrating how everyday electronic concepts translate into logical operations such as NOT, AND, and OR. From designing a buffer circuit and an automatic night lamp to building switch-based logic gates, this workshop bridges physics and computing—helping learners see how simple components form the foundation of digital systems.</p>
+          </div>
         </div>
       </div>
      </section>
@@ -1003,6 +1065,22 @@
           <div class="team-name">Mrs. Verna Lyza Olarve</div>
           <div class="team-role">PAPSI Secretariat</div>
         </div>
+
+        <div class="team-member">
+          <div class="team-photo-wrap">
+            <img class="team-photo" src="images/KuyaJulius1.png" alt="Mr. Julius Lopez" loading="lazy" decoding="async">
+          </div>
+          <div class="team-name">Mr. Julius Lopez</div>
+          <div class="team-role">PAPSI Staff</div>
+        </div>
+
+        <div class="team-member">
+          <div class="team-photo-wrap">
+            <img class="team-photo" src="images/KuyaHector1.png" alt="Mr. Hector Padrigo" loading="lazy" decoding="async">
+          </div>
+          <div class="team-name">Mr. Hector Padrigo</div>
+          <div class="team-role">PAPSI Staff</div>
+        </div>
       </div>
     </section>
   </main><button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
@@ -1020,6 +1098,20 @@
           <button id="zoomOutBtn" class="viewer-btn" aria-label="Zoom out">−</button>
           <span id="zoomLevel" class="zoom-level">100%</span>
           <button id="zoomInBtn" class="viewer-btn" aria-label="Zoom in">+</button>
+        </div>
+      </div>
+    </div>
+    <!-- Info Modal (About Speaker/Topic) - moved outside image viewer so it can open independently -->
+    <div id="infoModal" class="info-modal" aria-hidden="true" role="dialog" aria-labelledby="infoTitle">
+      <div class="info-overlay" data-close="true"></div>
+      <div class="info-box" role="document">
+        <div class="info-header">
+          <div id="infoTitle" class="info-title">Details</div>
+          <button id="infoClose" class="info-close" aria-label="Close">×</button>
+        </div>
+        <div id="infoContent" class="info-content"></div>
+        <div class="info-footer">
+          <button id="infoCloseBottom" class="btn btn-primary-green" aria-label="Close this dialog">Close</button>
         </div>
       </div>
     </div>
@@ -1211,6 +1303,57 @@
           update();
         }
       }, { passive: true });
+    })();
+
+    // Info modal for speakers/topics
+    (function initInfoModal(){
+      const modal = document.getElementById('infoModal');
+      const titleEl = document.getElementById('infoTitle');
+      const contentEl = document.getElementById('infoContent');
+      const closeBtn = document.getElementById('infoClose');
+      if (!modal) return;
+
+      function openModal(title, html){
+        titleEl.textContent = title;
+        contentEl.innerHTML = html;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        contentEl.innerHTML = '';
+      }
+
+      // Single robust click handler for all triggers
+      document.querySelectorAll('.info-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const speakerKey = btn.dataset.speaker || btn.getAttribute('data-speaker');
+          const kind = btn.dataset.kind || btn.getAttribute('data-kind'); // 'speaker' | 'topic'
+          const localSelector = kind === 'speaker'
+            ? `.speaker-info[data-speaker='${speakerKey}']`
+            : `.topic-info[data-speaker='${speakerKey}']`;
+          const card = btn.closest('.speaker-card');
+          let source = card ? card.querySelector(localSelector) : null;
+          if (!source) {
+            // Fallback: search document-wide in case of markup drift
+            source = document.querySelector(localSelector);
+          }
+          const html = source ? source.innerHTML : '<p>Details will be available soon.</p>';
+          const title = kind === 'speaker' ? 'About the Speaker' : 'About the Topic';
+          openModal(title, html);
+        });
+      });
+
+      // Close wiring
+      closeBtn.addEventListener('click', closeModal);
+      const closeBottom = document.getElementById('infoCloseBottom');
+      if (closeBottom) closeBottom.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target.classList.contains('info-overlay')) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
     })();
   </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9993c5c6c0428d09',t:'MTc2MjI1NTc1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>

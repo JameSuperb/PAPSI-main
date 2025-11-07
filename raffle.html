@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAPSI Raffle Wheel</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a2332 0%, #2d3e50 100%);
+      color: #ffffff;
+      min-height: 100%;
+    }
+
+    *, *::before, *::after {
+      box-sizing: inherit;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 2.5em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #14b8a6 0%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 1.1em;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 968px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      color: #1e293b;
+    }
+
+    .wheel-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 1;
+    }
+
+    #wheelCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    #pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 40px solid #fbbf24;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      z-index: 10;
+    }
+
+    .controls-section h2 {
+      margin: 0 0 20px 0;
+      font-size: 1.5em;
+      color: #1e293b;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.95em;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn:focus {
+      outline: 3px solid #14b8a6;
+      outline-offset: 2px;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+      color: white;
+      font-size: 1.2em;
+      padding: 18px 24px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(20, 184, 166, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #cbd5e1;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #dc2626;
+    }
+
+    .checkbox-group, .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #14b8a6;
+    }
+
+    .eligible-count {
+      text-align: center;
+      padding: 12px;
+      background: #f0fdfa;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #0d9488;
+      margin: 12px 0;
+    }
+
+    .names-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .names-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .names-list::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
+
+    .names-list::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+
+    .name-item {
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      background: white;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+
+    .winners-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    .winners-section h3 {
+      margin: 0 0 16px 0;
+      color: #1e293b;
+    }
+
+    .winners-table-container {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th {
+      background: #f1f5f9;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #475569;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      padding: 12px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      font-size: 0.9em;
+      color: #94a3b8;
+    }
+
+    footer a {
+      color: #14b8a6;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+      animation: modalPop 0.3s ease;
+    }
+
+    @keyframes modalPop {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-content h2 {
+      margin: 0 0 20px 0;
+      font-size: 2em;
+      color: #1e293b;
+    }
+
+    .winner-name {
+      font-size: 2.5em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #14b8a6 0%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 20px 0;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #fbbf24;
+      animation: confettiFall 3s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+      to {
+        transform: translateY(600px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #ef4444;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+    }
+
+    .spinner {
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #14b8a6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <header>
+    <h1 id="mainTitle">PAPSI Raffle Wheel</h1>
+    <p class="subtitle" id="subtitle">Fair. Fun. Transparent.</p>
+   </header>
+   <div class="main-content">
+    <div class="card wheel-section">
+     <div class="wheel-container">
+      <div id="pointer"></div>
+      <canvas id="wheelCanvas"></canvas>
+     </div><button id="spinBtn" class="btn btn-primary" disabled>Spin the Wheel!</button>
+    </div>
+    <div class="card controls-section">
+     <h2>Controls</h2>
+     <div class="control-group"><button id="refreshBtn" class="btn btn-secondary">🔄 Refresh Data</button>
+     </div>
+     <div class="checkbox-group"><input type="checkbox" id="removeAfterDraw" checked> <label for="removeAfterDraw">Remove winner from pool after draw</label>
+     </div>
+     <div class="toggle-group"><input type="checkbox" id="noBackToBack" checked> <label for="noBackToBack">Prevent back-to-back duplicate winner</label>
+     </div>
+     <div class="control-group"><label for="searchInput">Search Participants</label> <input type="text" id="searchInput" class="search-box" placeholder="Type to filter names...">
+     </div>
+     <div id="eligibleCount" class="eligible-count">
+      Eligible Participants: 0
+     </div>
+     <div id="namesList" class="names-list"></div>
+     <div class="winners-section">
+      <h3>Winners 🏆</h3>
+      <div class="winners-table-container">
+       <table id="winnersTable">
+        <thead>
+         <tr>
+          <th>#</th>
+          <th>Full Name</th>
+          <th>Time</th>
+         </tr>
+        </thead>
+        <tbody></tbody>
+       </table>
+      </div>
+      <div class="btn-group"><button id="exportWinnersBtn" class="btn btn-secondary">📥 Export Winners</button> <button id="resetWinnersBtn" class="btn btn-danger">🗑️ Reset Winners</button>
+      </div>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <p id="footerNote">Data refreshed: <span id="lastRefresh">Never</span></p>
+    <p>Data source: <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vQTkzbvMM61xp0UfCwSmfHsFSDEPIJ3aOLqvzEPbXFeH_M3vhCcao_mGfI348pLRTFGT55HNmUajP0X/pub?gid=774756482&amp;single=true&amp;output=csv" target="_blank" rel="noopener noreferrer">View Google Sheet</a></p>
+   </footer>
+  </div>
+  <div id="winnerModal" class="modal">
+   <div class="modal-content">
+    <h2>🎉 We Have a Winner! 🎉</h2>
+    <div class="winner-name" id="winnerName"></div><button id="closeModal" class="btn btn-primary">Continue</button>
+   </div>
+  </div>
+  <script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQTkzbvMM61xp0UfCwSmfHsFSDEPIJ3aOLqvzEPbXFeH_M3vhCcao_mGfI348pLRTFGT55HNmUajP0X/pub?gid=774756482&single=true&output=csv';
+    
+    const defaultConfig = {
+      main_title: 'PAPSI Raffle Wheel',
+      subtitle: 'Fair. Fun. Transparent.',
+      footer_note: 'Data refreshed:'
+    };
+
+    let allParticipants = [];
+    let eligibleParticipants = [];
+    let winners = [];
+    let lastWinner = null;
+    let isSpinning = false;
+    let currentRotation = 0;
+    let searchQuery = '';
+
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const spinBtn = document.getElementById('spinBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const removeAfterDraw = document.getElementById('removeAfterDraw');
+    const noBackToBack = document.getElementById('noBackToBack');
+    const searchInput = document.getElementById('searchInput');
+    const eligibleCount = document.getElementById('eligibleCount');
+    const namesList = document.getElementById('namesList');
+    const winnersTable = document.getElementById('winnersTable').querySelector('tbody');
+    const exportWinnersBtn = document.getElementById('exportWinnersBtn');
+    const resetWinnersBtn = document.getElementById('resetWinnersBtn');
+    const lastRefresh = document.getElementById('lastRefresh');
+    const winnerModal = document.getElementById('winnerModal');
+    const winnerName = document.getElementById('winnerName');
+    const closeModal = document.getElementById('closeModal');
+
+    function toTitleCase(str) {
+      return str.trim().split(/\s+/).map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ');
+    }
+
+    function findColumnIndex(headers, ...possibleNames) {
+      for (let name of possibleNames) {
+        const index = headers.findIndex(h => 
+          h.trim().toLowerCase() === name.toLowerCase()
+        );
+        if (index !== -1) return index;
+      }
+      return -1;
+    }
+
+    async function fetchAndParseCSV() {
+      try {
+        showLoading();
+        const response = await fetch(CSV_URL);
+        if (!response.ok) throw new Error('Failed to fetch CSV');
+        
+        const csvText = await response.text();
+        
+        return new Promise((resolve, reject) => {
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => resolve(results),
+            error: (error) => reject(error)
+          });
+        });
+      } catch (error) {
+        showError('Failed to load data: ' + error.message);
+        throw error;
+      }
+    }
+
+    function processData(parseResult) {
+      const headers = parseResult.meta.fields;
+      const rows = parseResult.data;
+
+      const firstNameIdx = findColumnIndex(headers, 'First Name', 'FirstName');
+      const lastNameIdx = findColumnIndex(headers, 'Last Name', 'LastName');
+      const doneEmailIdx = findColumnIndex(headers, 'Done Sending Email', 'Done Email', 'Email Sent');
+
+      if (firstNameIdx === -1 || lastNameIdx === -1) {
+        showError('Required columns "First Name" and "Last Name" not found');
+        return [];
+      }
+
+      if (doneEmailIdx === -1) {
+        showError('Column "Done Sending Email" not found');
+        return [];
+      }
+
+      const participants = [];
+      const seen = new Set();
+
+      for (let row of rows) {
+        const firstName = (row[headers[firstNameIdx]] || '').trim();
+        const lastName = (row[headers[lastNameIdx]] || '').trim();
+        const doneEmail = (row[headers[doneEmailIdx]] || '').trim();
+
+        if (!doneEmail) continue;
+        if (!firstName && !lastName) continue;
+
+        const fullName = toTitleCase(`${firstName} ${lastName}`);
+        const normalizedName = fullName.toLowerCase();
+
+        if (!seen.has(normalizedName)) {
+          seen.add(normalizedName);
+          participants.push(fullName);
+        }
+      }
+
+      return participants.sort();
+    }
+
+    function showLoading() {
+      namesList.innerHTML = '<div class="loading"><div class="spinner"></div>Loading participants...</div>';
+      spinBtn.disabled = true;
+    }
+
+    function showError(message) {
+      namesList.innerHTML = `<div class="error-message">${message}</div>`;
+      spinBtn.disabled = true;
+      eligibleCount.textContent = 'Eligible Participants: 0';
+    }
+
+    function updateEligibleParticipants() {
+      eligibleParticipants = allParticipants.filter(name => 
+        name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      if (noBackToBack.checked && lastWinner && eligibleParticipants.length > 1) {
+        eligibleParticipants = eligibleParticipants.filter(name => name !== lastWinner);
+      }
+
+      eligibleCount.textContent = `Eligible Participants: ${eligibleParticipants.length}`;
+      updateNamesList();
+      drawWheel();
+      
+      spinBtn.disabled = eligibleParticipants.length === 0 || isSpinning;
+    }
+
+    function updateNamesList() {
+      if (eligibleParticipants.length === 0) {
+        namesList.innerHTML = '<div class="name-item" style="text-align: center; color: #64748b;">No participants found</div>';
+        return;
+      }
+
+      namesList.innerHTML = eligibleParticipants
+        .map(name => `<div class="name-item">${name}</div>`)
+        .join('');
+    }
+
+    function resizeCanvas() {
+      const container = canvas.parentElement;
+      const size = Math.min(container.clientWidth, container.clientHeight);
+      canvas.width = size;
+      canvas.height = size;
+      drawWheel();
+    }
+
+    function drawWheel() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 10;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (eligibleParticipants.length === 0) {
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.fillStyle = '#64748b';
+        ctx.font = '20px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('No participants', centerX, centerY);
+        return;
+      }
+
+      const sliceAngle = (2 * Math.PI) / eligibleParticipants.length;
+      const colors = ['#14b8a6', '#0d9488', '#0f766e', '#115e59'];
+
+      eligibleParticipants.forEach((name, i) => {
+        const startAngle = currentRotation + i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        
+        const fontSize = Math.max(12, Math.min(18, radius / eligibleParticipants.length));
+        ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+        
+        const maxWidth = radius - 20;
+        let displayName = name;
+        if (ctx.measureText(name).width > maxWidth) {
+          while (ctx.measureText(displayName + '...').width > maxWidth && displayName.length > 0) {
+            displayName = displayName.slice(0, -1);
+          }
+          displayName += '...';
+        }
+        
+        ctx.fillText(displayName, radius - 10, 0);
+        ctx.restore();
+      });
+
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+
+    function playCelebrationSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 523.25;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    }
+
+    function createConfetti() {
+      const colors = ['#14b8a6', '#fbbf24', '#ef4444', '#8b5cf6', '#ec4899'];
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.querySelector('.modal-content').appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+
+    async function spinWheel() {
+      if (isSpinning || eligibleParticipants.length === 0) return;
+
+      isSpinning = true;
+      spinBtn.disabled = true;
+      refreshBtn.disabled = true;
+      searchInput.disabled = true;
+
+      const winnerIndex = Math.floor(Math.random() * eligibleParticipants.length);
+      const winner = eligibleParticipants[winnerIndex];
+
+      const sliceAngle = (2 * Math.PI) / eligibleParticipants.length;
+      // Calculate target angle to align winner slice with top pointer
+      // The pointer is at the top (-π/2 radians), and we want the center of the winner slice there
+      // Each slice starts at index * sliceAngle, so the center is at (index * sliceAngle + sliceAngle/2)
+      // We need to rotate so this center aligns with -π/2 (top of circle)
+      const winnerSliceCenter = winnerIndex * sliceAngle + sliceAngle / 2;
+      const targetAngle = -winnerSliceCenter - Math.PI / 2;
+      const spins = 5;
+      const totalRotation = spins * 2 * Math.PI + (targetAngle - currentRotation);
+
+      const duration = 4000;
+      const startTime = Date.now();
+      const startRotation = currentRotation;
+
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        currentRotation = startRotation + totalRotation * easeOut;
+        
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          currentRotation = targetAngle;
+          drawWheel();
+          showWinner(winner);
+        }
+      }
+
+      animate();
+    }
+
+    function showWinner(winner) {
+      playCelebrationSound();
+      createConfetti();
+      
+      winnerName.textContent = winner;
+      winnerModal.classList.add('active');
+
+      const timestamp = new Date().toLocaleString();
+      winners.push({ name: winner, time: timestamp });
+      updateWinnersTable();
+
+      lastWinner = winner;
+
+      if (removeAfterDraw.checked) {
+        allParticipants = allParticipants.filter(name => name !== winner);
+      }
+      
+      // Re-enable controls and update participants
+      isSpinning = false;
+      refreshBtn.disabled = false;
+      searchInput.disabled = false;
+      updateEligibleParticipants(); // This will re-enable the spin button if participants remain
+    }
+
+    function updateWinnersTable() {
+      winnersTable.innerHTML = winners
+        .map((w, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${w.name}</td>
+            <td>${w.time}</td>
+          </tr>
+        `)
+        .join('');
+    }
+
+    function exportWinners() {
+      if (winners.length === 0) {
+        return;
+      }
+
+      const csv = [
+        ['#', 'Full Name', 'Time'],
+        ...winners.map((w, i) => [i + 1, w.name, w.time])
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `raffle-winners-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetWinners() {
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h2>Reset Winners?</h2>
+          <p style="color: #64748b; margin: 20px 0;">This will clear all winner records. This action cannot be undone.</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button id="cancelReset" class="btn btn-secondary">Cancel</button>
+            <button id="confirmReset" class="btn btn-danger">Reset</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      document.getElementById('cancelReset').onclick = () => modal.remove();
+      document.getElementById('confirmReset').onclick = () => {
+        winners = [];
+        updateWinnersTable();
+        modal.remove();
+      };
+    }
+
+    async function refreshData() {
+      try {
+        const result = await fetchAndParseCSV();
+        allParticipants = processData(result);
+        
+        if (allParticipants.length === 0) {
+          showError('No eligible participants found. Check that "Done Sending Email" column has values.');
+          return;
+        }
+
+        lastRefresh.textContent = new Date().toLocaleString();
+        updateEligibleParticipants();
+      } catch (error) {
+        console.error('Error refreshing data:', error);
+      }
+    }
+
+    spinBtn.addEventListener('click', spinWheel);
+    refreshBtn.addEventListener('click', refreshData);
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      updateEligibleParticipants();
+    });
+    removeAfterDraw.addEventListener('change', updateEligibleParticipants);
+    noBackToBack.addEventListener('change', updateEligibleParticipants);
+    exportWinnersBtn.addEventListener('click', exportWinners);
+    resetWinnersBtn.addEventListener('click', resetWinners);
+    closeModal.addEventListener('click', () => {
+      winnerModal.classList.remove('active');
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+
+    async function onConfigChange(config) {
+      document.getElementById('mainTitle').textContent = config.main_title || defaultConfig.main_title;
+      document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+      
+      const footerNote = document.getElementById('footerNote');
+      const lastRefreshSpan = document.getElementById('lastRefresh');
+      const currentRefreshText = lastRefreshSpan.textContent;
+      footerNote.innerHTML = `${config.footer_note || defaultConfig.footer_note} <span id="lastRefresh">${currentRefreshText}</span>`;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['main_title', config.main_title || defaultConfig.main_title],
+          ['subtitle', config.subtitle || defaultConfig.subtitle],
+          ['footer_note', config.footer_note || defaultConfig.footer_note]
+        ])
+      });
+    }
+
+    resizeCanvas();
+    refreshData();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99ad3bf9a1a506ff',t:'MTc2MjUyMjc0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

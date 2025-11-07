@@ -1,0 +1,1686 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAPSI Staff View — Attendance &amp; Participants</title>
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .clock {
+            font-family: monospace;
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .refresh-btn {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .refresh-btn:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        .countdown {
+            background: #64748b;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Navigation */
+        .subnav {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.5rem 0;
+        }
+
+        .subnav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+        }
+
+        .subnav a {
+            color: #64748b;
+            text-decoration: none;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .subnav a:hover, .subnav a:focus {
+            color: #1e40af;
+            border-bottom-color: #1e40af;
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .kpi-card h3 {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .kpi-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .kpi-card .subvalue {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .filter-group input:focus, .filter-group select:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+            border-color: #3b82f6;
+        }
+
+        .clear-filters {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .clear-filters:hover {
+            background: #475569;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .bulk-btn {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .bulk-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .bulk-btn.danger {
+            background: #b91c1c;
+        }
+
+        .bulk-btn.danger:hover {
+            background: #991b1b;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .pagination select {
+            padding: 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th:hover {
+            background: #f1f5f9;
+        }
+
+        .sort-indicator {
+            margin-left: 0.5rem;
+            color: #9ca3af;
+        }
+
+        .sort-indicator.active {
+            color: #1e40af;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .expandable-row {
+            cursor: pointer;
+        }
+
+        .expanded-content {
+            background: #f8fafc;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .expanded-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .expanded-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .expanded-item strong {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge.success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge.warning {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge.danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badge.neutral {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* Actions Section */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .action-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .action-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .action-btn {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .action-btn.secondary {
+            background: #64748b;
+        }
+
+        .action-btn.secondary:hover {
+            background: #475569;
+        }
+
+        /* Webhook Settings */
+        .webhook-settings {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .webhook-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .webhook-url {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 300px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid #15803d;
+        }
+
+        .toast.error {
+            border-left: 4px solid #b91c1c;
+        }
+
+        /* Help Section */
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .help-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .help-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .help-card p, .help-card li {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .help-card ul {
+            padding-left: 1rem;
+        }
+
+        /* Print Styles */
+        @media print {
+            .header, .subnav, .filters, .bulk-actions, .pagination, .action-card, .help-card {
+                display: none !important;
+            }
+            
+            .main {
+                padding: 0;
+                max-width: none;
+            }
+            
+            .table-container {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 2rem;
+                padding: 1rem;
+                border-bottom: 2px solid #000;
+            }
+            
+            .signature-table th, .signature-table td {
+                border: 1px solid #000;
+                padding: 1rem;
+            }
+            
+            .signature-line {
+                border-bottom: 1px solid #000;
+                min-height: 2rem;
+                width: 150px;
+                display: inline-block;
+            }
+        }
+
+        .print-header {
+            display: none;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .header-right {
+                justify-content: space-between;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .bulk-actions {
+                justify-content: center;
+            }
+            
+            .actions-grid, .help-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Focus States */
+        button:focus, input:focus, select:focus, a:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* High Contrast Support */
+        @media (prefers-contrast: high) {
+            .kpi-card, .filters, .table-container, .action-card, .help-card {
+                border: 2px solid #000;
+            }
+            
+            .badge {
+                border: 1px solid currentColor;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body><!-- Header -->
+  <header class="header">
+   <div class="header-content">
+    <h1>PAPSI Staff View — Attendance &amp; Participants</h1>
+    <div class="header-right">
+     <div class="clock" id="clock" aria-live="polite"></div><button class="refresh-btn" id="refreshBtn" aria-label="Refresh data now"> <span>Refresh Now</span> <span class="countdown" id="countdown" aria-label="Auto refresh countdown">60s</span> </button>
+    </div>
+   </div>
+  </header><!-- Sub Navigation -->
+  <nav class="subnav" role="navigation" aria-label="Page sections">
+   <div class="subnav-content"><a href="#overview">Overview</a> <a href="#table">Table</a> <a href="#actions">Actions</a> <a href="#help">Help</a>
+   </div>
+  </nav><!-- Main Content -->
+  <main class="main"><!-- Overview Section -->
+   <section id="overview" class="section">
+    <h2>Overview</h2>
+    <div class="kpi-grid" id="kpiGrid"><!-- KPI cards will be populated by JavaScript -->
+    </div>
+   </section><!-- Filters Section -->
+   <section class="section">
+    <h2>Filters</h2>
+    <div class="filters">
+     <div class="filter-row">
+      <div class="filter-group"><label for="searchInput">Global Search</label> <input type="text" id="searchInput" placeholder="Search name, email, school, specialization..." aria-describedby="searchHelp"> <small id="searchHelp">Search across Full Name, Email, School/Company, and Specialization</small>
+      </div>
+    <div class="filter-group"><label for="membershipFilter">Membership Status</label> <select id="membershipFilter"> <option value="">All</option> <option value="active">ACTIVE</option> <option value="renew">RENEW</option> <option value="new">NEW</option> </select>
+      </div>
+      <div class="filter-group"><label for="schoolTypeFilter">School Type</label> <select id="schoolTypeFilter"> <option value="">All</option> <option value="Public">Public</option> <option value="Private">Private</option> </select>
+      </div>
+     </div>
+    <div class="filter-row">
+     <div class="filter-group"><label for="specializationFilter">Specialization</label> <select id="specializationFilter"> <option value="">All</option> </select>
+     </div>
+     <div class="filter-group"><label for="paidFilter">Paid</label> <select id="paidFilter"> <option value="">All</option> <option value="Yes">Yes</option> <option value="No">No</option> </select>
+     </div>
+    </div>
+     <div class="filter-row">
+      <div class="filter-group"><label for="minFee">Min Total Fee (₱)</label> <input type="number" id="minFee" min="0" step="100" placeholder="0">
+      </div>
+      <div class="filter-group"><label for="maxFee">Max Total Fee (₱)</label> <input type="number" id="maxFee" min="0" step="100" placeholder="No limit">
+      </div>
+      <div class="filter-group"><button class="clear-filters" id="clearFilters">Clear All Filters</button>
+      </div>
+     </div>
+    </div>
+   </section><!-- Table Section -->
+   <section id="table" class="section">
+    <h2>Participants Table</h2>
+    <div class="table-container">
+     <div class="table-header">
+      <div class="bulk-actions"><button class="bulk-btn" id="markAllPresent">Mark All Visible as Present</button> <button class="bulk-btn danger" id="clearAllPresent">Clear All Present (Visible)</button>
+      </div>
+      <div class="pagination"><label for="pageSize">Show:</label> <select id="pageSize"> <option value="10">10</option> <option value="25" selected>25</option> <option value="50">50</option> <option value="100">100</option> </select> <span id="paginationInfo">per page</span>
+      </div>
+     </div>
+     <div class="table-wrapper">
+      <table id="participantsTable" role="table">
+       <thead>
+    <tr role="row">
+     <th role="columnheader">#</th>
+     <th role="columnheader">Present</th>
+         <th role="columnheader">Check-in Time</th>
+         <th role="columnheader" class="sortable" data-sort="fullName">Full Name <span class="sort-indicator">↕</span></th>
+         <th role="columnheader" class="sortable" data-sort="email">Email Address <span class="sort-indicator">↕</span></th>
+         <th role="columnheader" class="sortable" data-sort="specialization">Specialization <span class="sort-indicator">↕</span></th>
+         <th role="columnheader" class="sortable" data-sort="school">School/Company <span class="sort-indicator">↕</span></th>
+         <th role="columnheader" class="sortable" data-sort="schoolType">School Type <span class="sort-indicator">↕</span></th>
+         <th role="columnheader" class="sortable" data-sort="membershipStatus">Membership <span class="sort-indicator">↕</span></th>
+         <th role="columnheader" class="sortable" data-sort="totalFee">Total Fee <span class="sort-indicator">↕</span></th>
+         <th role="columnheader">Paid</th>
+        </tr>
+       </thead>
+       <tbody id="tableBody"><!-- Table rows will be populated by JavaScript -->
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </section><!-- Actions Section -->
+   <section id="actions" class="section">
+    <h2>Actions</h2>
+    <div class="actions-grid">
+     <div class="action-card">
+      <h3>Export Data</h3><button class="action-btn" id="exportCsv">Export Filtered to CSV</button> <button class="action-btn secondary" id="printSignIn">Print Sign-in Sheet</button>
+      <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">Export includes Present status and Check-in Time as additional columns.</p>
+     </div>
+     <div class="action-card">
+      <h3>Webhook Sync (Optional)</h3>
+      <div class="webhook-toggle"><input type="checkbox" id="webhookEnabled" disabled> <label for="webhookEnabled">Enable POST on check-in</label>
+      </div><input type="url" class="webhook-url" id="webhookUrl" placeholder="https://script.google.com/macros/s/.../exec" disabled> <button class="action-btn secondary" id="testWebhook" disabled>Test Webhook</button>
+      <div class="webhook-settings">
+       <p style="font-size: 0.875rem; color: #64748b;"><strong>Note:</strong> Webhook is disabled by default. Enter a valid URL above to enable. When enabled, attendance changes will POST JSON data to your endpoint.</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- Help Section -->
+   <section id="help" class="section">
+    <h2>Help &amp; Notes</h2>
+    <div class="help-grid">
+     <div class="help-card">
+      <h3>Data Source</h3>
+      <p><strong>CSV Source:</strong> Read-only Google Sheets</p>
+      <p><strong>Last Sync:</strong> <span id="lastSync">Never</span></p>
+      <p><strong>Auto-refresh:</strong> Every 60 seconds</p>
+      <p>Attendance data is stored locally in your browser unless webhook is enabled.</p>
+     </div>
+     <div class="help-card">
+      <h3>Data Dictionary</h3>
+      <ul>
+       <li><strong>Email Address:</strong> Unique identifier for participants</li>
+       <li><strong>Total Fee:</strong> Sum of membership + registration fees</li>
+       <li><strong>PAPSI ID:</strong> Assigned member identification</li>
+       <li><strong>School Type:</strong> Public or Private institution</li>
+       <li><strong>Present:</strong> Local attendance status (stored in browser)</li>
+      </ul>
+     </div>
+     <div class="help-card">
+      <h3>Fee Parsing Rules</h3>
+      <p>Fees are automatically cleaned and converted to numbers:</p>
+      <ul>
+       <li>Currency symbols (₱) are removed</li>
+       <li>Commas and spaces are stripped</li>
+       <li>Non-numeric values default to ₱0</li>
+       <li>Totals are formatted with Philippine Peso (₱) currency</li>
+      </ul>
+     </div>
+    </div>
+   </section>
+  </main><!-- Print Header (hidden by default) -->
+  <div class="print-header">
+   <h1>PAPSI Training - Sign-in Sheet</h1>
+   <p>Date: <span id="printDate"></span></p>
+   <p>Total Participants: <span id="printCount"></span></p>
+  </div><!-- Toast Container -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+  <script>
+        // Global variables
+        let rawData = [];
+        let filteredData = [];
+        let currentSort = { field: null, direction: 'asc' };
+        let currentPage = 0;
+        let pageSize = 25;
+        let searchTimeout;
+        let refreshInterval;
+        let countdownInterval;
+        let countdownSeconds = 60;
+        
+        const STORAGE_KEY = 'papsiStaffAttendance_v1';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQTkzbvMM61xp0UfCwSmfHsFSDEPIJ3aOLqvzEPbXFeH_M3vhCcao_mGfI348pLRTFGT55HNmUajP0X/pub?gid=774756482&single=true&output=csv';
+        
+        // CSV Headers mapping
+        const CSV_HEADERS = {
+            timestamp: 'Timestamp',
+            email: 'Email Address',
+            title: 'Title',
+            fullName: 'Full Name',
+            firstName: 'First Name',
+            middleInitial: 'Middle Initial (e.g. B. )',
+            lastName: 'Last Name',
+            suffix: 'Suffix (e.g. Jr.)',
+            mobile: 'Mobile Number',
+            chooseOne: 'Choose one',
+            specialization: 'Specialization',
+            school: 'Name of School/ University/ Company',
+            schoolType: 'Is that a Public or a Private School/ University/ Company?',
+            address: 'Address of School/ University/ Company',
+            howKnow: 'How did you know about this PAPSI webinar?',
+            null: 'Null',
+            membershipStatus: 'Membership Status',
+            membershipFee: 'Membership Fee',
+            registrationFee: 'Registration Fee',
+            totalFee: 'Total Fee',
+            invoiceDate: 'Invoice Date',
+            invoiceNumber: 'Invoice Number',
+            papsiId: 'PAPSI ID',
+            emailSent: 'Done Sending Email',
+            invoiceSent: 'Done Sending Invoice'
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            setupEventListeners();
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            await fetchData();
+            startAutoRefresh();
+            
+            // Enable webhook URL input when URL is entered
+            const webhookUrl = document.getElementById('webhookUrl');
+            const webhookEnabled = document.getElementById('webhookEnabled');
+            const testWebhook = document.getElementById('testWebhook');
+            
+            webhookUrl.addEventListener('input', function() {
+                const hasUrl = this.value.trim().length > 0;
+                webhookEnabled.disabled = !hasUrl;
+                testWebhook.disabled = !hasUrl;
+                if (!hasUrl) {
+                    webhookEnabled.checked = false;
+                }
+            });
+        }
+
+        // Normalize various truthy/falsy strings to consistent Yes/No values
+        function normalizeYesNo(value) {
+            const s = (value || '').toString().trim().toLowerCase();
+            if (!s) return '';
+            const yesSet = new Set(['yes','y','true','1','sent','done','ok','okay','✔','✓']);
+            const noSet = new Set(['no','n','false','0','not sent','pending','✗','✘']);
+            if (yesSet.has(s)) return 'Yes';
+            if (noSet.has(s)) return 'No';
+            // Fall back to capitalized original for display
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        // Header aliasing to be resilient to spacing/casing variations
+        const HEADER_ALIASES = {
+            timestamp: ['Timestamp'],
+            email: ['Email Address','Email'],
+            title: ['Title'],
+            fullName: ['Full Name'],
+            firstName: ['First Name'],
+            middleInitial: ['Middle Initial (e.g. B. )','Middle Initial (e.g. B.)','Middle Initial'],
+            lastName: ['Last Name'],
+            suffix: ['Suffix (e.g. Jr.)','Suffix'],
+            mobile: ['Mobile Number','Mobile','Contact Number','Phone'],
+            chooseOne: ['Choose one','Choose One'],
+            specialization: ['Specialization'],
+            school: ['Name of School/ University/ Company','School/Company','School'],
+            schoolType: ['Is that a Public or a Private School/ University/ Company?','School Type'],
+            address: ['Address of School/ University/ Company','Address'],
+            howKnow: ['How did you know about this PAPSI webinar?','How did you know'],
+            attendance: ['Attendance'],
+            membershipStatus: ['Membership Status'],
+            membershipFee: ['Membership Fee'],
+            registrationFee: ['Registration Fee'],
+            totalFee: ['Total Fee'],
+            invoiceDate: ['Invoice Date'],
+            invoiceNumber: ['Invoice Number'],
+            papsiId: ['PAPSI ID'],
+            emailSent: ['Done Sending Email','Email Sent'],
+            invoiceSent: ['Done Sending Invoice','Invoice Sent']
+        };
+
+        function normHeader(s){ return (s||'').toString().toLowerCase().replace(/\s+/g,' ').trim(); }
+        function valueFor(row, fieldKey){
+            const aliases = HEADER_ALIASES[fieldKey] || [];
+            // Build a normalized lookup for row keys
+            const map = new Map(Object.keys(row).map(k => [normHeader(k), k]));
+            for (const alias of aliases){
+                const k = map.get(normHeader(alias));
+                if (k) return row[k];
+            }
+            return '';
+        }
+
+        function setupEventListeners() {
+            // Refresh button
+            document.getElementById('refreshBtn').addEventListener('click', fetchData);
+            
+            // Search input with debounce
+            document.getElementById('searchInput').addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    applyFilters();
+                }, 250);
+            });
+            
+            // Filter dropdowns
+            ['membershipFilter', 'schoolTypeFilter', 'specializationFilter', 'paidFilter', 'minFee', 'maxFee'].forEach(id => {
+                document.getElementById(id).addEventListener('change', applyFilters);
+            });
+            
+            // Clear filters
+            document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
+            
+            // Table sorting
+            document.querySelectorAll('.sortable').forEach(header => {
+                header.addEventListener('click', function() {
+                    const field = this.dataset.sort;
+                    sortTable(field);
+                });
+            });
+            
+            // Page size
+            document.getElementById('pageSize').addEventListener('change', function() {
+                pageSize = parseInt(this.value);
+                currentPage = 0;
+                renderTable();
+            });
+            
+            // Bulk actions
+            document.getElementById('markAllPresent').addEventListener('click', markAllVisiblePresent);
+            document.getElementById('clearAllPresent').addEventListener('click', clearAllVisiblePresent);
+            
+            // Export actions
+            document.getElementById('exportCsv').addEventListener('click', exportFilteredCsv);
+            document.getElementById('printSignIn').addEventListener('click', printSignInSheet);
+            
+            // Webhook test
+            document.getElementById('testWebhook').addEventListener('click', testWebhook);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-PH', {
+                hour12: true,
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('clock').textContent = timeString;
+        }
+
+        function startAutoRefresh() {
+            // Start countdown
+            countdownInterval = setInterval(() => {
+                countdownSeconds--;
+                document.getElementById('countdown').textContent = `${countdownSeconds}s`;
+                
+                if (countdownSeconds <= 0) {
+                    fetchData();
+                    countdownSeconds = 60;
+                }
+            }, 1000);
+        }
+
+        async function fetchData() {
+            try {
+                showToast('Refreshing data...', 'info');
+                
+                const response = await fetch(CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const csvText = await response.text();
+                rawData = parseCSV(csvText);
+                
+                // Merge with local attendance data
+                mergeAttendanceData();
+                
+                // Update UI
+                populateFilters();
+                applyFilters();
+                updateKPIs();
+                
+                // Update last sync time
+                document.getElementById('lastSync').textContent = new Date().toLocaleString('en-PH');
+                
+                showToast('Data refreshed successfully', 'success');
+                countdownSeconds = 60; // Reset countdown
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showToast(`Error refreshing data: ${error.message}`, 'error');
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) return [];
+            
+            const headers = parseCSVLine(lines[0]);
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    
+                    // Process the row
+                    const processedRow = processDataRow(row);
+                    if (processedRow.email) { // Only include rows with email
+                        data.push(processedRow);
+                    }
+                }
+            }
+            
+            return data;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++; // Skip next quote
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current);
+            return result;
+        }
+
+        function processDataRow(row) {
+            // Pull values via alias-aware lookup; construct fullName if missing
+            const firstName = valueFor(row,'firstName') || '';
+            const middleInitial = valueFor(row,'middleInitial') || '';
+            const lastName = valueFor(row,'lastName') || '';
+            const suffix = valueFor(row,'suffix') || '';
+            let fullName = valueFor(row,'fullName') || '';
+            if (!fullName) {
+                fullName = [firstName, middleInitial, lastName, suffix].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+            }
+
+            return {
+                timestamp: valueFor(row,'timestamp') || '',
+                email: (valueFor(row,'email') || '').toLowerCase().trim(),
+                title: valueFor(row,'title') || '',
+                fullName,
+                firstName,
+                middleInitial,
+                lastName,
+                suffix,
+                mobile: valueFor(row,'mobile') || '',
+                chooseOne: valueFor(row,'chooseOne') || '',
+                specialization: valueFor(row,'specialization') || '',
+                school: valueFor(row,'school') || '',
+                schoolType: valueFor(row,'schoolType') || '',
+                address: valueFor(row,'address') || '',
+                howKnow: valueFor(row,'howKnow') || '',
+                attendance: valueFor(row,'attendance') || '',
+                membershipStatus: valueFor(row,'membershipStatus') || '',
+                membershipFee: parseNumber(valueFor(row,'membershipFee')),
+                registrationFee: parseNumber(valueFor(row,'registrationFee')),
+                totalFee: parseNumber(valueFor(row,'totalFee')),
+                invoiceDate: valueFor(row,'invoiceDate') || '',
+                invoiceNumber: valueFor(row,'invoiceNumber') || '',
+                papsiId: valueFor(row,'papsiId') || '',
+                emailSent: normalizeYesNo(valueFor(row,'emailSent')),
+                invoiceSent: normalizeYesNo(valueFor(row,'invoiceSent')),
+                // Local attendance data (will be merged)
+                present: false,
+                checkInTime: null
+            };
+        }
+
+        function parseNumber(value) {
+            if (!value) return 0;
+            // Remove currency symbols, commas, and spaces
+            const cleaned = value.toString().replace(/[₱,\s]/g, '');
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function mergeAttendanceData() {
+            const attendanceData = getAttendanceData();
+            
+            rawData.forEach(row => {
+                const attendance = attendanceData[row.email];
+                if (attendance) {
+                    row.present = attendance.present || false;
+                    row.checkInTime = attendance.checkIn || null;
+                }
+            });
+        }
+
+        function getAttendanceData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                return stored ? JSON.parse(stored) : {};
+            } catch (error) {
+                console.error('Error reading attendance data:', error);
+                return {};
+            }
+        }
+
+        function saveAttendanceData(email, present, checkInTime = null) {
+            try {
+                const attendanceData = getAttendanceData();
+                
+                if (present && !attendanceData[email]?.checkIn) {
+                    // First time marking present - record check-in time
+                    checkInTime = new Date().toISOString();
+                }
+                
+                attendanceData[email] = {
+                    present: present,
+                    checkIn: checkInTime || attendanceData[email]?.checkIn || null
+                };
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceData));
+                
+                // Update the row in rawData
+                const row = rawData.find(r => r.email === email);
+                if (row) {
+                    row.present = present;
+                    row.checkInTime = attendanceData[email].checkIn;
+                }
+                
+                // Send webhook if enabled
+                if (present && document.getElementById('webhookEnabled').checked) {
+                    sendWebhook(row);
+                }
+                
+                // Re-render current view
+                renderTable();
+                updateKPIs();
+                
+            } catch (error) {
+                console.error('Error saving attendance data:', error);
+                showToast('Error saving attendance data', 'error');
+            }
+        }
+
+        function populateFilters() {
+            // Populate specialization filter
+            const specializations = [...new Set(rawData.map(row => row.specialization).filter(s => s))].sort();
+            const specializationFilter = document.getElementById('specializationFilter');
+            
+            // Clear existing options except "All"
+            specializationFilter.innerHTML = '<option value="">All</option>';
+            
+            specializations.forEach(spec => {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                specializationFilter.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const membershipFilter = document.getElementById('membershipFilter').value;
+            const schoolTypeFilter = document.getElementById('schoolTypeFilter').value;
+            const specializationFilter = document.getElementById('specializationFilter').value;
+            const paidFilter = document.getElementById('paidFilter').value;
+            const minFee = parseFloat(document.getElementById('minFee').value) || 0;
+            const maxFee = parseFloat(document.getElementById('maxFee').value) || Infinity;
+            
+            filteredData = rawData.filter(row => {
+                // Global search
+                if (search) {
+                    const searchFields = [row.fullName, row.email, row.school, row.specialization].join(' ').toLowerCase();
+                    if (!searchFields.includes(search)) return false;
+                }
+                
+                // Membership status filter (contains: ACTIVE, RENEW, NEW)
+                if (membershipFilter) {
+                    const status = (row.membershipStatus || '').toString().toLowerCase();
+                    const key = membershipFilter.toString().toLowerCase();
+                    if (!status.includes(key)) return false;
+                }
+                
+                // School type filter
+                if (schoolTypeFilter && row.schoolType !== schoolTypeFilter) return false;
+                
+                // Specialization filter
+                if (specializationFilter && row.specialization !== specializationFilter) return false;
+                
+                // Paid filter (based on presence of Done Sending Email value)
+                if (paidFilter) {
+                    const isPaid = (row.emailSent || '').toString().trim() !== '';
+                    if ((paidFilter === 'Yes' && !isPaid) || (paidFilter === 'No' && isPaid)) return false;
+                }
+                
+                // Fee range filter
+                if (row.totalFee < minFee || row.totalFee > maxFee) return false;
+                
+                return true;
+            });
+            
+            // Apply current sort
+            if (currentSort.field) {
+                sortData(currentSort.field, currentSort.direction);
+            }
+            
+            currentPage = 0;
+            renderTable();
+            updateKPIs();
+        }
+
+        function clearAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('membershipFilter').value = '';
+            document.getElementById('schoolTypeFilter').value = '';
+            document.getElementById('specializationFilter').value = '';
+            document.getElementById('paidFilter').value = '';
+            document.getElementById('minFee').value = '';
+            document.getElementById('maxFee').value = '';
+            
+            applyFilters();
+            showToast('All filters cleared', 'success');
+        }
+
+        function sortTable(field) {
+            if (currentSort.field === field) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.direction = 'asc';
+            }
+            
+            sortData(field, currentSort.direction);
+            renderTable();
+            updateSortIndicators();
+        }
+
+        function sortData(field, direction) {
+            filteredData.sort((a, b) => {
+                let aVal = a[field] || '';
+                let bVal = b[field] || '';
+                
+                // Handle numeric fields
+                if (field === 'totalFee' || field === 'membershipFee' || field === 'registrationFee') {
+                    aVal = parseFloat(aVal) || 0;
+                    bVal = parseFloat(bVal) || 0;
+                } else {
+                    aVal = aVal.toString().toLowerCase();
+                    bVal = bVal.toString().toLowerCase();
+                }
+                
+                if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                indicator.textContent = '↕';
+                indicator.classList.remove('active');
+            });
+            
+            if (currentSort.field) {
+                const header = document.querySelector(`[data-sort="${currentSort.field}"] .sort-indicator`);
+                if (header) {
+                    header.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
+                    header.classList.add('active');
+                }
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const startIndex = currentPage * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            tbody.innerHTML = '';
+            
+            pageData.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${startIndex + index + 1}</td>
+                    <td>
+                        <input type="checkbox" ${row.present ? 'checked' : ''} 
+                               onchange="togglePresent('${row.email}')"
+                               aria-label="Mark ${row.fullName} as present">
+                    </td>
+                    <td>${row.checkInTime ? new Date(row.checkInTime).toLocaleString('en-PH') : ''}</td>
+                    <td class="expandable-row" onclick="toggleRowExpansion(this)" tabindex="0" role="button" aria-expanded="false">
+                        ${row.fullName}
+                    </td>
+                    <td>${row.email}</td>
+                    <td>${row.specialization}</td>
+                    <td>${row.school}</td>
+                    <td>${getBadge(row.schoolType, row.schoolType === 'Public' ? 'success' : 'warning')}</td>
+                    <td>${getBadge(row.membershipStatus, row.membershipStatus === 'Member' ? 'success' : 'neutral')}</td>
+                    <td>${formatCurrency(row.totalFee)}</td>
+                    <td>${(() => { const paid = (row.emailSent || '').toString().trim() !== ''; return getBadge(paid ? 'Yes' : 'No', paid ? 'success' : 'danger'); })()}</td>
+                `;
+                
+                tbody.appendChild(tr);
+                
+                // Add expanded content row (hidden by default)
+                const expandedTr = document.createElement('tr');
+                expandedTr.style.display = 'none';
+                expandedTr.innerHTML = `
+                    <td colspan="11" class="expanded-content">
+                        <div class="expanded-grid">
+                            <div class="expanded-item">
+                                <strong>Title</strong>
+                                <span>${row.title}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Full Name</strong>
+                                <span>${row.firstName} ${row.middleInitial} ${row.lastName} ${row.suffix}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Mobile Number</strong>
+                                <span>${row.mobile}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Address</strong>
+                                <span>${row.address}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>How did you know?</strong>
+                                <span>${row.howKnow}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Registration Timestamp</strong>
+                                <span>${row.timestamp}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Invoice Number</strong>
+                                <span>${row.invoiceNumber}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Invoice Date</strong>
+                                <span>${row.invoiceDate}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>PAPSI ID</strong>
+                                <span>${row.papsiId}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Membership Fee</strong>
+                                <span>${formatCurrency(row.membershipFee)}</span>
+                            </div>
+                            <div class="expanded-item">
+                                <strong>Registration Fee</strong>
+                                <span>${formatCurrency(row.registrationFee)}</span>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(expandedTr);
+            });
+            
+            // Update pagination info
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+            document.getElementById('paginationInfo').textContent = 
+                `${startIndex + 1}-${endIndex} of ${filteredData.length} (Page ${currentPage + 1} of ${totalPages || 1})`;
+        }
+
+        function toggleRowExpansion(cell) {
+            const row = cell.parentElement;
+            const expandedRow = row.nextElementSibling;
+            const isExpanded = expandedRow.style.display !== 'none';
+            
+            expandedRow.style.display = isExpanded ? 'none' : 'table-row';
+            cell.setAttribute('aria-expanded', !isExpanded);
+        }
+
+        function getBadge(text, type = 'neutral') {
+            if (!text) return '<span class="badge neutral">—</span>';
+            return `<span class="badge ${type}">${text}</span>`;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-PH', {
+                style: 'currency',
+                currency: 'PHP'
+            }).format(amount || 0);
+        }
+
+        function togglePresent(email) {
+            const row = rawData.find(r => r.email === email);
+            if (row) {
+                const newPresent = !row.present;
+                const checkInTime = newPresent && !row.checkInTime ? new Date().toISOString() : row.checkInTime;
+                saveAttendanceData(email, newPresent, checkInTime);
+            }
+        }
+
+        function updateKPIs() {
+            const kpiGrid = document.getElementById('kpiGrid');
+
+            // Compute against ALL rows (exclude header) per request
+            const totalRegistered = rawData.length;
+
+            // Paid = rows with any value in "Done Sending Email"
+            const paidCount = rawData.filter(row => (row.emailSent || '') !== '').length;
+
+            // Attendance = rows with any value in Attendance column
+            const attendanceCount = rawData.filter(row => (row.attendance || '').toString().trim() !== '').length;
+
+            // School type breakdown
+            const publicCount = rawData.filter(row => (row.schoolType || '').toString().trim().toLowerCase() === 'public').length;
+            const privateCount = rawData.filter(row => (row.schoolType || '').toString().trim().toLowerCase() === 'private').length;
+
+            // Gross Payment = sum of Total Fee across all rows
+            const grossPayment = rawData.reduce((sum, row) => sum + (row.totalFee || 0), 0);
+
+            kpiGrid.innerHTML = `
+                <div class="kpi-card">
+                    <h3>Total Registered</h3>
+                    <div class="value">${totalRegistered.toLocaleString()}</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Paid Registrants</h3>
+                    <div class="value">${paidCount.toLocaleString()}</div>
+                    <div class="subvalue">${totalRegistered > 0 ? Math.round(paidCount/totalRegistered*100) : 0}% of total</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Attendance</h3>
+                    <div class="value">${attendanceCount.toLocaleString()}</div>
+                    <div class="subvalue">${totalRegistered > 0 ? Math.round(attendanceCount/totalRegistered*100) : 0}% of total</div>
+                </div>
+                <div class="kpi-card">
+                    <h3>School Types</h3>
+                    <div class="value">${(publicCount + privateCount).toLocaleString()}</div>
+                    <div class="subvalue">
+                        <span class="badge success">${publicCount} Public</span>
+                        <span class="badge warning">${privateCount} Private</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Gross Payment</h3>
+                    <div class="value">${formatCurrency(grossPayment)}</div>
+                    <div class="subvalue">Sum of Total Fee</div>
+                </div>
+            `;
+        }
+
+        function markAllVisiblePresent() {
+            if (confirm(`Mark all ${filteredData.length} visible participants as present?`)) {
+                filteredData.forEach(row => {
+                    if (!row.present) {
+                        const checkInTime = new Date().toISOString();
+                        saveAttendanceData(row.email, true, checkInTime);
+                    }
+                });
+                showToast(`Marked ${filteredData.length} participants as present`, 'success');
+            }
+        }
+
+        function clearAllVisiblePresent() {
+            const presentCount = filteredData.filter(row => row.present).length;
+            if (presentCount > 0 && confirm(`Clear present status for ${presentCount} visible participants?`)) {
+                filteredData.forEach(row => {
+                    if (row.present) {
+                        saveAttendanceData(row.email, false, null);
+                    }
+                });
+                showToast(`Cleared present status for ${presentCount} participants`, 'success');
+            }
+        }
+
+        function exportFilteredCsv() {
+            const exportData = filteredData.map(row => ({
+                'Full Name': row.fullName,
+                'Email Address': row.email,
+                'Title': row.title,
+                'First Name': row.firstName,
+                'Middle Initial': row.middleInitial,
+                'Last Name': row.lastName,
+                'Suffix': row.suffix,
+                'Mobile Number': row.mobile,
+                'Specialization': row.specialization,
+                'School/Company': row.school,
+                'School Type': row.schoolType,
+                'Address': row.address,
+                'How did you know?': row.howKnow,
+                'Membership Status': row.membershipStatus,
+                'Membership Fee': row.membershipFee,
+                'Registration Fee': row.registrationFee,
+                'Total Fee': row.totalFee,
+                'Invoice Date': row.invoiceDate,
+                'Invoice Number': row.invoiceNumber,
+                'PAPSI ID': row.papsiId,
+                'Email Sent': row.emailSent,
+                'Invoice Sent': row.invoiceSent,
+                'Present': row.present ? 'Yes' : 'No',
+                'Check-in Time': row.checkInTime ? new Date(row.checkInTime).toLocaleString('en-PH') : '',
+                'Registration Timestamp': row.timestamp
+            }));
+            
+            downloadCsv(exportData, `PAPSI_Participants_${new Date().toISOString().split('T')[0]}.csv`);
+            showToast(`Exported ${exportData.length} participants to CSV`, 'success');
+        }
+
+        function printSignInSheet() {
+            // Prepare print data
+            document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-PH');
+            document.getElementById('printCount').textContent = filteredData.length;
+            
+            // Create print-friendly table
+            const printTable = document.createElement('table');
+            printTable.className = 'signature-table';
+            printTable.style.width = '100%';
+            printTable.style.borderCollapse = 'collapse';
+            
+            printTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #000; padding: 0.5rem;">Full Name</th>
+                        <th style="border: 1px solid #000; padding: 0.5rem;">Email Address</th>
+                        <th style="border: 1px solid #000; padding: 0.5rem; width: 60px;">Present</th>
+                        <th style="border: 1px solid #000; padding: 0.5rem; width: 200px;">Signature</th>
+                        <th style="border: 1px solid #000; padding: 0.5rem; width: 100px;">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filteredData.map(row => `
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 0.5rem;">${row.fullName}</td>
+                            <td style="border: 1px solid #000; padding: 0.5rem;">${row.email}</td>
+                            <td style="border: 1px solid #000; padding: 0.5rem; text-align: center;">
+                                ${row.present ? '✓' : '☐'}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 0.5rem;">
+                                <div class="signature-line"></div>
+                            </td>
+                            <td style="border: 1px solid #000; padding: 0.5rem;">
+                                <div class="signature-line"></div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            // Replace table temporarily for printing
+            const originalTable = document.getElementById('participantsTable').parentElement;
+            originalTable.style.display = 'none';
+            originalTable.parentElement.appendChild(printTable);
+            
+            // Print
+            window.print();
+            
+            // Restore original table
+            printTable.remove();
+            originalTable.style.display = 'block';
+            
+            showToast('Sign-in sheet sent to printer', 'success');
+        }
+
+        async function sendWebhook(row) {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            if (!webhookUrl) return;
+            
+            const payload = {
+                email: row.email,
+                fullName: row.fullName,
+                present: row.present,
+                checkIn: row.checkInTime,
+                papsiId: row.papsiId,
+                invoiceNumber: row.invoiceNumber,
+                membershipStatus: row.membershipStatus
+            };
+            
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    showToast('Attendance synced to webhook', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Webhook error:', error);
+                showToast(`Webhook sync failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWebhook() {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            if (!webhookUrl) {
+                showToast('Please enter a webhook URL first', 'error');
+                return;
+            }
+            
+            const testPayload = {
+                email: 'test@example.com',
+                fullName: 'Test User',
+                present: true,
+                checkIn: new Date().toISOString(),
+                papsiId: 'TEST123',
+                invoiceNumber: 'INV-TEST',
+                membershipStatus: 'Member'
+            };
+            
+            try {
+                showToast('Testing webhook...', 'info');
+                
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testPayload)
+                });
+                
+                if (response.ok) {
+                    showToast('Webhook test successful!', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Webhook test error:', error);
+                showToast(`Webhook test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function downloadCsv(data, filename) {
+            if (data.length === 0) return;
+            
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => 
+                    headers.map(header => {
+                        const value = row[header] || '';
+                        // Escape quotes and wrap in quotes if contains comma or quote
+                        if (value.toString().includes(',') || value.toString().includes('"')) {
+                            return `"${value.toString().replace(/"/g, '""')}"`;
+                        }
+                        return value;
+                    }).join(',')
+                )
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard navigation for expandable rows
+        document.addEventListener('keydown', function(e) {
+            if (e.target.classList.contains('expandable-row') && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                toggleRowExpansion(e.target);
+            }
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99a5812fb1070945',t:'MTc2MjQ0MTY4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

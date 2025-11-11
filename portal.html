@@ -1592,6 +1592,23 @@
                     </div>
                 </div>
             </div>
+            <!-- Slides Chooser Modal (when multiple slide links exist) -->
+            <div id="slidesChooserModal" class="modal hidden z-50">
+                <div class="modal-content mx-auto p-0 max-w-xl">
+                    <div class="flex items-center justify-between px-4 py-3 border-b rounded-t-lg bg-white">
+                        <h3 id="slidesChooserTitle" class="text-lg font-bold text-papsi-dark">Select Slides</h3>
+                        <button onclick="closeSlidesChooser()" class="ml-2 text-gray-500 hover:text-gray-700" aria-label="Close" type="button">&times;</button>
+                    </div>
+                    <div class="bg-white">
+                        <div class="p-4 space-y-2" id="slidesChooserList">
+                            <!-- slide options injected here -->
+                        </div>
+                        <div class="px-4 py-3 border-t bg-gray-50 rounded-b-lg flex justify-end">
+                            <button onclick="closeSlidesChooser()" class="px-3 py-1.5 text-sm rounded bg-white border hover:bg-gray-50">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Modules (Drive Folder) Modal -->
             <div id="modulesModal" class="modal hidden z-50">
                 <div id="modulesModalContent" class="modal-content module-modal-content mx-auto p-0">
@@ -2668,6 +2685,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Extract the first http/https URL
             const match = text.match(/https?:\/\/[^\s)]+/i);
             return match ? match[0] : '';
+        }
+
+        // Extract all http/https URLs from a block of text
+        function getAllUrlsFromText(text) {
+            if (!text || typeof text !== 'string') return [];
+            const matches = text.match(/https?:\/\/[^\s)]+/gi);
+            return Array.isArray(matches) ? matches : [];
         }
 
         function normalizeDriveUrl(url) {
@@ -4624,20 +4648,19 @@ function audioRegisterNow() {
         function openCourseContent(contentType, courseId) {
             const course = myLearning.find(c => c.id === courseId);
             if (!course) return;
+            // Handle presentation separately to support multiple links
+            if (contentType === 'presentation') {
+                openSlidesFromField(course.presentation, course.title || 'Slides');
+                return;
+            }
             let url = '';
             if (contentType === 'video') url = course.video;
             else if (contentType === 'module') url = course.module;
-            else if (contentType === 'presentation') url = course.presentation;
             if (!url || !/^https?:\/\//i.test(url)) {
-                // Graceful fallback: do nothing if disabled, but keep for safety
                 return;
             }
             if (contentType === 'video') {
                 openVideoPlayer(url, course.title || 'Video');
-                return;
-            }
-            if (contentType === 'presentation') {
-                openSlidesViewer(url, course.title || 'Slides');
                 return;
             }
             if (contentType === 'module') {
@@ -5425,6 +5448,18 @@ function audioRegisterNow() {
         // ===== End Video Player =====
 
         // ===== Slides (PDF) Viewer =====
+        function openSlidesFromField(rawField, title) {
+            const urls = getAllUrlsFromText(String(rawField || ''))
+                .filter(u => /^https?:\/\//i.test(u));
+            if (urls.length === 0) return;
+            if (urls.length === 1) {
+                openSlidesViewer(urls[0], title || 'Slides');
+                return;
+            }
+            // Multiple links: show chooser
+            openSlidesChooser(urls, title || 'Slides');
+        }
+
         function normalizePdfUrl(input) {
             const url = String(input || '').trim();
             if (!url) return null;
@@ -5510,6 +5545,63 @@ function audioRegisterNow() {
             document.getElementById('slidesModal')?.addEventListener('click', function(e){ if (e.target === this) closeSlidesViewer(); });
         });
         // ===== End Slides (PDF) Viewer =====
+        // ===== Slides Chooser (for multiple links) =====
+        function openSlidesChooser(urls, title) {
+            const modal = document.getElementById('slidesChooserModal');
+            const list = document.getElementById('slidesChooserList');
+            const titleEl = document.getElementById('slidesChooserTitle');
+            if (!modal || !list) return;
+            if (titleEl) titleEl.textContent = (title ? `${title}: Select Slides` : 'Select Slides');
+            // Build list of options
+            list.innerHTML = '';
+            urls.forEach((u, idx) => {
+                let host = '';
+                try { host = new URL(u).hostname.replace(/^www\./,''); } catch { host = ''; }
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full text-left p-3 border rounded hover:bg-gray-50 transition flex items-center justify-between gap-3';
+                const left = document.createElement('div');
+                left.className = 'flex flex-col';
+                const lab = document.createElement('span');
+                lab.className = 'font-medium text-papsi-dark';
+                lab.textContent = `Slides ${idx + 1}`;
+                const meta = document.createElement('span');
+                meta.className = 'text-xs text-gray-500 break-all';
+                meta.textContent = host ? `${host}` : u;
+                left.appendChild(lab);
+                left.appendChild(meta);
+                const openIcon = document.createElement('span');
+                openIcon.className = 'text-gray-400';
+                openIcon.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 13l6-6M9 7h4v4" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3" width="14" height="14" rx="2"/></svg>';
+                btn.appendChild(left);
+                btn.appendChild(openIcon);
+                btn.addEventListener('click', () => {
+                    closeSlidesChooser();
+                    openSlidesViewer(u, title || 'Slides');
+                });
+                list.appendChild(btn);
+            });
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSlidesChooser() {
+            const modal = document.getElementById('slidesChooserModal');
+            if (modal) modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            document.addEventListener('keydown', function(e){
+                const modal = document.getElementById('slidesChooserModal');
+                if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') {
+                    e.preventDefault();
+                    closeSlidesChooser();
+                }
+            });
+            document.getElementById('slidesChooserModal')?.addEventListener('click', function(e){ if (e.target === this) closeSlidesChooser(); });
+        });
+        // ===== End Slides Chooser =====
         </script>
         <script>
         // ===== Modules (Drive Folder) Viewer =====

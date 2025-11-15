@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>PAPSI Admin</title>
+	<style>
+		:root {
+			--green:#166938; --green-2:#0f5a30; --bg:#f7f7f7; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+			--warn:#b45309; --error:#b91c1c; --ok:#065f46;
+		}
+		html,body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+		a { color:var(--green); text-decoration:none; }
+		.container { max-width:1100px; margin:0 auto; padding:16px; }
+		.topbar { position:sticky; top:0; z-index:10; background:linear-gradient(90deg,var(--green),var(--green-2)); color:#fff; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+		.topbar .wrap { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; }
+		.brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px; }
+		.badge { font-size:12px; padding:2px 8px; border-radius:999px; background:#ffffff22; }
+		.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; box-shadow:0 8px 20px rgba(0,0,0,.03); }
+		.grid { display:grid; gap:16px; }
+		@media (min-width: 880px) { .grid-2 { grid-template-columns: 1.2fr .8fr; } }
+		.row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+		.field { flex:1 1 220px; min-width:220px; }
+		label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+		input, select, textarea, button { font:inherit; }
+		input[type="text"], input[type="email"], input[type="password"], select, textarea {
+			width:100%; box-sizing:border-box; background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 12px; outline:none;
+		}
+		textarea { min-height:84px; }
+		input:focus, select:focus, textarea:focus { border-color:#9fd3b6; box-shadow:0 0 0 3px #9fd3b633; }
+		.btn { background:var(--green); color:#fff; border:none; border-radius:8px; padding:10px 14px; cursor:pointer; }
+		.btn.secondary { background:#e5e7eb; color:#111827; }
+		.btn.ghost { background:#ffffff; color:var(--green); border:1px solid #d1d5db; }
+		.btn:disabled { opacity:.6; cursor:not-allowed; }
+		.actions { display:flex; gap:8px; flex-wrap:wrap; }
+		.status { font-size:13px; margin-top:6px; }
+		.status.info { color:#374151; }
+		.status.ok { color:var(--ok); }
+		.status.warn { color:var(--warn); }
+		.status.error { color:var(--error); }
+		.kv { display:grid; grid-template-columns: 180px 1fr; gap:4px 10px; }
+		.kv div { padding:4px 0; border-bottom:1px dashed #e5e7eb; }
+		.title { font-size:18px; font-weight:700; }
+		.subtle { color:var(--muted); font-size:12px; }
+		.chip { display:inline-block; border:1px solid #d1d5db; border-radius:999px; padding:2px 8px; font-size:12px; color:#374151; background:#fff; }
+		.pill-ok { background:#ecfdf5; color:#065f46; border-color:#bbf7d0; }
+		.pill-warn { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+		.toast { position:fixed; right:12px; top:12px; background:#111827; color:#fff; padding:10px 12px; border-radius:8px; font-size:14px; opacity:0; transform:translateY(-8px); transition:all .2s; z-index:9999; }
+		.toast.show { opacity:1; transform:translateY(0); }
+		.gate { display:flex; align-items:center; justify-content:center; min-height:48vh; }
+		.hidden { display:none !important; }
+
+		/* Action cards */
+		.action-card { cursor:pointer; display:flex; align-items:center; gap:12px; padding:16px; border-radius:12px; border:1px solid var(--line); background:var(--card); box-shadow:0 8px 20px rgba(0,0,0,.03); outline:none; }
+		.action-card:hover { box-shadow:0 10px 28px rgba(0,0,0,.06); transform: translateY(-1px); }
+		.action-icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--green); color:#fff; font-weight:700; }
+		.action-title { font-weight:700; }
+		.action-sub { color:var(--muted); font-size:12px; }
+
+		/* Modal */
+		.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50; }
+		.modal-backdrop.show { display:flex; }
+		.modal { background:#fff; border:1px solid var(--line); border-radius:12px; width:min(520px, calc(100% - 32px)); padding:16px; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+		.modal .modal-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+		.modal .close-x { border:none; background:transparent; font-size:18px; line-height:1; cursor:pointer; color:#6b7280; padding:6px; border-radius:6px; }
+		.modal .close-x:hover { background:#f3f4f6; color:#374151; }
+
+		/* Dashboard widgets */
+		.kpi-grid { display:grid; gap:12px; grid-template-columns: repeat(3, minmax(170px,1fr)); }
+		.kpi { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; }
+		.kpi .label { font-size:12px; color:var(--muted); }
+		.kpi .value { font-size:22px; font-weight:700; margin-top:2px; }
+		.section-grid { display:grid; gap:16px; }
+		@media (min-width: 880px) { .section-grid { grid-template-columns: 1fr 1fr; } }
+		.bar-list { margin-top:8px; }
+		.bar-row { display:flex; align-items:center; gap:10px; margin:6px 0; }
+		.bar-label { flex:0 0 42%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px; color:#111827; }
+		.bar { flex:1; height:10px; background:#e5e7eb; border-radius:999px; overflow:hidden; }
+		.bar > span { display:block; height:100%; background:var(--green); width:0%; }
+		.bar-count { flex:0 0 auto; width:40px; text-align:right; font-size:12px; color:#374151; }
+	</style>
+	<meta name="robots" content="noindex, nofollow" />
+	<meta name="referrer" content="no-referrer" />
+	<link rel="icon" href="images/favicon.png" />
+	<link rel="canonical" href="adminjames.html" />
+	<meta name="theme-color" content="#166938" />
+	<meta name="description" content="PAPSI Admin Tools" />
+	<meta property="og:title" content="PAPSI Admin" />
+	<meta property="og:description" content="Member tools and quick actions" />
+	<meta property="og:type" content="website" />
+	<meta property="og:image" content="images/logo.png" />
+	<meta property="og:url" content="adminjames.html" />
+</head>
+<body>
+	<div class="topbar">
+		<div class="wrap">
+			<div class="brand">
+				<img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/papsilogo_1.png" alt="PAPSI" height="28" />
+				<div>PAPSI Admin</div>
+				<span class="badge">beta</span>
+			</div>
+			<div class="actions">
+				<button id="adminLogoutBtn" class="btn ghost hidden" type="button">Logout</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Top actions bar -->
+	<div class="container" style="padding-top:12px;">
+		<button id="retrieveBtn" class="btn" type="button" title="Retrieve membership data">Retrieve</button>
+		<span class="subtle" style="margin-left:10px;">Uses the email and password from Administrator Access.</span>
+		<div id="retrieveNotice" class="status info" style="margin-top:6px;"></div>
+	</div>
+
+	<!-- Gate (simple access key for now) -->
+	<div id="adminGate" class="container gate">
+		<div class="card" style="max-width:520px; width:100%;">
+					<div class="title">Administrator Access</div>
+					<div class="subtle" style="margin-top:4px;">Enter your admin email address to continue.</div>
+			<div class="row" style="margin-top:14px;">
+				<div class="field">
+							<label for="adminEmail">Admin email</label>
+							<input id="adminEmail" type="email" placeholder="you@organization.org" autocomplete="email" />
+				</div>
+			</div>
+					<div id="adminPwRow" class="row hidden" style="margin-top:10px;">
+						<div class="field">
+							<label for="adminPassword">Password</label>
+							<input id="adminPassword" type="password" placeholder="Enter your password" autocomplete="current-password" />
+						</div>
+					</div>
+			<div class="actions" style="margin-top:10px; align-items:center;">
+						<button id="adminLoginBtn" class="btn" type="button">Continue</button>
+						<label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#374151;">
+							<input id="rememberMe" type="checkbox" /> Remember me on this device
+						</label>
+				<div id="adminGateStatus" class="status"></div>
+			</div>
+			
+		</div>
+	</div>
+
+	<!-- App -->
+	<div id="adminApp" class="container hidden">
+		<!-- Dashboard (populated after Retrieve) -->
+		<div id="dashboardCard" class="card" style="display:none; margin-bottom:16px;">
+			<div class="title" style="margin-bottom:10px;">Dashboard</div>
+			<div class="kpi-grid">
+				<div class="kpi">
+					<div class="label">Total Members</div>
+					<div id="dashTotal" class="value">0</div>
+				</div>
+				<div class="kpi">
+					<div class="label">Active</div>
+					<div id="dashActive" class="value">0</div>
+				</div>
+				<div class="kpi">
+					<div class="label">Expired</div>
+					<div id="dashExpired" class="value">0</div>
+				</div>
+			</div>
+
+			<div class="section-grid" style="margin-top:14px;">
+				<div>
+					<div class="title" style="font-size:16px;">Members by Specialization</div>
+					<div id="dashSpecBars" class="bar-list"></div>
+				</div>
+				<div>
+					<div class="title" style="font-size:16px;">Top Cities / Regions</div>
+					<div id="dashCityBars" class="bar-list"></div>
+				</div>
+			</div>
+
+			<div style="margin-top:14px;">
+				<div class="title" style="font-size:16px;">Training Engagement</div>
+				<div class="subtle">Total trainings attended: <span id="dashTrainTotal">0</span></div>
+				<div id="dashTopTrainings" class="bar-list" style="margin-top:8px;"></div>
+			</div>
+		</div>
+		<!-- Members Feature (populated after Retrieve) -->
+		<div id="membersFeature" class="card" style="display:none; margin-bottom:16px;">
+			<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+				<div>
+					<div class="title" style="margin-bottom:4px;">PAPSI Members</div>
+					<div class="subtle" id="membersSummary">Waiting for data…</div>
+				</div>
+				<div class="row" style="align-items:flex-end; gap:8px;">
+					<div class="field" style="min-width:200px;">
+						<label for="membersSearch">Search</label>
+						<input id="membersSearch" type="text" placeholder="Name, email, school, specialization" />
+					</div>
+					<div class="field" style="min-width:140px;">
+						<label for="membersFilterMembership">Membership</label>
+						<select id="membersFilterMembership">
+							<option value="all">All</option>
+							<option value="active">Active</option>
+							<option value="expired">Expired</option>
+						</select>
+					</div>
+					<button id="membersClearBtn" class="btn secondary" type="button" style="margin-top:22px;">Clear</button>
+				</div>
+			</div>
+			<div style="margin-top:14px; overflow:auto;">
+				<table id="membersTable" style="width:100%; border-collapse:collapse; font-size:13px;">
+					<thead>
+						<tr style="text-align:left;">
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">#</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Name</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Email</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Mobile</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Membership</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Membership Date</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Specialization</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">School</th>
+						</tr>
+					</thead>
+					<tbody id="membersTbody"></tbody>
+				</table>
+			</div>
+			<div id="membersEmpty" class="status info" style="display:none; margin-top:10px;">No members match current filters.</div>
+		</div>
+	</div>
+
+	<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+	<!-- Removed feature modals and cards per request -->
+
+	<script>
+		// Config
+		const SCRIPT_BASE = 'https://script.google.com/macros/s/AKfycbydRAAaO83lKJpCpu7a48YlncAX9R5N1KvRx5LqMofd6Dd-O1S_Mnp9tGysVGFV7q6dZQ/exec';
+		const SHEET = 'Sheet1';
+		// Dedicated endpoint for membershipdata retrieval (per request)
+		const RETRIEVE_BASE = 'https://script.google.com/macros/s/AKfycbztdDNUY9aqUG0Bcd8mYabmO2Y7btCC2lMM7PiLCMDhSCr7huYip1HfWGRlXKjK9of9_w/exec';
+		// Remember-me keys
+		const REMEMBER_FLAG_KEY = 'PAPSI_ADMIN_REMEMBER';
+		const REMEMBER_EMAIL_KEY = 'PAPSI_ADMIN_SAVED_EMAIL';
+		const REMEMBER_PASS_KEY = 'PAPSI_ADMIN_SAVED_PASS'; // stored as base64; note: obfuscation, not encryption
+		// Demo admin key verifier: replace ADMIN_AUTH_URL with your Apps Script admin auth
+		const ADMIN_AUTH_URL = null; // e.g., `${SCRIPT_BASE}?SH=${SHEET}&func=adminlogin&email=...`
+		const ADMIN_SESSION_KEY = 'PAPSI_ADMIN_ACTIVE';
+		const ADMIN_EMAIL_KEY = 'PAPSI_ADMIN_EMAIL';
+		let ADMIN_FLOW_STEP = 'email'; // 'email' | 'password'
+		const IDS_SESSION_KEY = 'PAPSI_IDS';
+		const ADMIN_PROFILE_KEY = 'PAPSI_ADMIN_PROFILE';
+		// IDs endpoint (Get)
+		const IDS_GET_URL = 'https://script.google.com/macros/s/AKfycbzqiw4j1ibbbNIEYp_VIwXIQqI4feO3lpseMSGtGG9UeyznBDqaeuzx-pvO0QNCHUEU/exec?func=idget';
+		// IDs endpoint (Write)
+		const IDS_WRITE_BASE = 'https://script.google.com/macros/s/AKfycbzqiw4j1ibbbNIEYp_VIwXIQqI4feO3lpseMSGtGG9UeyznBDqaeuzx-pvO0QNCHUEU/exec?func=idwrite';
+
+		// Utils
+		function showToast(msg, type='info', ms=2600, position='top-right'){
+			const t = document.getElementById('toast'); if (!t) return;
+			t.textContent = msg;
+			t.style.background = (type==='error'?'#991b1b': type==='success'?'#065f46': '#111827');
+			// position handling
+			t.style.top = t.style.bottom = t.style.left = t.style.right = 'auto';
+			if (position.includes('top')){ t.style.top = '12px'; } else { t.style.bottom = '12px'; }
+			if (position.includes('left')){ t.style.left = '12px'; } else { t.style.right = '12px'; }
+			t.classList.add('show');
+			clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('show'), ms);
+		}
+		function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+		function setPending(btn, on, labelOn){
+			if (!btn) return;
+			if (!btn._orig) btn._orig = btn.textContent;
+			btn.disabled = !!on; btn.textContent = on ? (labelOn || 'Working…') : btn._orig;
+		}
+		// localStorage helpers for persistent login
+		function safeLS(){ try { return window.localStorage; } catch(e){ return null; } }
+		function lsGet(k){ try { return safeLS()?.getItem(k) ?? null; } catch(e){ return null; } }
+		function lsSet(k,v){ try { safeLS()?.setItem(k, v); } catch(e){} }
+		function lsRemove(k){ try { safeLS()?.removeItem(k); } catch(e){} }
+		function saveRemember(email, password, on){
+			if (!on){ lsRemove(REMEMBER_FLAG_KEY); lsRemove(REMEMBER_EMAIL_KEY); lsRemove(REMEMBER_PASS_KEY); return; }
+			lsSet(REMEMBER_FLAG_KEY, '1');
+			if (email) lsSet(REMEMBER_EMAIL_KEY, String(email));
+			if (password) {
+				try { lsSet(REMEMBER_PASS_KEY, btoa(unescape(encodeURIComponent(password)))); }
+				catch { lsSet(REMEMBER_PASS_KEY, btoa(password)); }
+			}
+		}
+		function getRemembered(){
+			const enabled = lsGet(REMEMBER_FLAG_KEY) === '1';
+			const email = lsGet(REMEMBER_EMAIL_KEY) || '';
+			let password = '';
+			try {
+				const raw = lsGet(REMEMBER_PASS_KEY);
+				password = raw ? decodeURIComponent(escape(atob(raw))) : '';
+			} catch { try { const raw = lsGet(REMEMBER_PASS_KEY); password = raw ? atob(raw) : ''; } catch(_){} }
+			return { enabled, email, password };
+		}
+		function parseFlexDate(val){
+			if (!val) return null;
+			if (val instanceof Date) return isNaN(val) ? null : val;
+			if (typeof val === 'number') { const d = new Date(val); return isNaN(d)?null:d; }
+			let s = String(val).trim();
+			if (!s) return null;
+			s = s.replace(/(\d+)(st|nd|rd|th)/gi,'$1').replace(/,/g,'');
+			// Handle "D day of Month YYYY" e.g., 5th day of October, 2025
+			{
+				const m = s.match(/^(\d{1,2})\s+day\s+of\s+([A-Za-z]+)\s+(\d{2,4})$/i);
+				if (m){
+					const day = parseInt(m[1],10);
+					const mo = m[2].slice(0,3).toLowerCase();
+					const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+					let year = parseInt(m[3],10); if (year<100) year = year>=70?1900+year:2000+year;
+					if (months[mo] !== undefined){ const dt=new Date(year, months[mo], day); return isNaN(dt)?null:dt; }
+				}
+			}
+			// ISO or yyyy-mm-dd
+			if (/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/.test(s)) { const d = new Date(s); return isNaN(d)?null:d; }
+			// dd/mm/yyyy or mm/dd/yyyy -> assume dd/mm if first > 12
+			if (/^\d{1,2}[/]\d{1,2}[/]\d{2,4}$/.test(s)){
+				const [a,b,c] = s.split('/').map(x=>parseInt(x,10));
+				const y = c<100 ? (c>=70?1900+c:2000+c) : c;
+				const mmFirst = !(a>12);
+				const m = (mmFirst?a:b)-1, d = mmFirst?b:a;
+				const dt = new Date(y, m, d);
+				return isNaN(dt)?null:dt;
+			}
+			// 05 Feb 2026 or Feb 05 2026
+			const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+			const m1 = s.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{2,4})$/);
+			const m2 = s.match(/^([A-Za-z]+)\s+(\d{1,2})\s+(\d{2,4})$/);
+			let y,m,d;
+			if (m1){ d=parseInt(m1[1],10); m=months[m1[2].slice(0,3).toLowerCase()]; y=parseInt(m1[3],10); }
+			if (m2){ d=parseInt(m2[2],10); m=months[m2[1].slice(0,3).toLowerCase()]; y=parseInt(m2[3],10); }
+			if (m!==undefined){ if (y<100) y = y>=70?1900+y:2000+y; const dt=new Date(y,m,d); return isNaN(dt)?null:dt; }
+			const dt = new Date(s); return isNaN(dt)?null:dt;
+		}
+
+		// Retrieve membership data (GET)
+		async function retrieveMembershipData(){
+			const btn = document.getElementById('retrieveBtn');
+			const notice = document.getElementById('retrieveNotice');
+			const outCard = document.getElementById('retrieveOutputCard');
+			const out = document.getElementById('retrieveOutput');
+			if (notice) { notice.textContent = ''; notice.className = 'status info'; }
+			let email = String(document.getElementById('adminEmail')?.value || '').trim();
+			let password = String(document.getElementById('adminPassword')?.value || '').trim();
+			// Use remembered creds if inputs are empty
+			if (!email || !password){
+				const rem = getRemembered();
+				if (!email && rem.email) email = rem.email;
+				if (!password && rem.password) password = rem.password;
+				// Reflect into inputs (optional)
+				try { if (email) document.getElementById('adminEmail').value = email; } catch{}
+				try { if (password) document.getElementById('adminPassword').value = password; } catch{}
+			}
+			if (!isValidEmail(email)) { if (notice){ notice.textContent = 'Enter a valid Admin email in Administrator Access.'; notice.className = 'status error'; } return; }
+			if (!password) { if (notice){ notice.textContent = 'Enter your Admin password in Administrator Access.'; notice.className = 'status error'; } return; }
+			const baseUrl = `${RETRIEVE_BASE}?func=membershipdata&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+			setPending(btn, true, 'Retrieving…');
+			try{
+				// Try GET without SH first
+				let attempt = 1;
+				let lastText = '';
+				let data = null;
+				let ok = false;
+				let usedUrl = baseUrl;
+				let usedMethod = 'GET';
+				const tryParse = (t)=>{ try{ return JSON.parse(t); }catch{ return null; } };
+				async function tryRequest(url, method){
+					const res = await fetch(url, { method });
+					const txt = await res.text();
+					return { status: res.status, ok: res.ok, text: txt };
+				}
+
+				// Attempt 1: GET base
+				let r = await tryRequest(baseUrl, 'GET');
+				lastText = r.text;
+				data = tryParse(r.text);
+				ok = !!(data && data.status === 'success');
+
+				// Attempt 2: If not ok, try GET with SH
+				if (!ok){
+					attempt = 2; usedUrl = baseUrl + `&SH=${encodeURIComponent(SHEET)}`;
+					r = await tryRequest(usedUrl, 'GET');
+					lastText = r.text; data = tryParse(r.text);
+					ok = !!(data && data.status === 'success');
+				}
+
+				// Attempt 3: If still not ok, try POST with SH
+				if (!ok){
+					attempt = 3; usedMethod = 'POST';
+					r = await tryRequest(usedUrl, 'POST');
+					lastText = r.text; data = tryParse(r.text);
+					ok = !!(data && data.status === 'success');
+				}
+
+				if (!ok){
+					// Show raw response to help diagnose
+					if (out){ out.textContent = (lastText || '').slice(0, 4000); }
+					if (outCard){ outCard.style.display = 'block'; }
+					throw new Error('Unexpected response');
+				}
+
+				// Success: pretty print JSON
+				try { sessionStorage.setItem('PAPSI_RETRIEVE_DATA', JSON.stringify(data)); } catch(_e){}
+				showToast('Data retrieved', 'success');
+				if (Array.isArray(data.data)) {
+					renderMembers(data.data);
+				} else {
+					showToast('No members array in response','warn');
+				}
+			} catch(e){
+				if (notice){ notice.textContent = e?.message || 'Failed to retrieve data.'; notice.className = 'status error'; }
+				showToast(e?.message || 'Failed to retrieve data', 'error');
+			} finally {
+				setPending(btn, false);
+			}
+		}
+
+		// ========= Members Rendering =========
+		let MEMBERS_RAW = [];
+		function safeStr(v){
+			return typeof v === 'string' ? v.trim() : String(v ?? '').trim();
+		}
+		function normalizeMember(m, idx){
+			const dateRaw = safeStr(m?.date);
+			const dt = parseFlexDate(dateRaw);
+			let membership = 'Expired';
+			if (dt){
+				const end = new Date(dt.getTime());
+				end.setHours(23,59,59,999);
+				membership = (new Date() <= end) ? 'Active' : 'Expired';
+			}
+			return {
+				idx,
+				name: safeStr(m?.nametext ?? m?.name),
+				email: safeStr(m?.email),
+				membership,
+				specialization: safeStr(m?.specialization),
+				school: safeStr(m?.school),
+				type: safeStr(m?.type),
+				mobile: safeStr(m?.mobile),
+				date: dateRaw,
+				data: m
+			};
+		}
+		function renderMembers(raw){
+			MEMBERS_RAW = Array.isArray(raw) ? raw.map(normalizeMember) : [];
+			const feature = document.getElementById('membersFeature');
+			if (feature) feature.style.display = 'block';
+			// Build dashboard metrics and show dashboard card
+			try { buildDashboard(MEMBERS_RAW); } catch (e) { console && console.warn && console.warn('Dashboard build failed:', e); }
+			filterAndDrawMembers();
+		}
+
+		function filterAndDrawMembers(){
+			const search = (document.getElementById('membersSearch')?.value || '').toLowerCase();
+			const fMembership = (document.getElementById('membersFilterMembership')?.value || 'all');
+			let list = MEMBERS_RAW.slice();
+			if (search){
+				list = list.filter(m =>
+					m.name.toLowerCase().includes(search) ||
+					m.email.toLowerCase().includes(search) ||
+					m.school.toLowerCase().includes(search) ||
+					m.specialization.toLowerCase().includes(search)
+				);
+			}
+			if (fMembership !== 'all'){
+				list = list.filter(m => m.membership.toLowerCase() === fMembership);
+			}
+			const tbody = document.getElementById('membersTbody');
+			const empty = document.getElementById('membersEmpty');
+			const summary = document.getElementById('membersSummary');
+			if (!tbody) return;
+			tbody.innerHTML = '';
+			if (summary){ summary.textContent = `${list.length} of ${MEMBERS_RAW.length} members shown`; }
+			if (list.length === 0){ if (empty) empty.style.display='block'; return; } else { if (empty) empty.style.display='none'; }
+			const frag = document.createDocumentFragment();
+			list.forEach((m,i)=>{
+				const tr = document.createElement('tr');
+				tr.style.borderBottom = '1px solid var(--line)';
+				const cells = [
+					(i+1).toString(),
+					m.name || '—',
+					m.email || '—',
+					m.mobile || '—',
+					formatMembershipCell(m.membership),
+					formatDateLongPadded(m.date) || '—',
+					m.specialization || '—',
+					m.school || '—'
+				];
+				cells.forEach((val, ci)=>{
+					const td = document.createElement('td');
+					td.style.padding='6px 10px';
+					if (ci===4 && typeof val !== 'string'){ td.appendChild(val); } else { td.textContent = typeof val === 'string'? val : String(val); }
+					tr.appendChild(td);
+				});
+				tr.addEventListener('click',()=> toggleMemberExpand(tr,m));
+				frag.appendChild(tr);
+			});
+			tbody.appendChild(frag);
+		}
+		function formatMembershipCell(stat){
+			const s = (stat||'').toLowerCase();
+			const span = document.createElement('span');
+			span.textContent = stat || '—';
+			span.className = 'chip ' + (s==='active' ? 'pill-ok' : s==='expired' ? 'pill-warn' : '');
+			return span;
+		}
+		function toggleMemberExpand(row, member){
+			// Collapse existing expansion
+			const next = row.nextElementSibling;
+			if (next && next.classList.contains('member-expand')){ next.remove(); return; }
+			// Build expansion row
+			const exp = document.createElement('tr');
+			exp.className = 'member-expand';
+			const td = document.createElement('td');
+			td.colSpan = 8;
+			td.style.background = '#fafafa';
+			td.style.padding = '10px 12px';
+			const d = member.data;
+			const extra = [
+				['Title', d?.title],
+				['First Name', d?.firstname],
+				['Middle Initial', d?.middleinitial],
+				['Last Name', d?.lastname],
+				['Suffix', d?.suffix],
+				['ID', d?.id],
+				['Membership Date', formatDateLongPadded(d?.date)],
+				['School', d?.school],
+				['Address', d?.address],
+				['Position', d?.position],
+				['Expertise', d?.expertise],
+				['Birthdate', formatDateLongPadded(d?.birthdate)],
+				['Counter', d?.counter],
+				['Last Accessed', formatDateLongPadded(d?.lastaccessed)],
+				['Trainings', d?.trainings]
+			];
+			const inner = document.createElement('div');
+			inner.style.display='grid';
+			inner.style.gridTemplateColumns='160px 1fr';
+			inner.style.gap='4px 10px';
+			extra.forEach(([k,v])=>{
+				const kEl = document.createElement('div'); kEl.className='subtle'; kEl.textContent = k;
+				const vEl = document.createElement('div'); vEl.textContent = v || '—';
+				inner.appendChild(kEl); inner.appendChild(vEl);
+			});
+			td.appendChild(inner);
+			exp.appendChild(td);
+			row.parentNode.insertBefore(exp, row.nextElementSibling);
+		}
+
+		// ======== Dashboard aggregation/rendering ========
+		function splitList(text){
+			const s = typeof text === 'string' ? text : String(text ?? '');
+			return s.split(/[|;,/]+/).map(v=>v.trim()).filter(v=>v.length>0);
+		}
+		function normalizeSpecTerm(term){
+			const t = String(term||'').toLowerCase();
+			if (!t) return 'Other';
+			if (t.includes('physics')) return 'Physics';
+			if (t.includes('chem')) return 'Chemistry';
+			if (t.includes('bio')) return 'Biology';
+			if ((t.includes('general') || t.includes('gen')) && t.includes('sci')) return 'General Science';
+			if (t.includes('earth')) return 'Earth Science';
+			if (t.includes('env')) return 'Environmental Science';
+			return t.charAt(0).toUpperCase() + t.slice(1);
+		}
+		function extractCityRegion(address){
+			const s = safeStr(address);
+			if (!s) return '';
+			const mCity = s.match(/([A-Za-z .'-]+City)/i);
+			if (mCity) return mCity[1].trim();
+			const mReg = s.match(/Region\s*[A-Za-z0-9\-]+/i);
+			if (mReg) return mReg[0].trim();
+			const parts = s.split(',').map(p=>p.trim()).filter(Boolean);
+			let pick = parts.length>1 ? parts[parts.length-1] : s;
+			pick = pick.replace(/\bPhilippines?\b/i,'').trim();
+			return pick || s;
+		}
+		function renderBarList(container, pairs, maxItems = 8){
+			const el = document.getElementById(container);
+			if (!el) return;
+			el.innerHTML = '';
+			const top = pairs.slice(0, maxItems);
+			const maxVal = Math.max(1, ...top.map(p=>p[1]));
+			top.forEach(([label,count])=>{
+				const row = document.createElement('div'); row.className = 'bar-row';
+				const lab = document.createElement('div'); lab.className = 'bar-label'; lab.title = label; lab.textContent = label;
+				const bar = document.createElement('div'); bar.className = 'bar';
+				const fill = document.createElement('span'); fill.style.width = Math.round(count/maxVal*100) + '%';
+				bar.appendChild(fill);
+				const c = document.createElement('div'); c.className = 'bar-count'; c.textContent = count;
+				row.appendChild(lab); row.appendChild(bar); row.appendChild(c);
+				el.appendChild(row);
+			});
+			if (top.length === 0){
+				const empty = document.createElement('div'); empty.className='subtle'; empty.textContent='No data';
+				el.appendChild(empty);
+			}
+		}
+		function buildDashboard(list){
+			// KPIs
+			const total = list.length;
+			const active = list.filter(m=>m.membership==='Active').length;
+			const expired = total - active;
+			const setText = (id,val)=>{ const el=document.getElementById(id); if (el) el.textContent = Number.isFinite(val)?val.toLocaleString():String(val); };
+			setText('dashTotal', total);
+			setText('dashActive', active);
+			setText('dashExpired', expired);
+			// Specialization counts
+			const specMap = new Map();
+			list.forEach(m=>{
+				const specs = splitList(m.specialization || m.data?.specialization || '');
+				if (specs.length===0){ const k='Other'; specMap.set(k,(specMap.get(k)||0)+1); return; }
+				specs.forEach(s=>{ const k = normalizeSpecTerm(s); specMap.set(k,(specMap.get(k)||0)+1); });
+			});
+			const specPairs = Array.from(specMap.entries()).sort((a,b)=>b[1]-a[1]);
+			renderBarList('dashSpecBars', specPairs, 8);
+			// Cities/Regions
+			const cityMap = new Map();
+			list.forEach(m=>{
+				const city = extractCityRegion(m.data?.address || m.data?.school || '');
+				if (!city) return;
+				cityMap.set(city,(cityMap.get(city)||0)+1);
+			});
+			const cityPairs = Array.from(cityMap.entries()).sort((a,b)=>b[1]-a[1]);
+			renderBarList('dashCityBars', cityPairs, 10);
+			// Training engagement
+			let trainTotal = 0;
+			const trainMap = new Map();
+			list.forEach(m=>{
+				const rawTrain = m.data?.trainings || '';
+				// Split only on explicit space-pipe-space sequences; allow variable spaces around pipe
+				const arr = String(rawTrain).split(/\s+\|\s+/).map(x=>x.trim()).filter(x=>x.length>0);
+				trainTotal += arr.length;
+				arr.forEach(t=>{
+					const key = t.replace(/\s+/g,' ').trim();
+					if (!key) return;
+					trainMap.set(key,(trainMap.get(key)||0)+1);
+				});
+			});
+			const trainPairs = Array.from(trainMap.entries()).sort((a,b)=>b[1]-a[1]);
+			setText('dashTrainTotal', trainTotal);
+			renderBarList('dashTopTrainings', trainPairs, 10);
+			// Show dashboard
+			const card = document.getElementById('dashboardCard');
+			if (card) card.style.display = 'block';
+		}
+		// Wire filters
+		document.getElementById('membersSearch')?.addEventListener('input', ()=> filterAndDrawMembers());
+		document.getElementById('membersFilterMembership')?.addEventListener('change', ()=> filterAndDrawMembers());
+		document.getElementById('membersClearBtn')?.addEventListener('click', ()=>{
+			const s = document.getElementById('membersSearch'); if (s) s.value='';
+			const fm = document.getElementById('membersFilterMembership'); if (fm) fm.value='all';
+			filterAndDrawMembers();
+		});
+		function formatValidity(val){
+			const d = parseFlexDate(val); if (!d) return '';
+			const fmt = d.toLocaleDateString('en-US',{month:'short', day:'2-digit', year:'numeric'});
+			return 'until ' + fmt;
+		}
+		// Format date to MM/DD/YYYY (pad month if padMonth=true; otherwise single-digit month)
+		function fmtMDY(date, padMonth=true){
+			const d = date instanceof Date ? date : new Date(date);
+			if (isNaN(d)) return '';
+			const m = d.getMonth()+1; const day = d.getDate(); const y = d.getFullYear();
+			const mm = padMonth ? String(m).padStart(2,'0') : String(m);
+			return `${mm}/${String(day).padStart(2,'0')}/${y}`;
+		}
+		// Format date to YYYY-MM-DD for <input type="date"> to avoid timezone shifts
+		function fmtYMD(date){
+			const d = date instanceof Date ? date : new Date(date);
+			if (isNaN(d)) return '';
+			const y = d.getFullYear();
+			const m = String(d.getMonth()+1).padStart(2,'0');
+			const day = String(d.getDate()).padStart(2,'0');
+			return `${y}-${m}-${day}`;
+		}
+		function isMembershipActive(profile){
+			const v = profile?.date || profile?.validity || profile?.expiry || profile?.expiration || profile?.Date || profile?.Validity || profile?.Expiry || profile?.Expiration;
+			const d = parseFlexDate(v); if (!d) return true;
+			d.setHours(23,59,59,999);
+			return new Date() <= d;
+		}
+
+		// Training helpers for date/code formats
+		function ordinalSuffix(n){
+			const s = ['th','st','nd','rd'];
+			const v = n % 100;
+			return s[(v-20)%10] || s[v] || s[0];
+		}
+		function formatDate1Long(d){
+			// MMMM D, YYYY e.g., October 5, 2025
+			const dt = d instanceof Date ? d : new Date(d);
+			if (isNaN(dt)) return '';
+			return dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+		}
+		function formatDate2Phrase(d){
+			// Dth day of MMMM, YYYY e.g., 5th day of October, 2025
+			const dt = d instanceof Date ? d : new Date(d);
+			if (isNaN(dt)) return '';
+			const day = dt.getDate();
+			const month = dt.toLocaleString('en-US', { month: 'long' });
+			const year = dt.getFullYear();
+			return `${day}${ordinalSuffix(day)} day of ${month}, ${year}`;
+		}
+		function formatDateLongPadded(val){
+			// MMMM dd, YYYY with zero-padded day; accepts Date or parseable string
+			const dt = parseFlexDate(val);
+			if (!dt) return '';
+			const month = dt.toLocaleString('en-US', { month: 'long' });
+			const day = String(dt.getDate()).padStart(2, '0');
+			const year = dt.getFullYear();
+			return `${month} ${day}, ${year}`;
+		}
+		function generateTrainingCode(){
+			// Three letters + six digits e.g., CMC102349
+			const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			let partA = '';
+			for (let i=0;i<3;i++){ partA += letters[Math.floor(Math.random()*letters.length)]; }
+			const partB = String(Math.floor(Math.random()*1_000_000)).padStart(6,'0');
+			return partA + partB;
+		}
+
+		// IDs helpers (UX only)
+		function loadIds(){
+			try{ const raw = sessionStorage.getItem(IDS_SESSION_KEY); return raw ? JSON.parse(raw) : {}; } catch(e){ return {}; }
+		}
+		function saveIds(ids){
+			try{ sessionStorage.setItem(IDS_SESSION_KEY, JSON.stringify(ids || {})); } catch(e){}
+		}
+		function renderIds(ids){
+			const pidEl = document.getElementById('papsiIdField');
+			const invEl = document.getElementById('invoiceNoField');
+			if (pidEl) pidEl.value = ids?.papsiId || '';
+			if (invEl) invEl.value = ids?.invoiceNo || '';
+		}
+		function incrementIdString(s){
+			const str = String(s ?? '');
+			const m = str.match(/(\d+)(?!.*\d)/);
+			if (!m) return str;
+			const num = m[1];
+			const inc = String(parseInt(num, 10) + 1).padStart(num.length, '0');
+			return str.slice(0, m.index) + inc + str.slice(m.index + num.length);
+		}
+		function generateSampleIds(){
+			const now = new Date();
+			const y = now.getFullYear();
+			const seed = (now.getMonth()+1)*100000 + now.getDate()*1000 + now.getHours()*10 + Math.floor(Math.random()*10);
+			const seq = String(seed).padStart(6,'0');
+			return { papsiId: `PAPSI-${y}-${seq}`, invoiceNo: `INV-${y}-${seq}` };
+		}
+		function parseIdsResponse(raw){
+			if (raw == null) return {};
+			let text = typeof raw === 'string' ? raw.trim() : '';
+			// Try JSON first
+			try {
+				const j = typeof raw === 'string' ? JSON.parse(text) : raw;
+				if (j && typeof j === 'object'){
+					// Normalize keys case-insensitively
+					const entries = Object.entries(j).reduce((acc,[k,v])=>{ acc[String(k).toLowerCase()] = v; return acc; },{});
+					const pid = entries['papsiid'] || entries['papsi_id'] || entries['papsi'] || entries['papsi id'] || entries['id'] || entries['memberid'];
+					const inv = entries['invoiceno'] || entries['invoice_no'] || entries['invoice'] || entries['invoice number'] || entries['invoicenumber'] || entries['invoicenum'] || entries['or'] || entries['ornumber'];
+					return { papsiId: pid ? String(pid) : '', invoiceNo: inv ? String(inv) : '' };
+				}
+			} catch {}
+			// If JSON array
+			try {
+				const arr = JSON.parse(text);
+				if (Array.isArray(arr) && arr.length >= 2){
+					return { papsiId: String(arr[0] ?? ''), invoiceNo: String(arr[1] ?? '') };
+				}
+			} catch {}
+			// Fallback: parse delimited text
+			if (text){
+				// Look for labeled pairs like PAPSI: X, INVOICE: Y
+				const rePid = /papsi\s*id\s*[:=-]\s*([^\n,|]+)/i;
+				const reInv = /invoice\s*(?:no|number|num)?\s*[:=-]\s*([^\n,|]+)/i;
+				const m1 = text.match(rePid);
+				const m2 = text.match(reInv);
+				if (m1 || m2){ return { papsiId: m1 ? m1[1].trim() : '', invoiceNo: m2 ? m2[1].trim() : '' }; }
+				// Split by newline/pipe/comma
+				const parts = text.split(/\r?\n|\|/).join(',').split(',').map(s=>s.trim()).filter(Boolean);
+				if (parts.length >= 2){ return { papsiId: parts[0], invoiceNo: parts[1] }; }
+			}
+			return {};
+		}
+		function openIdsModal(){
+			const modal = document.getElementById('idsModal');
+			const pInput = document.getElementById('papsiIdInput');
+			const iInput = document.getElementById('invoiceNoInput');
+			const ids = loadIds();
+			pInput.value = ids.papsiId || '';
+			iInput.value = ids.invoiceNo || '';
+			modal.classList.add('show');
+			setTimeout(()=> pInput.focus(), 0);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeIdsModal(); } if (e.key==='Enter'){ e.preventDefault(); saveFromModal(); } }
+			modal.addEventListener('keydown', onKey);
+			modal._onKey = onKey;
+		}
+		function closeIdsModal(){
+			const modal = document.getElementById('idsModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey = null; }
+			modal.classList.remove('show');
+		}
+		function saveFromModal(){
+			const p = String(document.getElementById('papsiIdInput').value||'').trim();
+			const i = String(document.getElementById('invoiceNoInput').value||'').trim();
+			const ids = { papsiId: p, invoiceNo: i };
+			saveIds(ids); renderIds(ids); closeIdsModal(); showToast('IDs updated (local only)','success');
+		}
+
+		// Membership Request modal helpers
+		function openMemReqModal(){
+			const modal = document.getElementById('memReqModal');
+			// Prefill invoice/papsi from current fields if present
+			const pid = document.getElementById('papsiIdField')?.value || '';
+			const inv = document.getElementById('invoiceNoField')?.value || '';
+			const nextPid = incrementIdString(pid);
+			const nextInv = incrementIdString(inv);
+			document.getElementById('mrPapsiID').value = nextPid;
+			document.getElementById('mrInvoiceNumber').value = nextInv;
+			// Prefill dates and fee
+			const today = new Date();
+			document.getElementById('mrInvoiceDate').value = fmtMDY(today, true); // MM/DD/YYYY
+			document.getElementById('mrMemStartDate').value = fmtMDY(today, true); // MM/DD/YYYY
+			const nextYear = new Date(today.getFullYear()+1, today.getMonth(), today.getDate());
+			document.getElementById('mrMembEndDate').value = fmtMDY(nextYear, false); // M/DD/YYYY (month not padded)
+			document.getElementById('mrTotalFee').value = '500';
+			modal.classList.add('show');
+			setTimeout(()=> document.getElementById('mrRowNumber').focus(), 0);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeMemReqModal(); } }
+			modal.addEventListener('keydown', onKey);
+			modal._onKey = onKey;
+		}
+		function closeMemReqModal(){
+			const modal = document.getElementById('memReqModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey = null; }
+			modal.classList.remove('show');
+		}
+		async function submitMemReq(){
+			const payload = {
+				RowNumber: document.getElementById('mrRowNumber').value.trim(),
+				TotalFee: document.getElementById('mrTotalFee').value.trim(),
+				InvoiceDate: document.getElementById('mrInvoiceDate').value.trim(),
+				InvoiceNumber: document.getElementById('mrInvoiceNumber').value.trim(),
+				PapsiID: document.getElementById('mrPapsiID').value.trim(),
+				MemStartDate: document.getElementById('mrMemStartDate').value.trim(),
+				MembEndDate: document.getElementById('mrMembEndDate').value.trim()
+			};
+			// Confirmation then submit to webhook
+			openConfirm('Are you ready to submit the membership request to master list?', async () => {
+				const yesBtn = document.getElementById('confirmYesBtn');
+				const noBtn = document.getElementById('confirmNoBtn');
+				if (yesBtn) { yesBtn.disabled = true; yesBtn.textContent = 'Submitting…'; }
+				if (noBtn) noBtn.disabled = true;
+				try{
+					const base = 'https://hook.eu1.make.com/68xrav0c4mfcgqb6decumt95ekn8bia3';
+					const qs = `?RowNumber=${encodeURIComponent(payload.RowNumber)}&TotalFee=${encodeURIComponent(payload.TotalFee)}&InvoiceDate=${encodeURIComponent(payload.InvoiceDate)}&InvoiceNumber=${encodeURIComponent(payload.InvoiceNumber)}&PapsiID=${encodeURIComponent(payload.PapsiID)}&MemStartDate=${encodeURIComponent(payload.MemStartDate)}&MembEndDate=${encodeURIComponent(payload.MembEndDate)}`;
+					const res = await fetch(base + qs, { method:'POST' });
+					const text = await res.text();
+					closeConfirm();
+					closeMemReqModal();
+					showToast(text || 'Submitted', 'success', 3500, 'top-right');
+					// After successful submission, update IDs via Apps Script idwrite
+					// If any field is empty, use the present value from Get IDs (session), then fallback to the current dashboard fields
+					try{
+						const current = loadIds() || {};
+						const fieldP = String(document.getElementById('papsiIdField')?.value || '').trim();
+						const fieldI = String(document.getElementById('invoiceNoField')?.value || '').trim();
+						const finalP = (payload.PapsiID && payload.PapsiID.trim()) || current.papsiId || fieldP;
+						const finalI = (payload.InvoiceNumber && payload.InvoiceNumber.trim()) || current.invoiceNo || fieldI;
+						if (!finalP && !finalI){
+							showToast('IDs not updated: missing PapsiID and InvoiceNumber', 'info', 3000, 'top-right');
+						} else {
+							const writeUrl = IDS_WRITE_BASE + '&PapsiID=' + encodeURIComponent(finalP) + '&InvoiceNum=' + encodeURIComponent(finalI);
+							const res2 = await fetch(writeUrl, { method:'POST' });
+							const msg = await res2.text();
+							// Sync UI and session values
+							const ids = { papsiId: finalP, invoiceNo: finalI };
+							saveIds(ids); renderIds(ids);
+							showToast(msg || 'IDs updated', 'success', 3000, 'top-right');
+						}
+					} catch(e2){
+							showToast(e2?.message || 'Failed to update IDs', 'error', 3000, 'top-right');
+					}
+				} catch(e){
+					closeConfirm();
+					showToast(e?.message || 'Submission failed', 'error', 3500, 'top-right');
+				}
+			});
+		}
+
+		// Confirm modal helpers
+		function openConfirm(message, onYes){
+			const modal = document.getElementById('confirmModal');
+			const msgEl = document.getElementById('confirmMessage');
+			const yesBtn = document.getElementById('confirmYesBtn');
+			const noBtn = document.getElementById('confirmNoBtn');
+			const closeBtn = document.getElementById('confirmCloseBtn');
+			if (msgEl) msgEl.textContent = message || 'Are you sure?';
+			// Reset buttons to default state on open
+			if (yesBtn){ if (!yesBtn._orig) yesBtn._orig = yesBtn.textContent; yesBtn.textContent = yesBtn._orig || 'Yes'; yesBtn.disabled = false; }
+			if (noBtn){ if (!noBtn._orig) noBtn._orig = noBtn.textContent; noBtn.textContent = noBtn._orig || 'No'; noBtn.disabled = false; }
+			modal.classList.add('show');
+			// Clean existing listeners
+			[yesBtn,noBtn,closeBtn].forEach(el=>{ if (el && el._fn){ el.removeEventListener('click', el._fn); el._fn=null; } });
+			// Attach
+			yesBtn._fn = async ()=>{ try { await onYes?.(); } catch {} };
+			noBtn._fn = ()=> closeConfirm();
+			closeBtn._fn = ()=> closeConfirm();
+			yesBtn.addEventListener('click', yesBtn._fn);
+			noBtn.addEventListener('click', noBtn._fn);
+			closeBtn.addEventListener('click', closeBtn._fn);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeConfirm(); } }
+			modal.addEventListener('keydown', onKey); modal._onKey = onKey;
+			modal.addEventListener('click', function onBack(e){ if (e.target===e.currentTarget){ closeConfirm(); modal.removeEventListener('click', onBack); } });
+		}
+		function closeConfirm(){
+			const modal = document.getElementById('confirmModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey = null; }
+			const yesBtn = document.getElementById('confirmYesBtn');
+			const noBtn = document.getElementById('confirmNoBtn');
+			const closeBtn = document.getElementById('confirmCloseBtn');
+			[yesBtn,noBtn,closeBtn].forEach(el=>{ if (el && el._fn){ el.removeEventListener('click', el._fn); el._fn=null; } });
+			// Restore buttons to defaults when closing
+			if (yesBtn){ yesBtn.disabled = false; if (yesBtn._orig) yesBtn.textContent = yesBtn._orig; else yesBtn.textContent = 'Yes'; }
+			if (noBtn){ noBtn.disabled = false; if (noBtn._orig) noBtn.textContent = noBtn._orig; else noBtn.textContent = 'No'; }
+			modal.classList.remove('show');
+		}
+
+		// Auth (simple key; replace with server verification)
+				function showPasswordStep(){
+					const row = document.getElementById('adminPwRow');
+					const btn = document.getElementById('adminLoginBtn');
+					if (row) row.classList.remove('hidden');
+					if (btn) btn.textContent = 'Sign in';
+					ADMIN_FLOW_STEP = 'password';
+					setTimeout(()=>{ try{ document.getElementById('adminPassword')?.focus(); }catch(e){} }, 0);
+				}
+
+				function resetAdminGateToEmail(){
+					ADMIN_FLOW_STEP = 'email';
+					try { sessionStorage.removeItem(ADMIN_EMAIL_KEY); } catch(e){}
+					lsRemove(ADMIN_EMAIL_KEY);
+					const row = document.getElementById('adminPwRow'); if (row) row.classList.add('hidden');
+					const btn = document.getElementById('adminLoginBtn'); if (btn) btn.textContent = 'Continue';
+					const emailInput = document.getElementById('adminEmail'); if (emailInput) emailInput.value = '';
+					const passInput = document.getElementById('adminPassword'); if (passInput) passInput.value = '';
+					setTimeout(()=>{ try{ emailInput?.focus(); }catch(e){} }, 0);
+				}
+
+				async function adminLogin(){
+					const emailInput = document.getElementById('adminEmail');
+					const passInput = document.getElementById('adminPassword');
+					const status = document.getElementById('adminGateStatus');
+					const btn = document.getElementById('adminLoginBtn');
+					status.textContent = '';
+
+					const email = String(emailInput?.value || '').trim();
+					if (!isValidEmail(email)){ status.textContent = 'Please enter a valid admin email.'; status.className = 'status error'; emailInput?.focus(); return; }
+
+					if (ADMIN_FLOW_STEP === 'email'){
+						setPending(btn, true, 'Verifying…');
+						try{
+							// Step 1: POST validate expecting reply 'login'
+							const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=validate&email=${encodeURIComponent(email)}`;
+							const res = await fetch(url, { method:'POST' });
+							const text = (await res.text() || '').trim();
+							if (text.toLowerCase() === 'login'){
+							status.textContent = 'Email recognized. Please enter your password.';
+							status.className = 'status info';
+								showPasswordStep();
+								return;
+							}
+							// Any other response: Access Denied
+							status.textContent = 'Access Denied';
+							status.className = 'status error';
+							resetAdminGateToEmail();
+						} catch(e){
+							status.textContent = e?.message || 'Unable to reach server.';
+							status.className = 'status error';
+						} finally {
+							setPending(btn, false);
+						}
+						return;
+					}
+
+					// ADMIN_FLOW_STEP === 'password'
+					const password = String(passInput?.value || '').trim();
+					if (!password){ status.textContent = 'Please enter your password.'; status.className = 'status error'; passInput?.focus(); return; }
+					setPending(btn, true, 'Signing in…');
+					try{
+						const loginUrl = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+						const res = await fetch(loginUrl, { method:'POST' });
+						const text = (await res.text() || '').trim();
+						// Require a JSON response; access is allowed only if JSON.id contains 'Admin'
+						let j;
+						try { j = JSON.parse(text); } catch(e) { throw new Error('Access Denied'); }
+						const idStr = j && j.id ? String(j.id) : '';
+						if (!idStr || !/admin/i.test(idStr)) throw new Error('Access Denied');
+						// Persist login across refresh/visits until explicit logout
+						lsSet(ADMIN_SESSION_KEY, '1');
+						lsSet(ADMIN_EMAIL_KEY, email);
+						try { lsSet(ADMIN_PROFILE_KEY, JSON.stringify(j)); } catch(e){}
+						// Handle remember me
+						const remember = document.getElementById('rememberMe');
+						saveRemember(email, password, !!(remember && remember.checked));
+						document.getElementById('adminGate').classList.add('hidden');
+						document.getElementById('adminApp').classList.remove('hidden');
+						document.getElementById('adminLogoutBtn').classList.remove('hidden');
+						showToast('Welcome, ' + email,'success');
+					} catch(e){
+						status.textContent = e?.message || 'Login failed';
+						status.className = 'status error';
+						if (/Access Denied/i.test(status.textContent)) resetAdminGateToEmail();
+					} finally {
+						setPending(btn, false);
+					}
+				}
+		function adminLogout(){
+			// Clear any session/local keys
+			try { sessionStorage.removeItem(ADMIN_SESSION_KEY); } catch(e){}
+			try { sessionStorage.removeItem(ADMIN_EMAIL_KEY); } catch(e){}
+			lsRemove(ADMIN_SESSION_KEY);
+			lsRemove(ADMIN_EMAIL_KEY);
+			lsRemove(ADMIN_PROFILE_KEY);
+			// Keep remembered credentials unless user unchecks next time; do not clear here.
+			document.getElementById('adminApp').classList.add('hidden');
+			document.getElementById('adminGate').classList.remove('hidden');
+			document.getElementById('adminLogoutBtn').classList.add('hidden');
+			showToast('Logged out','info');
+				// Reset gate
+				ADMIN_FLOW_STEP = 'email';
+				document.getElementById('adminPwRow')?.classList.add('hidden');
+				const btn = document.getElementById('adminLoginBtn'); if (btn) btn.textContent = 'Continue';
+				const status = document.getElementById('adminGateStatus'); if (status) status.textContent = '';
+		}
+
+		// Membership check (POST)
+		async function membershipCheck(email){
+			const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=membershipcheck&email=${encodeURIComponent(email)}`;
+			const res = await fetch(url, { method:'POST' });
+			const text = await res.text();
+			if (/^\s*new\s*$/i.test(text)) return 'NEW';
+			try { return JSON.parse(text); } catch { return text; }
+		}
+
+		async function handleMembershipCheck(){
+			const emailEl = document.getElementById('memEmail');
+			const status = document.getElementById('memStatus');
+			const btn = document.getElementById('memCheckBtn');
+			const jsonOut = document.getElementById('jsonOut');
+			const card = document.getElementById('memResultCard');
+			status.textContent = ''; status.className = 'status info';
+			jsonOut.textContent = '';
+			card.hidden = true;
+
+			const email = String(emailEl?.value || '').trim();
+			if (!isValidEmail(email)){ status.textContent = 'Enter a valid email.'; status.className = 'status error'; emailEl?.focus(); return; }
+
+			setPending(btn, true, 'Checking…'); status.textContent = 'Checking membership…';
+			try{
+				const data = await membershipCheck(email);
+				if (data === 'NEW'){
+					status.innerHTML = 'No existing record. <a href="membership.html" target="_blank" rel="noopener">Proceed to membership registration</a>.';
+					status.className = 'status warn';
+					showToast('No record found. Ask member to register.', 'info');
+					return;
+				}
+				if (typeof data === 'string'){
+					status.textContent = data || 'Unexpected response.';
+					status.className = 'status warn';
+					return;
+				}
+
+				// JSON profile
+				jsonOut.textContent = JSON.stringify(data, null, 2);
+				const p = data.profile || data;
+
+				// Fill card
+				document.getElementById('kvName').textContent = [p.title,p.firstname,p.middleinitial,p.lastname,p.suffix].filter(Boolean).join(' ').replace(/\s+/g,' ');
+				document.getElementById('kvEmail').textContent = p.email || email;
+				document.getElementById('kvMobile').textContent = p.mobilenumber || p.mobile || '';
+				document.getElementById('kvSchool').textContent = p.school || '';
+				document.getElementById('kvSpec').textContent = p.specialization || '';
+				document.getElementById('kvPos').textContent = p.position || p.occupation || '';
+				document.getElementById('kvAddr').textContent = p.address || '';
+
+				const validitySrc = p.date || p.validity || p.expiry || p.expiration || p.Date || p.Validity || p.Expiry || p.Expiration;
+				const active = isMembershipActive(p);
+				const badge = document.getElementById('memBadge');
+				const valEl = document.getElementById('memValidity');
+				badge.textContent = active ? 'Active' : 'Expired';
+				badge.className = 'chip ' + (active ? 'pill-ok' : 'pill-warn');
+				valEl.textContent = validitySrc ? formatValidity(validitySrc) : '';
+				card.hidden = false;
+
+				status.textContent = active ? 'Member is active.' : 'Membership expired. Consider sending a renewal notice.';
+				status.className = 'status ' + (active ? 'ok' : 'warn');
+			} catch(e){
+				status.textContent = e?.message || 'Unable to check membership right now.';
+				status.className = 'status error';
+			} finally {
+				setPending(btn, false);
+			}
+		}
+
+		async function handleSendPassword(){
+			const email = String(document.getElementById('memEmail')?.value || '').trim();
+			if (!isValidEmail(email)){ showToast('Enter a valid email','error'); return; }
+			const btn = document.getElementById('memSendPwBtn');
+			setPending(btn, true, 'Sending…');
+			try{
+				const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=password&email=${encodeURIComponent(email)}`;
+				const res = await fetch(url, {
+					method:'POST',
+					headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
+					body: JSON.stringify({ email })
+				});
+				const text = await res.text();
+				showToast(text || 'Password email sent (if account exists).','success', 3500);
+			} catch(e){
+				showToast(e?.message || 'Failed to send password email.','error');
+			} finally {
+				setPending(btn, false);
+			}
+		}
+
+		// Export JSON currently shown
+		function handleExportJSON(){
+			const pre = document.getElementById('jsonOut');
+			if (!pre?.textContent){ showToast('Nothing to export','info'); return; }
+			const blob = new Blob([pre.textContent], { type:'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url; a.download = 'member.json';
+			document.body.appendChild(a); a.click(); a.remove();
+			URL.revokeObjectURL(url);
+		}
+
+		// Wire up
+		// Core auth wiring (keep registration/login intact)
+		document.getElementById('adminLoginBtn')?.addEventListener('click', adminLogin);
+		document.getElementById('adminLogoutBtn')?.addEventListener('click', adminLogout);
+		// Retrieve button
+		document.getElementById('retrieveBtn')?.addEventListener('click', retrieveMembershipData);
+		// Action cards
+		function activateButtonCard(el, onClick){
+			if(!el) return;
+			el.addEventListener('click', onClick);
+			el.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); onClick(); } });
+		}
+		// Open Membership Request modal
+		activateButtonCard(document.getElementById('btnMembershipRequests'), openMemReqModal);
+		activateButtonCard(document.getElementById('btnTrainingRequests'), openTrainingReqModal);
+		const _memCheckBtn = document.getElementById('memCheckBtn'); if (_memCheckBtn) _memCheckBtn.addEventListener('click', handleMembershipCheck);
+		const _memCopyBtn = document.getElementById('memCopyBtn'); if (_memCopyBtn) _memCopyBtn.addEventListener('click', () => {
+			const email = document.getElementById('memEmail')?.value || '';
+			if (!email) return;
+			try { navigator.clipboard.writeText(email); showToast('Copied email','success'); } catch(e){ showToast(email,'info'); }
+		});
+		const _memSendPwBtn = document.getElementById('memSendPwBtn'); if (_memSendPwBtn) _memSendPwBtn.addEventListener('click', handleSendPassword);
+		const _memOpenMemberPageBtn = document.getElementById('memOpenMemberPageBtn'); if (_memOpenMemberPageBtn) _memOpenMemberPageBtn.addEventListener('click', ()=> window.open('membership.html','_blank','noopener'));
+
+		const _toolExportBtn = document.getElementById('toolExportBtn'); if (_toolExportBtn) _toolExportBtn.addEventListener('click', handleExportJSON);
+
+		// IDs events
+		const _btnGetIds = document.getElementById('btnGetIds'); if (_btnGetIds) _btnGetIds.addEventListener('click', async ()=>{
+			const btn = document.getElementById('btnGetIds');
+			setPending(btn, true, 'Fetching…');
+			try{
+				const res = await fetch(IDS_GET_URL, { method:'POST' });
+				const text = await res.text();
+				const parsed = parseIdsResponse(text);
+				let ids = parsed;
+				// If nothing parsed, fallback to stored or sample
+				if (!ids.papsiId && !ids.invoiceNo){ ids = loadIds(); }
+				if (!ids.papsiId && !ids.invoiceNo){ ids = generateSampleIds(); }
+				saveIds(ids);
+				renderIds(ids);
+				showToast('IDs loaded', 'success');
+			} catch(e){
+				showToast(e?.message || 'Failed to get IDs','error');
+			} finally {
+				setPending(btn, false);
+			}
+		});
+		const _btnUpdateIds = document.getElementById('btnUpdateIds'); if (_btnUpdateIds) _btnUpdateIds.addEventListener('click', async ()=>{
+			const btn = document.getElementById('btnUpdateIds');
+			const p = String(document.getElementById('papsiIdField')?.value || '').trim();
+			const i = String(document.getElementById('invoiceNoField')?.value || '').trim();
+			if (!p && !i){ showToast('Nothing to update','info'); return; }
+			setPending(btn, true, 'Updating…');
+			try{
+				const url = IDS_WRITE_BASE + '&PapsiID=' + encodeURIComponent(p) + '&InvoiceNum=' + encodeURIComponent(i);
+				const res = await fetch(url, { method:'POST' });
+				const text = await res.text();
+				// Save locally on success-ish reply
+				const ids = { papsiId: p, invoiceNo: i };
+				saveIds(ids);
+				showToast(text || 'IDs updated','success');
+			} catch(e){
+				showToast(e?.message || 'Failed to update IDs','error');
+			} finally {
+				setPending(btn, false);
+			}
+		});
+		document.getElementById('idsCancelBtn')?.addEventListener('click', closeIdsModal);
+		document.getElementById('idsSaveBtn')?.addEventListener('click', saveFromModal);
+
+		// Membership Request modal events
+		const _memReqCloseBtn = document.getElementById('memReqCloseBtn'); if (_memReqCloseBtn) _memReqCloseBtn.addEventListener('click', closeMemReqModal);
+		const _memReqCancelBtn = document.getElementById('memReqCancelBtn'); if (_memReqCancelBtn) _memReqCancelBtn.addEventListener('click', closeMemReqModal);
+		const _memReqSubmitBtn = document.getElementById('memReqSubmitBtn'); if (_memReqSubmitBtn) _memReqSubmitBtn.addEventListener('click', submitMemReq);
+		const _memReqModal = document.getElementById('memReqModal'); if (_memReqModal) _memReqModal.addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeMemReqModal(); });
+
+		// Training Request modal logic
+		function prefillTrainingTotals(){
+			const mem = parseFloat(document.getElementById('trMemFee').value||'0')||0;
+			const reg = parseFloat(document.getElementById('trRegFee').value||'0')||0;
+			document.getElementById('trTotalFee').value = String(Math.round(mem+reg));
+		}
+		function openTrainingReqModal(){
+			const modal = document.getElementById('trainingReqModal');
+			// Prefill from dashboard
+			const pid = document.getElementById('papsiIdField')?.value || '';
+			const inv = document.getElementById('invoiceNoField')?.value || '';
+			// Use current IDs + 1 unit
+			document.getElementById('trPapsiID').value = pid ? incrementIdString(pid) : '';
+			document.getElementById('trInvoiceNumber').value = inv ? incrementIdString(inv) : '';
+			const today = new Date();
+			document.getElementById('trInvoiceDate').value = fmtMDY(today, true);
+			document.getElementById('trMemStartDate').value = fmtMDY(today, true);
+			const nextYear = new Date(today.getFullYear()+1, today.getMonth(), today.getDate());
+			document.getElementById('trMemEndDate').value = fmtMDY(nextYear, false);
+			// Date1 and Date2 prefill per request
+			document.getElementById('trDate1').value = formatDate1Long(today); // October 5, 2025
+			document.getElementById('trDate2').value = formatDate2Phrase(today); // 5th day of October, 2025
+			// Default fees and auto-calc
+			document.getElementById('trMemFee').value = '0';
+			document.getElementById('trRegFee').value = '0';
+			prefillTrainingTotals();
+			// Code and Hour prefill
+			document.getElementById('trCode').value = generateTrainingCode(); // e.g., CMC102349
+			document.getElementById('trHour').value = '2-hour';
+			// Clear other optionals
+			['trRowNumber','trWebinarRow'].forEach(id=>{ const el = document.getElementById(id); if (el) el.value = ''; });
+			modal.classList.add('show');
+			setTimeout(()=> document.getElementById('trRowNumber').focus(), 0);
+			function onKey(e){ if (e.key==='Escape'){ e.preventDefault(); closeTrainingReqModal(); } }
+			modal.addEventListener('keydown', onKey); modal._onKey = onKey;
+			// Initialize date pickers' default to current values
+			try{
+				const d1 = parseFlexDate(document.getElementById('trDate1').value);
+				const d2 = parseFlexDate(document.getElementById('trDate2').value);
+				const dS = parseFlexDate(document.getElementById('trMemStartDate').value);
+				const dE = parseFlexDate(document.getElementById('trMemEndDate').value);
+				const d1p = document.getElementById('trDate1Picker');
+				const d2p = document.getElementById('trDate2Picker');
+				const dSp = document.getElementById('trMemStartDatePicker');
+				const dEp = document.getElementById('trMemEndDatePicker');
+				if (d1p && d1){ d1p.value = fmtYMD(d1); }
+				if (d2p && d2){ d2p.value = fmtYMD(d2); }
+				if (dSp && dS){ dSp.value = fmtYMD(dS); }
+				if (dEp && dE){ dEp.value = fmtYMD(dE); }
+			} catch(e){}
+		}
+		function closeTrainingReqModal(){
+			const modal = document.getElementById('trainingReqModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey=null; }
+			modal.classList.remove('show');
+		}
+		async function submitTrainingReq(){
+			const payload = {
+				RowNumber: document.getElementById('trRowNumber').value.trim(),
+				WebinarRow: document.getElementById('trWebinarRow').value.trim(),
+				MemFee: document.getElementById('trMemFee').value.trim(),
+				RegFee: document.getElementById('trRegFee').value.trim(),
+				TotalFee: document.getElementById('trTotalFee').value.trim(),
+				InvoiceDate: document.getElementById('trInvoiceDate').value.trim(),
+				InvoiceNumber: document.getElementById('trInvoiceNumber').value.trim(),
+				PapsiID: document.getElementById('trPapsiID').value.trim(),
+				MemStartDate: document.getElementById('trMemStartDate').value.trim(),
+				MemEndDate: document.getElementById('trMemEndDate').value.trim(),
+				Date1: document.getElementById('trDate1').value.trim(),
+				Date2: document.getElementById('trDate2').value.trim(),
+				Code: document.getElementById('trCode').value.trim(),
+				Hour: document.getElementById('trHour').value.trim()
+			};
+			openConfirm('Submit this training request?', async ()=>{
+				const yesBtn = document.getElementById('confirmYesBtn');
+				const noBtn = document.getElementById('confirmNoBtn');
+				if (yesBtn) { yesBtn.disabled = true; yesBtn.textContent = 'Submitting…'; }
+				if (noBtn) noBtn.disabled = true;
+				try{
+					const base = 'https://hook.eu1.make.com/p9aokk5rhilkrhnj3hcppewc8h5kreu8';
+					const qs = `?RowNumber=${encodeURIComponent(payload.RowNumber)}&WebinarRow=${encodeURIComponent(payload.WebinarRow)}&MemFee=${encodeURIComponent(payload.MemFee)}&RegFee=${encodeURIComponent(payload.RegFee)}&TotalFee=${encodeURIComponent(payload.TotalFee)}&InvoiceDate=${encodeURIComponent(payload.InvoiceDate)}&InvoiceNumber=${encodeURIComponent(payload.InvoiceNumber)}&PapsiID=${encodeURIComponent(payload.PapsiID)}&MemStartDate=${encodeURIComponent(payload.MemStartDate)}&MemEndDate=${encodeURIComponent(payload.MemEndDate)}&Date1=${encodeURIComponent(payload.Date1)}&Date2=${encodeURIComponent(payload.Date2)}&Code=${encodeURIComponent(payload.Code)}&Hour=${encodeURIComponent(payload.Hour)}`;
+					const res = await fetch(base + qs, { method:'POST' });
+					const text = await res.text();
+					closeConfirm();
+					closeTrainingReqModal();
+					showToast(text || 'Submitted', 'success', 3500, 'top-right');
+					// After successful submission, update IDs on dashboard; if a field is empty, do not overwrite it
+					try{
+						const stored = loadIds() || {};
+						const fieldP = String(document.getElementById('papsiIdField')?.value || '').trim();
+						const fieldI = String(document.getElementById('invoiceNoField')?.value || '').trim();
+						const baseP = stored.papsiId || fieldP;
+						const baseI = stored.invoiceNo || fieldI;
+						const hasP = !!(payload.PapsiID && payload.PapsiID.trim());
+						const hasI = !!(payload.InvoiceNumber && payload.InvoiceNumber.trim());
+						if (hasP || hasI){
+							const finalP = hasP ? payload.PapsiID : baseP;
+							const finalI = hasI ? payload.InvoiceNumber : baseI;
+							// Update UI/session first so it reflects immediately
+							const merged = { papsiId: finalP || '', invoiceNo: finalI || '' };
+							saveIds(merged); renderIds(merged);
+							// Persist to Apps Script only if both values are present to avoid clearing
+							if (finalP && finalI){
+								const writeUrl = IDS_WRITE_BASE + '&PapsiID=' + encodeURIComponent(finalP) + '&InvoiceNum=' + encodeURIComponent(finalI);
+								const r2 = await fetch(writeUrl, { method:'POST' });
+								const msg2 = await r2.text();
+								showToast(msg2 || 'IDs synchronized', 'success', 3000, 'top-right');
+							} else {
+								showToast('IDs updated locally', 'info', 2200, 'top-right');
+							}
+						}
+					} catch(e3){ /* non-fatal */ }
+				} catch(e){
+					closeConfirm();
+					showToast(e?.message || 'Submission failed', 'error', 3500, 'top-right');
+				}
+			});
+		}
+		// Fee auto-calc events
+		document.getElementById('trMemFee')?.addEventListener('input', prefillTrainingTotals);
+		document.getElementById('trRegFee')?.addEventListener('input', prefillTrainingTotals);
+
+		// Training modal events
+		const _trainingReqSubmitBtn = document.getElementById('trainingReqSubmitBtn'); if (_trainingReqSubmitBtn) _trainingReqSubmitBtn.addEventListener('click', submitTrainingReq);
+		const _trainingReqCancelBtn = document.getElementById('trainingReqCancelBtn'); if (_trainingReqCancelBtn) _trainingReqCancelBtn.addEventListener('click', closeTrainingReqModal);
+		const _trainingReqCloseBtn = document.getElementById('trainingReqCloseBtn'); if (_trainingReqCloseBtn) _trainingReqCloseBtn.addEventListener('click', closeTrainingReqModal);
+		const _trainingReqModal = document.getElementById('trainingReqModal'); if (_trainingReqModal) _trainingReqModal.addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeTrainingReqModal(); });
+		document.getElementById('trainingReqClearBtn').addEventListener('click', ()=>{
+			// Empty specific fields
+			document.getElementById('trInvoiceNumber').value = '';
+			document.getElementById('trPapsiID').value = '';
+			document.getElementById('trInvoiceDate').value = '';
+			document.getElementById('trMemStartDate').value = '';
+			document.getElementById('trMemEndDate').value = '';
+			// Reset associated hidden pickers to avoid stale selection
+			const ip = document.getElementById('trInvoiceDatePicker'); if (ip) ip.value = '';
+			const sp = document.getElementById('trMemStartDatePicker'); if (sp) sp.value = '';
+			const ep = document.getElementById('trMemEndDatePicker'); if (ep) ep.value = '';
+			showToast('Cleared InvoiceNumber, PapsiID, InvoiceDate, MemStartDate, MemEndDate','info', 2200, 'top-right');
+		});
+
+		// Date picker wiring for Date1 and Date2
+		function openDatePicker(btnId, pickerId, inputId, formatter){
+			const btn = document.getElementById(btnId);
+			const picker = document.getElementById(pickerId);
+			const input = document.getElementById(inputId);
+			if (!btn || !picker || !input) return;
+			btn.addEventListener('click', (ev)=>{
+				// Set default date to the date encoded in the textbox
+				const d = parseFlexDate(input.value) || new Date();
+				try { picker.value = fmtYMD(d); } catch(e){}
+				// Temporarily make the picker focusable and near the button
+				const prev = picker.getAttribute('style') || '';
+				try {
+					const rect = btn.getBoundingClientRect();
+					picker.style.position = 'fixed';
+					picker.style.left = Math.max(0, rect.left) + 'px';
+					picker.style.top = Math.max(0, rect.bottom + 6) + 'px';
+					picker.style.width = '200px';
+					picker.style.height = '28px';
+					picker.style.opacity = '0.001';
+					picker.style.pointerEvents = 'auto';
+					picker.focus();
+					if (typeof picker.showPicker === 'function') {
+						picker.showPicker();
+					} else {
+						picker.click();
+					}
+				} catch(e) {
+					// best-effort fallback
+					try { picker.click(); } catch(_) {}
+				}
+				// Restore style after a tick
+				setTimeout(()=>{ picker.setAttribute('style', prev); }, 500);
+			});
+			picker.addEventListener('change', ()=>{
+				// Parse from YYYY-MM-DD as local date
+				let d;
+				if (picker.value){
+					const [yy,mm,dd] = picker.value.split('-').map(Number);
+					d = new Date(yy, (mm||1)-1, dd||1);
+				} else {
+					d = null;
+				}
+				if (!d || isNaN(d)) return;
+				input.value = formatter(d);
+			});
+		}
+		openDatePicker('trDate1Btn','trDate1Picker','trDate1', formatDate1Long);
+		openDatePicker('trDate2Btn','trDate2Picker','trDate2', formatDate2Phrase);
+		// Mem dates: Start uses MM/DD/YYYY; End uses M/DD/YYYY
+		openDatePicker('trMemStartDateBtn','trMemStartDatePicker','trMemStartDate', (d)=> fmtMDY(d, true));
+		openDatePicker('trMemEndDateBtn','trMemEndDatePicker','trMemEndDate', (d)=> fmtMDY(d, false));
+
+		// Auto open app if session exists
+			(function init(){
+			if (lsGet(ADMIN_SESSION_KEY) === '1'){
+				document.getElementById('adminGate').classList.add('hidden');
+				document.getElementById('adminApp').classList.remove('hidden');
+				document.getElementById('adminLogoutBtn').classList.remove('hidden');
+			}
+					// Auto-fill remembered credentials and optionally auto-login
+			const rem = getRemembered();
+			try {
+				if (rem.email) document.getElementById('adminEmail').value = rem.email;
+				if (rem.password) document.getElementById('adminPassword').value = rem.password;
+				if (rem.enabled && lsGet(ADMIN_SESSION_KEY) !== '1'){
+					// Skip the email step and attempt login directly
+					ADMIN_FLOW_STEP = 'password';
+					showPasswordStep();
+					setTimeout(()=> adminLogin(), 50);
+				}
+			} catch{}
+					// Enter to submit on key
+						document.getElementById('adminEmail')?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
+						document.getElementById('adminPassword')?.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
+				const _memEmail = document.getElementById('memEmail'); if (_memEmail) _memEmail.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); handleMembershipCheck(); } });
+			// Render IDs from session on load
+			renderIds(loadIds());
+		})();
+	</script>
+</body>
+</html>

@@ -45,6 +45,7 @@
 		.chip { display:inline-block; border:1px solid #d1d5db; border-radius:999px; padding:2px 8px; font-size:12px; color:#374151; background:#fff; }
 		.pill-ok { background:#ecfdf5; color:#065f46; border-color:#bbf7d0; }
 		.pill-warn { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+		.pill-assoc { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
 		.toast { position:fixed; right:12px; top:12px; background:#111827; color:#fff; padding:10px 12px; border-radius:8px; font-size:14px; opacity:0; transform:translateY(-8px); transition:all .2s; z-index:9999; }
 		.toast.show { opacity:1; transform:translateY(0); }
 		.gate { display:flex; align-items:center; justify-content:center; min-height:48vh; }
@@ -66,7 +67,7 @@
 		.modal .close-x:hover { background:#f3f4f6; color:#374151; }
 
 		/* Dashboard widgets */
-		.kpi-grid { display:grid; gap:12px; grid-template-columns: repeat(3, minmax(170px,1fr)); }
+		.kpi-grid { display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); }
 		.kpi { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; }
 		.kpi .label { font-size:12px; color:var(--muted); }
 		.kpi .value { font-size:22px; font-weight:700; margin-top:2px; }
@@ -144,7 +145,7 @@
 	<div id="adminApp" class="container hidden">
 		<!-- Dashboard (populated after Retrieve) -->
 		<div id="dashboardCard" class="card" style="display:none; margin-bottom:16px;">
-			<div class="title" style="margin-bottom:10px;">Dashboard</div>
+			<div class="title" style="margin-bottom:10px;">Dashboard <span id="dashVersion" class="subtle" style="margin-left:8px; font-weight:500;">v—</span></div>
 			<div class="kpi-grid">
 				<div class="kpi">
 					<div class="label">Total Members</div>
@@ -155,9 +156,33 @@
 					<div id="dashActive" class="value">0</div>
 				</div>
 				<div class="kpi">
+					<div class="label">Associate</div>
+					<div id="dashAssociate" class="value">0</div>
+				</div>
+				<div class="kpi">
 					<div class="label">Expired</div>
 					<div id="dashExpired" class="value">0</div>
 				</div>
+			</div>
+
+			<div class="kpi-grid" style="margin-top:12px;">
+				<div class="kpi">
+					<div class="label">Members w/ Access</div>
+					<div id="dashAccessed" class="value">0</div>
+				</div>
+				<div class="kpi">
+					<div class="label">Top Access (Counter)</div>
+					<div id="dashTopAccessCounter" class="value">0</div>
+				</div>
+				<div class="kpi">
+					<div class="label">Avg Training / Member</div>
+					<div id="dashAvgTraining" class="value">0</div>
+				</div>
+			</div>
+
+			<div style="margin-top:10px;">
+				<div class="title" style="font-size:16px;">Top 10 by Access</div>
+				<div id="dashTopAccess" class="bar-list"></div>
 			</div>
 
 			<div class="section-grid" style="margin-top:14px;">
@@ -194,6 +219,7 @@
 						<select id="membersFilterMembership">
 							<option value="all">All</option>
 							<option value="active">Active</option>
+							<option value="associate">Associate</option>
 							<option value="expired">Expired</option>
 						</select>
 					</div>
@@ -423,7 +449,14 @@
 			if (dt){
 				const end = new Date(dt.getTime());
 				end.setHours(23,59,59,999);
-				membership = (new Date() <= end) ? 'Active' : 'Expired';
+				if (new Date() <= end){
+					// Determine Active vs Associate based on trainings data presence
+					const trainRaw = safeStr(m?.trainings ?? m?.training ?? m?.Training);
+					const hasTraining = /\w/.test(trainRaw); // any word char indicates content
+					membership = hasTraining ? 'Active' : 'Associate';
+				} else {
+					membership = 'Expired';
+				}
 			}
 			return {
 				idx,
@@ -498,7 +531,7 @@
 			const s = (stat||'').toLowerCase();
 			const span = document.createElement('span');
 			span.textContent = stat || '—';
-			span.className = 'chip ' + (s==='active' ? 'pill-ok' : s==='expired' ? 'pill-warn' : '');
+			span.className = 'chip ' + (s==='active' ? 'pill-ok' : s==='associate' ? 'pill-assoc' : s==='expired' ? 'pill-warn' : '');
 			return span;
 		}
 		function toggleMemberExpand(row, member){
@@ -595,13 +628,51 @@
 		}
 		function buildDashboard(list){
 			// KPIs
+			// Set dashboard version tag for cache-busting verification
+			const verEl = document.getElementById('dashVersion');
+			if (verEl){
+				try {
+					const dt = new Date();
+					const yyyy = dt.getFullYear();
+					const mm = String(dt.getMonth()+1).padStart(2,'0');
+					const dd = String(dt.getDate()).padStart(2,'0');
+					verEl.textContent = `v${yyyy}-${mm}-${dd}`;
+				} catch {}
+			}
+
 			const total = list.length;
 			const active = list.filter(m=>m.membership==='Active').length;
-			const expired = total - active;
+			const associate = list.filter(m=>m.membership==='Associate').length;
+			const expired = list.filter(m=>m.membership==='Expired').length;
 			const setText = (id,val)=>{ const el=document.getElementById(id); if (el) el.textContent = Number.isFinite(val)?val.toLocaleString():String(val); };
 			setText('dashTotal', total);
 			setText('dashActive', active);
+			setText('dashAssociate', associate);
 			setText('dashExpired', expired);
+			// Access metrics (members with lastaccessed and top counters)
+			const accessedMembers = list.filter(m=>{
+				const la = (m.data?.lastaccessed || '').trim();
+				return la.length>0;
+			});
+			const accessedCount = accessedMembers.length;
+			setText('dashAccessed', accessedCount);
+			// Top by counter
+			const withCounters = list.map(m=>({ name: m.name || m.email || '—', counter: parseInt(m.data?.counter,10) || 0 })).filter(x=>x.counter>0);
+			withCounters.sort((a,b)=>b.counter-a.counter);
+			const topCounter = withCounters.length? withCounters[0].counter : 0;
+			setText('dashTopAccessCounter', topCounter);
+			// Render top 10 access list
+			const accessPairs = withCounters.slice(0,10).map(x=>[x.name, x.counter]);
+			renderBarList('dashTopAccess', accessPairs, 10);
+			// Average trainings per member (includes members with zero trainings)
+			let trainingEntryTotal = 0;
+			list.forEach(m=>{
+				const rawTrain = m.data?.trainings || '';
+				const arr = String(rawTrain).split(/\s+\|\s+/).map(x=>x.trim()).filter(x=>x.length>0);
+				trainingEntryTotal += arr.length;
+			});
+			const avgTraining = total? (trainingEntryTotal/total) : 0;
+			setText('dashAvgTraining', avgTraining.toFixed(2));
 			// Specialization counts
 			const specMap = new Map();
 			list.forEach(m=>{

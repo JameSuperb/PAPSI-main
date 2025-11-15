@@ -107,7 +107,7 @@
 	</div>
 
 	<!-- Top actions bar -->
-	<div class="container" style="padding-top:12px;">
+	<div id="topActions" class="container hidden" style="padding-top:12px;">
 		<button id="retrieveBtn" class="btn" type="button" title="Retrieve membership data">Retrieve</button>
 		<span class="subtle" style="margin-left:10px;">Uses the email and password from Administrator Access.</span>
 		<div id="retrieveNotice" class="status info" style="margin-top:6px;"></div>
@@ -194,6 +194,10 @@
 					<div class="title" style="font-size:16px;">Top Cities / Regions</div>
 					<div id="dashCityBars" class="bar-list"></div>
 				</div>
+				<div>
+					<div class="title" style="font-size:16px;">Top 10 Schools</div>
+					<div id="dashTopSchools" class="bar-list"></div>
+				</div>
 			</div>
 
 			<div style="margin-top:14px;">
@@ -224,6 +228,7 @@
 						</select>
 					</div>
 					<button id="membersClearBtn" class="btn secondary" type="button" style="margin-top:22px;">Clear</button>
+					<button id="membersSortBtn" class="btn ghost" type="button" style="margin-top:22px;">Sort Z→A</button>
 				</div>
 			</div>
 			<div style="margin-top:14px; overflow:auto;">
@@ -439,6 +444,7 @@
 
 		// ========= Members Rendering =========
 		let MEMBERS_RAW = [];
+		let MEMBERS_SORT_DIR = 'asc'; // 'asc' | 'desc' (default A→Z)
 		function safeStr(v){
 			return typeof v === 'string' ? v.trim() : String(v ?? '').trim();
 		}
@@ -460,7 +466,8 @@
 			}
 			return {
 				idx,
-				name: safeStr(m?.nametext ?? m?.name),
+				// Use column A 'name' strictly; do not source from 'nametext'
+				name: safeStr(m?.name ?? m?.Name ?? ''),
 				email: safeStr(m?.email),
 				membership,
 				specialization: safeStr(m?.specialization),
@@ -495,6 +502,13 @@
 			if (fMembership !== 'all'){
 				list = list.filter(m => m.membership.toLowerCase() === fMembership);
 			}
+			// Sort by name based on MEMBERS_SORT_DIR
+			list.sort((a,b)=>{
+				const an = (a.name || '').toString();
+				const bn = (b.name || '').toString();
+				const cmp = an.localeCompare(bn, undefined, { sensitivity:'base' });
+				return MEMBERS_SORT_DIR === 'asc' ? cmp : -cmp;
+			});
 			const tbody = document.getElementById('membersTbody');
 			const empty = document.getElementById('membersEmpty');
 			const summary = document.getElementById('membersSummary');
@@ -582,6 +596,27 @@
 			const s = typeof text === 'string' ? text : String(text ?? '');
 			return s.split(/[|;,/]+/).map(v=>v.trim()).filter(v=>v.length>0);
 		}
+		// Resolve a raw fullname from a record: prefer any key matching "fullname" (case/spacing-insensitive),
+		// else assemble from title/firstname/middleinitial/lastname/suffix.
+		function resolveRawFullname(obj){
+			if (!obj || typeof obj !== 'object') return '';
+			try{
+				for (const [k,v] of Object.entries(obj)){
+					const kn = String(k).toLowerCase().replace(/\s+|_/g,'');
+					if (kn === 'fullname'){
+						const val = typeof v === 'string' ? v : String(v ?? '');
+						if (val.trim()) return val.trim();
+					}
+				}
+				const title = obj.title || obj.Title || '';
+				const first = obj.firstname || obj.firstName || obj.FirstName || '';
+				const mi = obj.middleinitial || obj.middleInitial || obj.MiddleInitial || obj.middlename || obj.middleName || '';
+				const last = obj.lastname || obj.lastName || obj.LastName || '';
+				const suffix = obj.suffix || obj.Suffix || '';
+				const assembled = [title, first, mi, last, suffix].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+				return assembled;
+			} catch { return ''; }
+		}
 		function normalizeSpecTerm(term){
 			const t = String(term||'').toLowerCase();
 			if (!t) return 'Other';
@@ -626,6 +661,25 @@
 				el.appendChild(empty);
 			}
 		}
+		// Collapse multi-day trainings into a base name
+		function trainingBaseName(label){
+			let s = String(label||'').trim();
+			// Remove (Day X) or variations in parentheses
+			s = s.replace(/\(\s*Day\s*\d+\s*\)/gi,'').trim();
+			// Remove segments like ": Day 1 ..." or "- Day 1 ..." or "– Day 1 ..." at the end
+			s = s.replace(/[:\-–]\s*Day\s*\d+.*$/i,'').trim();
+			// Also catch standalone trailing "Day N ..." without punctuation before
+			s = s.replace(/\bDay\s*\d+\b.*$/i,'').trim();
+			// Drop common series suffix noise at end
+			s = s.replace(/\b(?:Webinar\s+)?Training\s+Series\b.*$/i,'').trim();
+			// Remove trailing date in parentheses: 04-22-2023 or 4/2/23 or 2023-04-22 or April 22, 2023
+			s = s.replace(/\(\s*\d{1,4}[-\/]\d{1,2}[-\/]\d{1,4}\s*\)\s*$/,'').trim();
+			s = s.replace(/\(\s*[A-Za-z]+\s+\d{1,2},\s*\d{2,4}\s*\)\s*$/,'').trim();
+			// Clean dangling punctuation
+			s = s.replace(/[:\-–,]+$/,'').trim();
+			// Collapse spaces
+			return s.replace(/\s+/g,' ');
+		}
 		function buildDashboard(list){
 			// KPIs
 			// Set dashboard version tag for cache-busting verification
@@ -656,20 +710,24 @@
 			});
 			const accessedCount = accessedMembers.length;
 			setText('dashAccessed', accessedCount);
-			// Top by counter
-			const withCounters = list.map(m=>({ name: m.name || m.email || '—', counter: parseInt(m.data?.counter,10) || 0 })).filter(x=>x.counter>0);
+			// Top by counter (use raw fullname; assemble if missing; avoid nametext)
+			const withCounters = list
+				.map(m=>({ name: safeStr(resolveRawFullname(m.data) || m.email || '—'), counter: parseInt(m.data?.counter,10) || 0 }))
+				.filter(x=>x.counter>0);
 			withCounters.sort((a,b)=>b.counter-a.counter);
 			const topCounter = withCounters.length? withCounters[0].counter : 0;
 			setText('dashTopAccessCounter', topCounter);
 			// Render top 10 access list
 			const accessPairs = withCounters.slice(0,10).map(x=>[x.name, x.counter]);
 			renderBarList('dashTopAccess', accessPairs, 10);
-			// Average trainings per member (includes members with zero trainings)
+			// Average trainings per member (collapse multi-day, exclude 'conference')
 			let trainingEntryTotal = 0;
-			list.forEach(m=>{
+			list.forEach((m)=>{
 				const rawTrain = m.data?.trainings || '';
-				const arr = String(rawTrain).split(/\s+\|\s+/).map(x=>x.trim()).filter(x=>x.length>0);
-				trainingEntryTotal += arr.length;
+				const items = String(rawTrain).split(/\s*\|\s*/).map(x=>x.trim()).filter(x=>x.length>0);
+				const filtered = items.filter(t=>!(/\bconference\b/i.test(t)));
+				const baseSet = new Set(filtered.map(trainingBaseName));
+				trainingEntryTotal += baseSet.size;
 			});
 			const avgTraining = total? (trainingEntryTotal/total) : 0;
 			setText('dashAvgTraining', avgTraining.toFixed(2));
@@ -691,21 +749,50 @@
 			});
 			const cityPairs = Array.from(cityMap.entries()).sort((a,b)=>b[1]-a[1]);
 			renderBarList('dashCityBars', cityPairs, 10);
-			// Training engagement
-			let trainTotal = 0;
-			const trainMap = new Map();
+			// Schools (Top 10)
+			const schoolMap = new Map();
 			list.forEach(m=>{
+				const k = safeStr(m.school || m.data?.school || '').replace(/\s+/g,' ');
+				if (!k) return;
+				schoolMap.set(k, (schoolMap.get(k)||0) + 1);
+			});
+			const schoolPairs = Array.from(schoolMap.entries()).sort((a,b)=> b[1]-a[1]);
+			renderBarList('dashTopSchools', schoolPairs, 10);
+			// Training engagement (collapse multi-day, exclude 'conference')
+			let trainTotal = 0; // total unique bases across members
+			const baseMemberMap = new Map(); // base -> Set(memberIdx)
+			const baseLabelMemberMap = new Map(); // base -> Map(label -> Set(memberIdx))
+			list.forEach((m, idx)=>{
 				const rawTrain = m.data?.trainings || '';
-				// Split only on explicit space-pipe-space sequences; allow variable spaces around pipe
-				const arr = String(rawTrain).split(/\s+\|\s+/).map(x=>x.trim()).filter(x=>x.length>0);
-				trainTotal += arr.length;
-				arr.forEach(t=>{
-					const key = t.replace(/\s+/g,' ').trim();
-					if (!key) return;
-					trainMap.set(key,(trainMap.get(key)||0)+1);
+				const items = String(rawTrain).split(/\s*\|\s*/).map(x=>x.trim()).filter(x=>x.length>0);
+				const filtered = items.filter(t=>!(/\bconference\b/i.test(t)));
+				const baseSet = new Set(filtered.map(trainingBaseName));
+				trainTotal += baseSet.size;
+				baseSet.forEach(base=>{
+					if (!baseMemberMap.has(base)) baseMemberMap.set(base, new Set());
+					baseMemberMap.get(base).add(idx);
+				});
+				filtered.forEach(orig=>{
+					const base = trainingBaseName(orig);
+					if (!baseLabelMemberMap.has(base)) baseLabelMemberMap.set(base, new Map());
+					const labelMap = baseLabelMemberMap.get(base);
+					if (!labelMap.has(orig)) labelMap.set(orig, new Set());
+					labelMap.get(orig).add(idx);
 				});
 			});
-			const trainPairs = Array.from(trainMap.entries()).sort((a,b)=>b[1]-a[1]);
+			const trainPairs = [];
+			baseMemberMap.forEach((memberSet, base)=>{
+				let repLabel = base;
+				let maxMembers = memberSet.size;
+				const labelMap = baseLabelMemberMap.get(base);
+				if (labelMap){
+					labelMap.forEach((mSet,label)=>{
+						if (mSet.size > maxMembers){ maxMembers = mSet.size; repLabel = label; }
+					});
+				}
+				trainPairs.push([repLabel, memberSet.size]);
+			});
+			trainPairs.sort((a,b)=>b[1]-a[1]);
 			setText('dashTrainTotal', trainTotal);
 			renderBarList('dashTopTrainings', trainPairs, 10);
 			// Show dashboard
@@ -718,6 +805,12 @@
 		document.getElementById('membersClearBtn')?.addEventListener('click', ()=>{
 			const s = document.getElementById('membersSearch'); if (s) s.value='';
 			const fm = document.getElementById('membersFilterMembership'); if (fm) fm.value='all';
+			filterAndDrawMembers();
+		});
+		document.getElementById('membersSortBtn')?.addEventListener('click', ()=>{
+			MEMBERS_SORT_DIR = MEMBERS_SORT_DIR === 'asc' ? 'desc' : 'asc';
+			const btn = document.getElementById('membersSortBtn');
+			if (btn) btn.textContent = MEMBERS_SORT_DIR === 'asc' ? 'Sort Z→A' : 'Sort A→Z';
 			filterAndDrawMembers();
 		});
 		function formatValidity(val){
@@ -1078,6 +1171,7 @@
 						document.getElementById('adminGate').classList.add('hidden');
 						document.getElementById('adminApp').classList.remove('hidden');
 						document.getElementById('adminLogoutBtn').classList.remove('hidden');
+							document.getElementById('topActions')?.classList.remove('hidden');
 						showToast('Welcome, ' + email,'success');
 					} catch(e){
 						status.textContent = e?.message || 'Login failed';
@@ -1098,6 +1192,7 @@
 			document.getElementById('adminApp').classList.add('hidden');
 			document.getElementById('adminGate').classList.remove('hidden');
 			document.getElementById('adminLogoutBtn').classList.add('hidden');
+			document.getElementById('topActions')?.classList.add('hidden');
 			showToast('Logged out','info');
 				// Reset gate
 				ADMIN_FLOW_STEP = 'email';
@@ -1412,7 +1507,7 @@
 		const _trainingReqCancelBtn = document.getElementById('trainingReqCancelBtn'); if (_trainingReqCancelBtn) _trainingReqCancelBtn.addEventListener('click', closeTrainingReqModal);
 		const _trainingReqCloseBtn = document.getElementById('trainingReqCloseBtn'); if (_trainingReqCloseBtn) _trainingReqCloseBtn.addEventListener('click', closeTrainingReqModal);
 		const _trainingReqModal = document.getElementById('trainingReqModal'); if (_trainingReqModal) _trainingReqModal.addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeTrainingReqModal(); });
-		document.getElementById('trainingReqClearBtn').addEventListener('click', ()=>{
+		const _trainingReqClearBtn = document.getElementById('trainingReqClearBtn'); if (_trainingReqClearBtn) _trainingReqClearBtn.addEventListener('click', ()=>{
 			// Empty specific fields
 			document.getElementById('trInvoiceNumber').value = '';
 			document.getElementById('trPapsiID').value = '';
@@ -1485,6 +1580,7 @@
 				document.getElementById('adminGate').classList.add('hidden');
 				document.getElementById('adminApp').classList.remove('hidden');
 				document.getElementById('adminLogoutBtn').classList.remove('hidden');
+				document.getElementById('topActions')?.classList.remove('hidden');
 			}
 					// Auto-fill remembered credentials and optionally auto-login
 			const rem = getRemembered();

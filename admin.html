@@ -198,6 +198,10 @@
 					<div class="title" style="font-size:16px;">Top 10 Schools (All)</div>
 					<div id="dashTopSchools" class="bar-list"></div>
 				</div>
+				<div>
+					<div class="title" style="font-size:16px;">Top 10 Schools (Regular Members)</div>
+					<div id="dashTopSchoolsRegular" class="bar-list"></div>
+				</div>
 			</div>
 
 			<div style="margin-top:14px;">
@@ -758,6 +762,16 @@
 			});
 			const schoolPairs = Array.from(schoolMap.entries()).sort((a,b)=> b[1]-a[1]);
 			renderBarList('dashTopSchools', schoolPairs, 10);
+			// Schools (Top 10 Regular Members: Active + Associate only)
+			const regularList = list.filter(m => m.membership === 'Active' || m.membership === 'Associate');
+			const schoolMapRegular = new Map();
+			regularList.forEach(m => {
+				const k = safeStr(m.school || m.data?.school || '').replace(/\s+/g,' ');
+				if (!k) return;
+				schoolMapRegular.set(k, (schoolMapRegular.get(k) || 0) + 1);
+			});
+			const schoolPairsRegular = Array.from(schoolMapRegular.entries()).sort((a,b)=> b[1]-a[1]);
+			renderBarList('dashTopSchoolsRegular', schoolPairsRegular, 10);
 			// Training engagement (collapse multi-day, exclude 'conference')
 			let trainTotal = 0; // total unique bases across members
 			const baseMemberMap = new Map(); // base -> Set(memberIdx)

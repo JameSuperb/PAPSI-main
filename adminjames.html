@@ -155,52 +155,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="grid grid-2">
-			<div class="card">
-				<div class="title">Members</div>
-				<div class="subtle" style="margin-top:2px;">Search a member by Email, view status, and take quick actions.</div>
-				<div class="row" style="margin-top:12px;">
-					<div class="field">
-						<label for="memEmail">Email address</label>
-						<input id="memEmail" type="email" placeholder="you@example.com" />
-					</div>
-					<button id="memCheckBtn" class="btn" type="button">Check membership</button>
-					<button id="memCopyBtn" class="btn secondary" type="button">Copy email</button>
-				</div>
-				<div id="memStatus" class="status info"></div>
-
-				<div id="memResultCard" class="card" style="margin-top:14px; background:#fafafa;" hidden>
-					<div style="display:flex; align-items:center; gap:8px; justify-content:space-between;">
-						<div style="display:flex; align-items:center; gap:10px;">
-							<span id="memBadge" class="chip pill-ok">Active</span>
-							<span id="memValidity" class="subtle"></span>
-						</div>
-						<div class="actions">
-							<button id="memSendPwBtn" class="btn ghost" type="button" title="Send password email">Send password</button>
-							<button id="memOpenMemberPageBtn" class="btn ghost" type="button" title="Open Membership page">Open membership page</button>
-						</div>
-					</div>
-					<div class="kv" style="margin-top:10px;">
-						<div class="subtle">Name</div><div id="kvName">—</div>
-						<div class="subtle">Email</div><div id="kvEmail">—</div>
-						<div class="subtle">Mobile</div><div id="kvMobile">—</div>
-						<div class="subtle">School</div><div id="kvSchool">—</div>
-						<div class="subtle">Specialization</div><div id="kvSpec">—</div>
-						<div class="subtle">Position</div><div id="kvPos">—</div>
-						<div class="subtle">Address</div><div id="kvAddr">—</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="card">
-				<div class="title">Tools</div>
-				<div class="subtle" style="margin-top:2px;">Quick utilities for admins.</div>
-				<div class="row" style="margin-top:12px;">
-					<button id="toolExportBtn" class="btn ghost" type="button">Export visible profile JSON</button>
-				</div>
-				<pre id="jsonOut" style="margin-top:12px; background:#0b1020; color:#d1e7ff; padding:10px; border-radius:8px; max-height:280px; overflow:auto; font-size:12px;"></pre>
-			</div>
-		</div>
+		<!-- Members and Tools cards removed per request -->
 
 	</div>
 
@@ -795,107 +750,7 @@
 				const status = document.getElementById('adminGateStatus'); if (status) status.textContent = '';
 		}
 
-		// Membership check (POST)
-		async function membershipCheck(email){
-			const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=membershipcheck&email=${encodeURIComponent(email)}`;
-			const res = await fetch(url, { method:'POST' });
-			const text = await res.text();
-			if (/^\s*new\s*$/i.test(text)) return 'NEW';
-			try { return JSON.parse(text); } catch { return text; }
-		}
-
-		async function handleMembershipCheck(){
-			const emailEl = document.getElementById('memEmail');
-			const status = document.getElementById('memStatus');
-			const btn = document.getElementById('memCheckBtn');
-			const jsonOut = document.getElementById('jsonOut');
-			const card = document.getElementById('memResultCard');
-			status.textContent = ''; status.className = 'status info';
-			jsonOut.textContent = '';
-			card.hidden = true;
-
-			const email = String(emailEl?.value || '').trim();
-			if (!isValidEmail(email)){ status.textContent = 'Enter a valid email.'; status.className = 'status error'; emailEl?.focus(); return; }
-
-			setPending(btn, true, 'Checking…'); status.textContent = 'Checking membership…';
-			try{
-				const data = await membershipCheck(email);
-				if (data === 'NEW'){
-					status.innerHTML = 'No existing record. <a href="membership.html" target="_blank" rel="noopener">Proceed to membership registration</a>.';
-					status.className = 'status warn';
-					showToast('No record found. Ask member to register.', 'info');
-					return;
-				}
-				if (typeof data === 'string'){
-					status.textContent = data || 'Unexpected response.';
-					status.className = 'status warn';
-					return;
-				}
-
-				// JSON profile
-				jsonOut.textContent = JSON.stringify(data, null, 2);
-				const p = data.profile || data;
-
-				// Fill card
-				document.getElementById('kvName').textContent = [p.title,p.firstname,p.middleinitial,p.lastname,p.suffix].filter(Boolean).join(' ').replace(/\s+/g,' ');
-				document.getElementById('kvEmail').textContent = p.email || email;
-				document.getElementById('kvMobile').textContent = p.mobilenumber || p.mobile || '';
-				document.getElementById('kvSchool').textContent = p.school || '';
-				document.getElementById('kvSpec').textContent = p.specialization || '';
-				document.getElementById('kvPos').textContent = p.position || p.occupation || '';
-				document.getElementById('kvAddr').textContent = p.address || '';
-
-				const validitySrc = p.date || p.validity || p.expiry || p.expiration || p.Date || p.Validity || p.Expiry || p.Expiration;
-				const active = isMembershipActive(p);
-				const badge = document.getElementById('memBadge');
-				const valEl = document.getElementById('memValidity');
-				badge.textContent = active ? 'Active' : 'Expired';
-				badge.className = 'chip ' + (active ? 'pill-ok' : 'pill-warn');
-				valEl.textContent = validitySrc ? formatValidity(validitySrc) : '';
-				card.hidden = false;
-
-				status.textContent = active ? 'Member is active.' : 'Membership expired. Consider sending a renewal notice.';
-				status.className = 'status ' + (active ? 'ok' : 'warn');
-			} catch(e){
-				status.textContent = e?.message || 'Unable to check membership right now.';
-				status.className = 'status error';
-			} finally {
-				setPending(btn, false);
-			}
-		}
-
-		async function handleSendPassword(){
-			const email = String(document.getElementById('memEmail')?.value || '').trim();
-			if (!isValidEmail(email)){ showToast('Enter a valid email','error'); return; }
-			const btn = document.getElementById('memSendPwBtn');
-			setPending(btn, true, 'Sending…');
-			try{
-				const url = `${SCRIPT_BASE}?SH=${encodeURIComponent(SHEET)}&func=password&email=${encodeURIComponent(email)}`;
-				const res = await fetch(url, {
-					method:'POST',
-					headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
-					body: JSON.stringify({ email })
-				});
-				const text = await res.text();
-				showToast(text || 'Password email sent (if account exists).','success', 3500);
-			} catch(e){
-				showToast(e?.message || 'Failed to send password email.','error');
-			} finally {
-				setPending(btn, false);
-			}
-		}
-
-		// Export JSON currently shown
-		function handleExportJSON(){
-			const pre = document.getElementById('jsonOut');
-			if (!pre?.textContent){ showToast('Nothing to export','info'); return; }
-			const blob = new Blob([pre.textContent], { type:'application/json' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url; a.download = 'member.json';
-			document.body.appendChild(a); a.click(); a.remove();
-			URL.revokeObjectURL(url);
-		}
+		// (Members & Tools functions removed per request)
 
 		// Wire up
 		document.getElementById('adminLoginBtn').addEventListener('click', adminLogin);
@@ -909,16 +764,7 @@
 		// Open Membership Request modal
 		activateButtonCard(document.getElementById('btnMembershipRequests'), openMemReqModal);
 		activateButtonCard(document.getElementById('btnTrainingRequests'), openTrainingReqModal);
-		document.getElementById('memCheckBtn').addEventListener('click', handleMembershipCheck);
-		document.getElementById('memCopyBtn').addEventListener('click', () => {
-			const email = document.getElementById('memEmail')?.value || '';
-			if (!email) return;
-			try { navigator.clipboard.writeText(email); showToast('Copied email','success'); } catch(e){ showToast(email,'info'); }
-		});
-		document.getElementById('memSendPwBtn').addEventListener('click', handleSendPassword);
-		document.getElementById('memOpenMemberPageBtn').addEventListener('click', ()=> window.open('membership.html','_blank','noopener'));
-
-		document.getElementById('toolExportBtn').addEventListener('click', handleExportJSON);
+		// Removed event listeners for Members & Tools cards
 
 		// IDs events
 		document.getElementById('btnGetIds').addEventListener('click', async ()=>{
@@ -1175,7 +1021,7 @@
 					// Enter to submit on key
 					document.getElementById('adminEmail').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
 					document.getElementById('adminPassword').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); adminLogin(); } });
-			document.getElementById('memEmail').addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); handleMembershipCheck(); } });
+			// memEmail listener removed with card
 			// Render IDs from session on load
 			renderIds(loadIds());
 		})();

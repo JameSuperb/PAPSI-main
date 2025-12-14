@@ -1,3 +1,31 @@
+/* Promo Bundles tilt/lightbox */
+.bundle-figure {
+  perspective: 800px;
+}
+.bundle-tilt {
+  transform-style: preserve-3d;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+.bundle-figure:hover .bundle-tilt {
+  transform: rotateX(4deg) rotateY(-4deg) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+.bundle-img {
+  display: block;
+  border-radius: 8px;
+}
+@media (hover: none) {
+  .bundle-figure:hover .bundle-tilt {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Venobox close button position tweak (ensure top-right visibility) */
+.vbox-close {
+  right: 16px;
+  top: 12px;
+}
 /* Utility class to hide elements */
 .hidden {
   display: none !important;
@@ -793,6 +821,26 @@ link:focus,
    ========================= */
 /* Keep header above all content (Bootstrap modals are ~1050) */
 .header { z-index: 1030; }
+
+/* Add safe offset below fixed header when main follows header */
+header.fixed-top.header + main {
+  padding-top: 120px;
+}
+@media (max-width: 991px) {
+  header.fixed-top.header + main {
+    padding-top: 160px;
+  }
+}
+
+/* Improve anchor/hash link scrolling under fixed header */
+html {
+  scroll-padding-top: 120px;
+}
+@media (max-width: 991px) {
+  html {
+    scroll-padding-top: 160px;
+  }
+}
 
 /* Solid background so navbar-dark links are visible */
 .papsi-navbar { background-color: #166938; }

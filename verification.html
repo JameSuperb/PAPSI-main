@@ -310,29 +310,51 @@
 
 <!-- /notice details -->
 
-  <!-- copyright -->
-  <div class="copyright py-4 bg-footer">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-7 text-sm-left text-center">
-          <p class="mb-0">Copyright &copy;
-            <script>
-              var CurrentYear = new Date().getFullYear()
-              document.write(CurrentYear)
-            </script> 
-            Developed for <a href="https://papsitraining.com/" class="text-muted">PAPSI</a>
-          </p>
+<!-- Footer -->
+<footer class="bg-footer pt-5 pb-4">
+  <div class="container">
+    <div class="row align-items-start">
+      <div class="col-md-4 mb-4">
+        <div class="d-flex align-items-center">
+          <img src="images/logo.png" alt="PAPSI Logo" style="height:56px;width:auto;margin-right:12px;" onerror="this.style.display='none'">
+          <div>
+            <h5 class="mb-1" style="color:#fff;">PHILIPPINE ASSOCIATION OF PHYSICS AND SCIENCE INSTRUCTORS</h5>
+            <small class="text-muted">Advancing excellence in science education</small>
+          </div>
         </div>
-        <div class="col-sm-5 text-sm-right text-center">
-          <ul class="list-inline">
-            <li class="list-inline-item"><a class="d-inline-block p-2" href="https://facebook.com/papsifbpage"><i class="ti-facebook text-primary"></i></a></li>
-          </ul>
-        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h6 class="mb-3" style="color:#fff;">Contact</h6>
+        <ul class="list-unstyled text-muted mb-0">
+          <li class="mb-1"><span class="ti-location-pin mr-2 text-primary"></span>De La Salle University, Manila</li>
+          <li class="mb-1"><span class="ti-mobile mr-2 text-primary"></span>0966-165-2084</li>
+          <li class="mb-1"><span class="ti-email mr-2 text-primary"></span><a href="mailto:admin@papsicenter.com" class="text-muted">admin@papsicenter.com</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h6 class="mb-3" style="color:#fff;">Quick Links</h6>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-1"><a href="center.html" class="text-muted">Training Center</a></li>
+          <li class="mb-1"><a href="membership.html" class="text-muted">Membership</a></li>
+          <li class="mb-1"><a href="portal.html" class="text-muted">Member Portal</a></li>
+          <li class="mb-1"><a href="contact.html" class="text-muted">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="border-secondary" />
+    <div class="row">
+      <div class="col-sm-7 text-sm-left text-center">
+        <p class="mb-0 text-muted">Copyright &copy; <span id="footerYear"></span> Developed for <a href="https://papsitraining.com/" class="text-muted">PAPSI</a></p>
+      </div>
+      <div class="col-sm-5 text-sm-right text-center">
+        <ul class="list-inline mb-0">
+          <li class="list-inline-item"><a class="d-inline-block p-2" href="https://facebook.com/papsifbpage" aria-label="Facebook"><i class="ti-facebook text-primary"></i></a></li>
+        </ul>
       </div>
     </div>
   </div>
 </footer>
-<!-- /footer -->
+<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
 
 <!-- Certificate Verification Modal -->
 <div id="verifyModal" class="verify-modal hidden" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">

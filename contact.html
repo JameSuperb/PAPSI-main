@@ -40,13 +40,7 @@
   <!-- Main Stylesheet -->
   <link href="css/style.css" rel="stylesheet">
 
-  <style>
-    #map_canvas {
-      width: 100%;
-      height: 400px;
-      min-height: 300px;
-    }
-  </style>
+  <!-- Removed custom map canvas styles; using iframe embed instead -->
 
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png">
@@ -198,12 +192,15 @@
     </div>
     <div class="row">
       <div class="col-lg-7 mb-4 mb-lg-0">
-        <form action="/contact.html" method="POST">
+        <form id="contactForm" action="/contact.html" method="POST">
           <input type="text" class="form-control mb-3" id="name" name="name" placeholder="Your Name" required>
           <input type="email" class="form-control mb-3" id="mail" name="mail" placeholder="Your Email" required>
           <input type="text" class="form-control mb-3" id="subject" name="subject" placeholder="Subject" required>
           <textarea name="message" id="message" class="form-control mb-3" placeholder="Your Message" required></textarea>
+          <!-- Honeypot: hidden field to trap bots -->
+          <input type="text" name="hp" id="hp" class="d-none" aria-hidden="true" tabindex="-1" autocomplete="off">
           <button type="submit" value="send" class="btn btn-primary">SEND MESSAGE</button>
+          <div id="contactStatus" class="d-none mt-3" role="status"></div>
         </form>
       </div>
       <div class="col-lg-5">
@@ -213,20 +210,16 @@
           <strong>Saturday:</strong> 8:00am–4:00pm
         </p>
       
-        <h4 class="mb-4">Corporate Offices</h4>
+        <h4 class="mb-4">Corporate Office</h4>
         <p class="mb-4">
           <strong>Manila:</strong><br>
-          Office of the DLSU STC Vice Chancellor, De La Salle University, 2401 Taft Ave, Malate, Manila, 1004 Metro Manila
-        </p>
-        <p class="mb-4">
-          <strong>Laguna:</strong><br>
-          Office of the DLSU STC Vice Chancellor, De La Salle University Science & Technology Complex, LTI Spine Road, Laguna Blvd, Biñan, Laguna
+          De La Salle University, 2401 Taft Ave, Malate, Manila, 1004 Metro Manila
         </p>
       
         <h4 class="mb-4">Contact Info</h4>
         <p class="mb-4">
           <strong>Phone:</strong> 0966-165-2084<br>
-          <strong>Email:</strong> <a href="mailto:papsi.seminar@gmail.com">papsi.seminar@gmail.com</a>
+          <strong>Email:</strong> <a href="mailto:admin@papsicenter.com">admin@papsicenter.com</a>
         </p>
       
         <h4 class="mb-4">Social Media</h4>
@@ -241,35 +234,66 @@
 </section>
 <!-- /contact -->
 
-<!-- gmap -->
+<!-- Map (embedded) -->
 <section class="section pt-0">
-  <!-- Google Map -->
-  <div id="map_canvas" data-latitude="14.56494395" data-longitude="120.99309922392345"></div>
-</section>
-<!-- /gmap -->
-  <!-- copyright -->
-  <div class="copyright py-4 bg-footer">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-7 text-sm-left text-center">
-          <p class="mb-0">Copyright &copy;
-            <script>
-              var CurrentYear = new Date().getFullYear()
-              document.write(CurrentYear)
-            </script> 
-            Developed for <a href="https://papsitraining.com/" class="text-muted">PAPSI</a>
-          </p>
-        </div>
-        <div class="col-sm-5 text-sm-right text-center">
-          <ul class="list-inline">
-            <li class="list-inline-item"><a class="d-inline-block p-2" href="https://facebook.com/papsifbpage"><i class="ti-facebook text-primary"></i></a></li>
-          </ul>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe class="embed-responsive-item" title="De La Salle University Manila Location"
+                  src="https://www.google.com/maps?q=De%20La%20Salle%20University%20Manila&output=embed"
+                  referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
         </div>
       </div>
     </div>
   </div>
+  </section>
+<!-- /Map (embedded) -->
+<!-- Footer -->
+<footer class="bg-footer pt-5 pb-4">
+  <div class="container">
+    <div class="row align-items-start">
+      <div class="col-md-4 mb-4">
+        <div class="d-flex align-items-center">
+          <img src="images/logo.png" alt="PAPSI Logo" style="height:56px;width:auto;margin-right:12px;" onerror="this.style.display='none'">
+          <div>
+            <h5 class="mb-1" style="color:#fff;">PHILIPPINE ASSOCIATION OF PHYSICS AND SCIENCE INSTRUCTORS</h5>
+            <small class="text-muted">Advancing excellence in science education</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h6 class="mb-3" style="color:#fff;">Contact</h6>
+        <ul class="list-unstyled text-muted mb-0">
+          <li class="mb-1"><span class="ti-location-pin mr-2 text-primary"></span>De La Salle University, Manila</li>
+          <li class="mb-1"><span class="ti-mobile mr-2 text-primary"></span>0966-165-2084</li>
+          <li class="mb-1"><span class="ti-email mr-2 text-primary"></span><a href="mailto:admin@papsicenter.com" class="text-muted">admin@papsicenter.com</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-4">
+        <h6 class="mb-3" style="color:#fff;">Quick Links</h6>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-1"><a href="center.html" class="text-muted">Training Center</a></li>
+          <li class="mb-1"><a href="membership.html" class="text-muted">Membership</a></li>
+          <li class="mb-1"><a href="portal.html" class="text-muted">Member Portal</a></li>
+          <li class="mb-1"><a href="contact.html" class="text-muted">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="border-secondary" />
+    <div class="row">
+      <div class="col-sm-7 text-sm-left text-center">
+        <p class="mb-0 text-muted">Copyright &copy; <span id="footerYear"></span> Developed for <a href="https://papsitraining.com/" class="text-muted">PAPSI</a></p>
+      </div>
+      <div class="col-sm-5 text-sm-right text-center">
+        <ul class="list-inline mb-0">
+          <li class="list-inline-item"><a class="d-inline-block p-2" href="https://facebook.com/papsifbpage" aria-label="Facebook"><i class="ti-facebook text-primary"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </footer>
-<!-- /footer -->
+<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
 
 <!-- jQuery -->
 <script src="plugins/jQuery/jquery.min.js"></script>
@@ -283,12 +307,103 @@
 <script src="plugins/venobox/venobox.min.js"></script>
 <!-- filter -->
 <script src="plugins/filterizr/jquery.filterizr.min.js"></script>
-<!-- google map -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcABaamniA6OL5YvYSpB3pFMNrXwXnLwU"></script>
-<script src="plugins/google-map/gmap.js"></script>
+<!-- google map removed: using iframe embed to avoid API key/billing issues -->
 
 <!-- Main Script -->
 <script src="js/script.js"></script>
+
+<!-- Contact form submit handler (configure CONTACT_WEBAPP_URL below) -->
+<script>
+  const CONTACT_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbywHWYV6CTzNa_oXJhIoLqWpPL_1yDllfSrNV6nhE0bra2W1fH06MrWL-5mhkVZoPwW/exec';
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('contactForm');
+    if (!form) return;
+    var statusEl = document.getElementById('contactStatus');
+    var submitBtn = form.querySelector('button[type="submit"]');
+
+    // Lightweight toast styles (scoped)
+    var toastStyle = document.createElement('style');
+    toastStyle.textContent = `
+      .papsi-toast { position: fixed; right: 16px; bottom: 16px; z-index: 2000; }
+      .papsi-toast .toast-body { color: #fff; }
+      .papsi-toast-success { background: #28a745; box-shadow: 0 6px 16px rgba(40,167,69,0.3); }
+      .papsi-toast-error { background: #dc3545; box-shadow: 0 6px 16px rgba(220,53,69,0.3); }
+    `;
+    document.head.appendChild(toastStyle);
+
+    function showToast(type, msg) {
+      var wrap = document.createElement('div');
+      wrap.className = 'papsi-toast';
+      var box = document.createElement('div');
+      box.className = 'papsi-toast-' + (type === 'success' ? 'success' : 'error') + ' rounded px-3 py-2';
+      var body = document.createElement('div');
+      body.className = 'toast-body';
+      body.textContent = msg;
+      box.appendChild(body);
+      wrap.appendChild(box);
+      document.body.appendChild(wrap);
+      setTimeout(function(){
+        try { document.body.removeChild(wrap); } catch(_){}
+      }, 3500);
+    }
+
+    function showStatus(type, msg) { showToast(type, msg); }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      var payload = {
+        name: (form.name.value || '').trim(),
+        email: (form.mail.value || '').trim(), // send as both keys for backend compatibility
+        mail: (form.mail.value || '').trim(),
+        subject: (form.subject.value || '').trim(),
+        message: (form.message.value || '').trim(),
+        hp: (form.hp && form.hp.value ? form.hp.value : '').trim()
+      };
+
+      if (!CONTACT_WEBAPP_URL || CONTACT_WEBAPP_URL.indexOf('REPLACE_') === 0) {
+        showStatus('danger', 'Service temporarily unavailable. Please try again later.');
+        return;
+      }
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.dataset.originalText = submitBtn.textContent;
+          submitBtn.textContent = 'Sending...';
+        }
+
+        var res = await fetch(CONTACT_WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: JSON.stringify(payload)
+        });
+
+        var ok = false;
+        try {
+          var data = await res.json();
+          ok = !!data.ok;
+        } catch (_) {
+          ok = res.ok;
+        }
+
+        if (ok) {
+          showStatus('success', 'Message sent! We will get back to you soon.');
+          form.reset();
+        } else {
+          showStatus('danger', 'Failed to send. Please try again later.');
+        }
+      } catch (err) {
+        showStatus('danger', 'Network error. Please try again.');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = submitBtn.dataset.originalText || 'SEND MESSAGE';
+        }
+      }
+    });
+  });
+</script>
 
 </body>
 </html>

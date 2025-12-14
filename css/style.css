@@ -30,6 +30,12 @@
 .hidden {
   display: none !important;
 }
+/* Promo: improve bundle chooser visibility */
+.promo-bundles-card { border-left: 4px solid #166938; }
+.bundle-item { cursor: pointer; font-size: 1.06rem; }
+.bundle-item:hover { background-color: rgba(22,105,56,0.06); }
+.bundle-item.active { background-color: rgba(22,105,56,0.12); }
+.bundle-check { transform: scale(1.25); margin-right: 0.5rem; }
 /**
  * WEBSITE: https://themefisher.com
  * TWITTER: https://twitter.com/themefisher

@@ -128,7 +128,7 @@
       <div class="container">
         <div class="row">
           <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-overview" class="h4">Promo Overview</h2>
+            <h2 id="promo-overview" class="h4">2025 Christmas Sale: Webinar-On-Demand Special Offer</h2>
             <p>
               Celebrate the season of learning with PAPSI’s 2025 Christmas Sale! This special Webinar-on-Demand bundle features a curated collection of past PAPSI webinars, giving you access to high-quality trainings in Physics, Biology, Chemistry, science experiments, research writing, and systematic reviews at 50% OFF. Since these are recorded sessions, all trainings are fully self-paced and can be accessed anytime. Participants will enjoy seamless learning through the PAPSI Member Portal, a dedicated web app where video recordings and modules are centrally organized for easy viewing, downloading, and review. This limited-time Christmas offer lets you learn at your own pace—anytime, anywhere.
             </p>
@@ -138,7 +138,7 @@
     </section>
 
     <!-- Registration Form -->
-    <section class="py-4 bg-light" aria-labelledby="promo-registration">
+    <section class="py-4" aria-labelledby="promo-registration" style="background-color:#fffffb;">
       <div class="container">
         <div class="row">
           <div class="col-12 col-lg-10 mx-auto">
@@ -151,6 +151,21 @@
                 <div class="form-group col-12">
                   <label for="regEmail">Email Address*</label>
                   <input type="email" class="form-control" id="regEmail" name="email" placeholder="name@example.com" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-12">
+                  <label for="regTitle">Title*</label>
+                  <input type="text" class="form-control" id="regTitle" name="title" list="titleOptions" placeholder="Mr., Ms., Mrs., Dr., Engr., or type...">
+                  <datalist id="titleOptions">
+                    <option value="Mr."></option>
+                    <option value="Ms."></option>
+                    <option value="Mrs."></option>
+                    <option value="Dr."></option>
+                    <option value="Engr."></option>
+                  </datalist>
+                  <small class="form-text text-muted">–You may type or choose</small>
                 </div>
               </div>
 
@@ -179,7 +194,128 @@
                 </div>
               </div>
 
-              <button type="button" class="btn btn-primary">Enter</button>
+              <button type="button" id="promoEnterBtn" class="btn btn-primary">Enter</button>
+              
+              <!-- Expanded Registration Details (shown after successful response) -->
+              <div id="promoExpanded" class="hidden mt-4" aria-live="polite">
+                <h3 class="h5">Additional Details</h3>
+
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label for="regSpecialization">Specialization</label>
+                    <select class="form-control" id="regSpecialization" name="specialization">
+                      <option value="" selected>Select specialization</option>
+                      <option value="Physics">Physics</option>
+                      <option value="Biology">Biology</option>
+                      <option value="Chemistry">Chemistry</option>
+                      <option value="Earth Science">Earth Science</option>
+                      <option value="General Science">General Science</option>
+                      <option value="Research">Research</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <input type="text" class="form-control mt-2 d-none" id="regSpecializationOther" name="specializationOther" placeholder="Please specify your specialization">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label for="regSchoolName">Name of School</label>
+                    <input type="text" class="form-control" id="regSchoolName" name="schoolName" placeholder="e.g., Sample National High School">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label for="regSchoolType">Type</label>
+                    <select class="form-control" id="regSchoolType" name="schoolType">
+                      <option value="" selected>Select type</option>
+                      <option value="Private">Private</option>
+                      <option value="Public">Public</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label for="regSchoolAddress">Address of School</label>
+                    <input type="text" class="form-control" id="regSchoolAddress" name="schoolAddress" placeholder="Street, Barangay, City/Province">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label class="d-block">Choose Training Bundles (multiple selection allowed)</label>
+                    <div class="card border-0 shadow-sm mb-3 promo-bundles-card">
+                      <div class="card-body p-2">
+                        <div id="bundleGroup" class="list-group list-group-flush">
+                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundlePhysics">
+                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundlePhysics" name="bundleIds[]" value="physics">
+                            <span>Physics: Vectors, Motion, & Collision</span>
+                          </label>
+                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleBiology">
+                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleBiology" name="bundleIds[]" value="biology">
+                            <span>Biology: From Cells to Genetics</span>
+                          </label>
+                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleChemistry">
+                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleChemistry" name="bundleIds[]" value="chemistry">
+                            <span>Chemistry: From Electrons to Reactions</span>
+                          </label>
+                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleExperiment">
+                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleExperiment" name="bundleIds[]" value="experiment">
+                            <span>Guide to Science Experiment</span>
+                          </label>
+                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleResearch">
+                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleResearch" name="bundleIds[]" value="research">
+                            <span>Research Writing and Presentation</span>
+                          </label>
+                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleSystematic">
+                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleSystematic" name="bundleIds[]" value="systematic">
+                            <span>Conducting Systematic Reviews</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <label>Webinars Included (You may choose your preferred certificate date)</label>
+                    <div id="webinarItems" class="mt-2"></div>
+                  </div>
+                </div>
+
+                <!-- Fees Summary (auto-computed) -->
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <div id="feesSummary" class="card border-0 shadow-sm d-none">
+                      <div class="card-body p-3">
+                        <h4 class="h6 mb-3">Fees Summary</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span class="text-muted">Membership Fee</span>
+                          <strong id="feeMembership">PHP 0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <span class="text-muted">Training Fee</span>
+                          <strong id="feeTraining">PHP 0</strong>
+                        </div>
+                        <hr class="my-2"/>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span class="text-muted">Total</span>
+                          <strong id="feeTotal">PHP 0</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Submit Registration (shown when any bundle is selected) -->
+                <div class="form-row">
+                  <div class="form-group col-12">
+                    <button type="button" id="submitRegBtn" class="btn btn-success d-none">Submit Registration</button>
+                  </div>
+                </div>
+              </div>
             </form>
           </div>
         </div>
@@ -195,24 +331,24 @@
               <div class="row">
                 <div class="col-12 col-md-4 mb-3">
                   <figure class="m-0 bundle-figure">
-                    <a href="images/xmaspromo2025_ (1).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 1 image">
-                      <img src="images/xmaspromo2025_ (1).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 1">
+                    <a href="images/xmaspromo2025_%20(1).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 1 image">
+                      <img src="images/xmaspromo2025_%20(1).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 1">
                     </a>
                     <figcaption class="small text-muted mt-2">Bundle 1</figcaption>
                   </figure>
                 </div>
                 <div class="col-12 col-md-4 mb-3">
                   <figure class="m-0 bundle-figure">
-                    <a href="images/xmaspromo2025_ (2).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 2 image">
-                      <img src="images/xmaspromo2025_ (2).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 2">
+                    <a href="images/xmaspromo2025_%20(2).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 2 image">
+                      <img src="images/xmaspromo2025_%20(2).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 2">
                     </a>
                     <figcaption class="small text-muted mt-2">Bundle 2</figcaption>
                   </figure>
                 </div>
                 <div class="col-12 col-md-4 mb-3">
                   <figure class="m-0 bundle-figure">
-                    <a href="images/xmaspromo2025_ (3).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 3 image">
-                      <img src="images/xmaspromo2025_ (3).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 3">
+                    <a href="images/xmaspromo2025_%20(3).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 3 image">
+                      <img src="images/xmaspromo2025_%20(3).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 3">
                     </a>
                     <figcaption class="small text-muted mt-2">Bundle 3</figcaption>
                   </figure>

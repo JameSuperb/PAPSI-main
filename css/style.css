@@ -36,6 +36,20 @@
 .bundle-item:hover { background-color: rgba(22,105,56,0.06); }
 .bundle-item.active { background-color: rgba(22,105,56,0.12); }
 .bundle-check { transform: scale(1.25); margin-right: 0.5rem; }
+/* Thin separators around key sections */
+.section-sep {
+  border-top: 1px solid rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(0,0,0,0.25);
+}
+/* Excluded webinar row styling */
+.excluded {
+  background-color: #fff3cd !important; /* subtle warning background */
+  border-left: 4px solid #ffeeba;
+}
+.excluded-input {
+  opacity: 0.6;
+  pointer-events: none;
+}
 /**
  * WEBSITE: https://themefisher.com
  * TWITTER: https://twitter.com/themefisher

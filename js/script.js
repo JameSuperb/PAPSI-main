@@ -77,13 +77,109 @@
 		var form = $("section[aria-labelledby='promo-registration'] form");
 		if (!form.length) return;
 
+		// Cache for member trainings and CSV map
+		form.data('memberTrainings', []);
+		form.data('csvMapLoaded', false);
+		form.data('csvMap', {});
+
+		function normalizeTitle(t){
+			var s = (t || '').toString().toLowerCase();
+			// Trim
+			s = s.trim();
+			// Replace smart quotes and dashes
+			s = s.replace(/[\u2018\u2019\u201A\u201B]/g, "'").replace(/[\u201C\u201D\u201E]/g, '"');
+			s = s.replace(/[\u2013\u2014\u2212]/g, '-');
+			// Convert ampersand to 'and'
+			s = s.replace(/&/g, ' and ');
+			// Remove punctuation commonly differing between CSV and DOM
+			s = s.replace(/[\.,:;!\?\(\)\[\]\{\}]/g, ' ');
+			// Collapse multiple whitespace/dashes
+			s = s.replace(/[-\s]+/g, ' ').trim();
+			return s;
+		}
+
+		function parseMemberTrainings(trainingsText){
+			if (!trainingsText) return [];
+			// Split by " | " with spaces around pipe; be tolerant of extra spaces
+			return trainingsText.split(/\s*\|\s*/).map(function(s){ return normalizeTitle(s); }).filter(function(s){ return s.length; });
+		}
+
+		function loadCsvMapOnce(){
+			if (form.data('csvMapLoaded')) return Promise.resolve(form.data('csvMap'));
+			// Robust CSV parser supporting quoted fields and commas inside quotes
+			function parseCSV(text){
+				var rows = [];
+				var row = [];
+				var field = '';
+				var inQuotes = false;
+				for (var i = 0; i < text.length; i++){
+					var ch = text[i];
+					if (ch === '"'){
+						if (inQuotes && text[i+1] === '"'){
+							field += '"';
+							i++;
+						} else {
+							inQuotes = !inQuotes;
+						}
+					} else if (ch === ',' && !inQuotes){
+						row.push(field);
+						field = '';
+					} else if ((ch === '\n' || ch === '\r') && !inQuotes){
+						if (ch === '\r' && text[i+1] === '\n') { i++; }
+						row.push(field);
+						rows.push(row);
+						row = [];
+						field = '';
+					} else {
+						field += ch;
+					}
+				}
+				// push last field/row if any
+				if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+				return rows.filter(function(r){ return r && r.join('').trim().length; });
+			}
+
+			var url = 'files/webinartrainingtitle.csv?ts=' + Date.now();
+			return fetch(url, { cache: 'no-store' })
+				.then(function(resp){ return resp.text(); })
+				.then(function(text){
+					var rows = parseCSV(text);
+					if (!rows.length) { form.data('csvMapLoaded', true); return {}; }
+					// Assume first row is header
+					var map = {};
+					for (var i=1; i<rows.length; i++){
+						var cols = rows[i];
+						if (!cols || cols.length < 3) continue;
+						var webinarRaw = (cols[0] || '').trim();
+						var trainingRaw = (cols[1] || '').trim();
+						var costRaw = (cols[2] || '').trim();
+						var costNum = parseFloat(costRaw.replace(/[^0-9.\-]/g,''));
+						if (!isFinite(costNum)) costNum = 0;
+						map[normalizeTitle(webinarRaw)] = {
+							webinarRaw: webinarRaw,
+							trainingRaw: trainingRaw,
+							trainingLower: normalizeTitle(trainingRaw),
+							cost: costNum
+						};
+					}
+					form.data('csvMap', map);
+					form.data('csvMapLoaded', true);
+					return map;
+				})
+				.catch(function(){
+					form.data('csvMapLoaded', true);
+					form.data('csvMap', {});
+					return {};
+				});
+		}
+
 		var emailInput = form.find('#regEmail');
 		var titleInput = form.find('#regTitle');
 		var firstNameInput = form.find('#regFirstName');
 		var miInput = form.find('#regMI');
 		var lastNameInput = form.find('#regLastName');
 		var suffixInput = form.find('#regSuffix');
-		var submitBtn = form.find('button.btn');
+		var enterBtn = form.find('#promoEnterBtn');
 
 		function showInlineError(input, message) {
 			var help = $('<small class="form-text text-danger"></small>').text(message);
@@ -127,7 +223,7 @@
 			return upper.trim();
 		}
 
-		submitBtn.on('click', function () {
+		enterBtn.on('click', function () {
 			// Clear prior errors
 			[emailInput, titleInput, firstNameInput, miInput, lastNameInput, suffixInput].forEach(function (el) { clearInlineError(el); });
 
@@ -189,7 +285,7 @@
 			var url = baseUrl + '?func=nametext&nametext=' + encodeURIComponent(nametext);
 
 			// Disable button while processing
-			submitBtn.prop('disabled', true).text('Processing...');
+			enterBtn.prop('disabled', true).text('Processing...');
 
 			fetch(url, { method: 'GET' })
 				.then(function (resp) { return resp.text(); })
@@ -224,20 +320,37 @@
 					var feedback = form.find('.submission-feedback');
 					if (!feedback.length) {
 						feedback = $('<div class="submission-feedback mt-2"></div>');
-						submitBtn.after(feedback);
+						enterBtn.after(feedback);
 					}
 					feedback.text(message).removeClass('text-danger').addClass('text-success');
 
 					// Always proceed to expanded details regardless of case
-					submitBtn.addClass('d-none');
+					enterBtn.addClass('d-none');
 					var expanded = form.find('#promoExpanded');
-					if (expanded.length) {
+						if (expanded.length) {
 						expanded.removeClass('hidden');
+							// Move success feedback above "Additional Details" heading
+							var heading = expanded.find('h3.h5').first();
+							if (heading.length) {
+								feedback.addClass('mb-2');
+								heading.before(feedback);
+							}
 						initializeBundleRendering(form);
 						initializeSpecializationOther(form);
+							initializeSubmitValidation(form);
 						// Initialize fees with membership status and zero training prior to selection
 						initializeAutoFees(form, caseType);
 						if (caseType === 'PAPSI_MEMBER_JSON' && jsonData) {
+							// Parse member trainings list (json field: trainings)
+							var trainingsText = (jsonData.trainings || '').trim();
+							var trainList = parseMemberTrainings(trainingsText);
+							form.data('memberTrainings', trainList);
+							// Load CSV mapping early
+							loadCsvMapOnce().then(function(){
+								// Re-render to apply exclusions if bundles already selected
+								initializeBundleRendering(form);
+								computeFees(form);
+							});
 							// Fill expanded form fields from JSON
 							var spec = (jsonData.specialization || '').trim();
 							var school = (jsonData.school || '').trim();
@@ -283,6 +396,7 @@
 							form.find('#regSchoolName').val('');
 							form.find('#regSchoolType').val('');
 							form.find('#regSchoolAddress').val('');
+							form.data('memberTrainings', []);
 							// Uncheck bundles and clear webinars
 							form.find('#bundleGroup input[type="checkbox"]').prop('checked', false);
 							form.find('#webinarItems').empty();
@@ -294,16 +408,17 @@
 					var feedback = form.find('.submission-feedback');
 					if (!feedback.length) {
 						feedback = $('<div class="submission-feedback mt-2"></div>');
-						submitBtn.after(feedback);
+						enterBtn.after(feedback);
 					}
 					feedback.text('Network error. Please try again.').removeClass('text-success').addClass('text-danger');
 					// Proceed to expanded details with blank form on network error
-					submitBtn.addClass('d-none');
+					enterBtn.addClass('d-none');
 					var expanded = form.find('#promoExpanded');
 					if (expanded.length) {
 						expanded.removeClass('hidden');
 						initializeBundleRendering(form);
 						initializeSpecializationOther(form);
+						initializeSubmitValidation(form);
 						initializeAutoFees(form, 'OTHER_TEXT');
 						form.find('#regSpecialization').val('');
 						form.find('#regSchoolName').val('');
@@ -311,10 +426,11 @@
 						form.find('#regSchoolAddress').val('');
 						form.find('#bundleGroup input[type="checkbox"]').prop('checked', false);
 						form.find('#webinarItems').empty();
+						form.data('memberTrainings', []);
 					}
 				})
 				.finally(function () {
-					submitBtn.prop('disabled', false).text('Enter');
+					enterBtn.prop('disabled', false).text('Enter');
 				});
 		});
 
@@ -401,6 +517,8 @@
 				var pointer = startOfToday();
 				var offset = 0;
 
+				var csvMap = form.data('csvMap') || {};
+				var memberTrainings = form.data('memberTrainings') || [];
 				selected.forEach(function (key) {
 					var list = bundleMap[key] || [];
 					if (!list.length) return;
@@ -419,23 +537,42 @@
 						var titleId = 'lbl-' + id;
 
 						var tr = $('<tr></tr>');
-						var tdTitle = $('<td></td>').append($('<span></span>').attr('id', titleId).text(num + '. ' + title));
+						var normKey = normalizeTitle(title);
+						var mapping = csvMap[normKey] || null;
+						var trainingLower = mapping ? mapping.trainingLower : null;
+						var isExcluded = !!(trainingLower && memberTrainings.indexOf(trainingLower) !== -1);
+						var tdTitleText = num + '. ' + title + (isExcluded ? ' — You have already attended this webinar and so this webinar is excluded on the training bundle' : '');
+						var tdTitle = $('<td></td>').append($('<span></span>').attr('id', titleId).text(tdTitleText));
 						var assigned = addDays(pointer, offset);
 						// Skip holidays by advancing until non-holiday
 						while (isHoliday(assigned)) {
 							offset += 1;
 							assigned = addDays(pointer, offset);
 						}
-						var tdDate = $('<td></td>').append(
-							$('<input type="date" class="form-control"/>')
-								.attr('id', id)
-								.attr('name', name)
-								.attr('aria-labelledby', titleId)
-								.val(toYMD(assigned))
-						);
+						var dateInput = $('<input type="date" class="form-control"/>')
+							.attr('id', id)
+							.attr('name', name)
+							.attr('aria-labelledby', titleId);
+						// Attach normalized key and potential cost
+						tr.attr('data-webinarkey', normKey);
+						if (mapping && !isExcluded) {
+							tr.attr('data-cost', String(mapping.cost));
+						} else {
+							tr.attr('data-cost', '0');
+						}
+						if (isExcluded) {
+							dateInput.val('')
+								.prop('disabled', true)
+								.addClass('excluded-input');
+							tr.addClass('excluded');
+						} else {
+							dateInput.val(toYMD(assigned));
+							// Only advance offset for non-excluded webinars
+							offset += 1;
+						}
+						var tdDate = $('<td></td>').append(dateInput);
 						tr.append(tdTitle, tdDate);
 						tbody.append(tr);
-						offset += 1;
 					});
 
 					table.append(thead, tbody);
@@ -470,6 +607,8 @@
 				var label = $(this).closest('.bundle-item');
 				if (label.length) label.toggleClass('active', this.checked);
 				render();
+				// Ensure fees recompute even if render short-circuits
+				computeFees(form);
 			});
 			render();
 		}
@@ -495,6 +634,91 @@
 			specSel.off('change.specializationOther').on('change.specializationOther', updateOther);
 			updateOther();
 		}
+
+		// Submit button validations: required fields and total > 0
+		function initializeSubmitValidation(form){
+			var submitBtn = form.find('#submitRegBtn');
+			if (!submitBtn.length) return;
+			submitBtn.off('click.promoSubmit').on('click.promoSubmit', function(e){
+				e.preventDefault();
+				// Elements
+				var specSel = form.find('#regSpecialization');
+				var specOther = form.find('#regSpecializationOther');
+				var schoolName = form.find('#regSchoolName');
+				var schoolType = form.find('#regSchoolType');
+				var schoolAddr = form.find('#regSchoolAddress');
+				var bundleGroup = form.find('#bundleGroup');
+				var feesCard = form.find('#feesSummary');
+
+				// Clear previous errors
+				[emailInput, titleInput, firstNameInput, lastNameInput, specSel, specOther, schoolName, schoolType, schoolAddr].forEach(function(el){ clearInlineError(el); });
+				bundleGroup.siblings('.form-text.text-danger').remove();
+				feesCard.siblings('.form-text.text-danger').remove();
+
+				var hasError = false;
+				function setError(el, msg){
+					showInlineError(el, msg);
+					if (!hasError && el && el.length) {
+						try { el[0].focus(); } catch(e){}
+					}
+					hasError = true;
+				}
+				function parsePhp(text){
+					var n = parseFloat(String(text || '').replace(/[^0-9\.\-]/g, ''));
+					return isFinite(n) ? n : 0;
+				}
+
+				// Email
+				var email = (emailInput.val() || '').trim();
+				if (!email) setError(emailInput, 'Please enter your email address.');
+				else if (!isValidEmail(email)) setError(emailInput, 'Email address looks incorrect.');
+
+				// Title
+				var titleVal = (titleInput.val() || '').trim();
+				if (!titleVal) setError(titleInput, 'Please select or enter your title.');
+
+				// Names
+				if (!(firstNameInput.val() || '').trim()) setError(firstNameInput, 'Please enter your first name.');
+				if (!(lastNameInput.val() || '').trim()) setError(lastNameInput, 'Please enter your last name.');
+
+				// Specialization
+				var specVal = (specSel.val() || '').trim();
+				if (!specVal) setError(specSel, 'Please select your specialization.');
+				if (specVal === 'Other'){
+					var specOtherVal = (specOther.val() || '').trim();
+					if (!specOtherVal) setError(specOther, 'Please specify your specialization.');
+				}
+
+				// School details
+				if (!(schoolName.val() || '').trim()) setError(schoolName, 'Please enter the name of your school.');
+				if (!(schoolType.val() || '').trim()) setError(schoolType, 'Please select the type of school.');
+				if (!(schoolAddr.val() || '').trim()) setError(schoolAddr, 'Please enter the address of your school.');
+
+				// Bundles
+				var selectedBundles = bundleGroup.find('input[type="checkbox"]:checked').length;
+				if (selectedBundles === 0) setError(bundleGroup, 'Please select at least one training bundle.');
+
+				// Total must not be zero
+				var totalVal = parsePhp(form.find('#feeTotal').text());
+				if (totalVal <= 0) {
+					showInlineError(feesCard, 'Total is zero. Please pick training bundles.');
+					if (!hasError && feesCard.offset()) {
+						window.scrollTo({ top: Math.max(0, feesCard.offset().top - 40), behavior: 'smooth' });
+					}
+					hasError = true;
+				}
+
+				if (hasError) return;
+
+				// All validations passed
+				var submitFeedback = form.find('.submit-feedback');
+				if (!submitFeedback.length) {
+					submitFeedback = $('<div class="submit-feedback mt-2 text-success"></div>');
+					submitBtn.after(submitFeedback);
+				}
+				submitFeedback.text('All required fields are valid.');
+			});
+		}
 	});
 
 	// Fees: Auto-compute based on selections and membership status
@@ -512,29 +736,45 @@
 		var feeTotalEl = form.find('#feeTotal');
 		if (!feesCard.length) return;
 
-		// Pricing per bundle (promo prices)
-		var bundlePrices = {
-			physics: 600,
-			biology: 600,
-			chemistry: 600,
-			experiment: 450,
-			research: 600,
-			systematic: 450
-		};
-
 		// Membership fee for non-members or non-active cases
 		var MEMBERSHIP_FEE = 500;
 		var membershipFee = (caseType === 'PAPSI_MEMBER_JSON') ? 0 : MEMBERSHIP_FEE;
 
-		// Sum selected bundle prices
 		var trainingFee = 0;
-		var bundleGroup = form.find('#bundleGroup');
-		bundleGroup.find('input[type="checkbox"]:checked').each(function(){
-			var key = $(this).val();
-			if (bundlePrices.hasOwnProperty(key)) {
-				trainingFee += bundlePrices[key];
+		var csvLoaded = !!form.data('csvMapLoaded');
+		var csvMap = form.data('csvMap') || {};
+		if (caseType === 'PAPSI_MEMBER_JSON') {
+			if (csvLoaded && Object.keys(csvMap).length) {
+				// Sum costs from data attributes for non-excluded rows
+				var itemsContainer = form.find('#webinarItems');
+				itemsContainer.find('tbody tr').each(function(){
+					var tr = $(this);
+					if (tr.hasClass('excluded')) return;
+					var costAttr = tr.attr('data-cost');
+					var costVal = parseFloat((costAttr || '0').replace(/[^0-9\.\-]/g, ''));
+					if (isFinite(costVal)) trainingFee += costVal;
+				});
+			} else {
+				// CSV not yet ready for old member; keep trainingFee at 0 for now.
 			}
-		});
+		} else {
+			// Fallback to original per-bundle pricing for non-members/new members
+			var bundlePrices = {
+				physics: 600,
+				biology: 600,
+				chemistry: 600,
+				experiment: 450,
+				research: 600,
+				systematic: 450
+			};
+			var bundleGroup = form.find('#bundleGroup');
+			bundleGroup.find('input[type="checkbox"]:checked').each(function(){
+				var key = $(this).val();
+				if (bundlePrices.hasOwnProperty(key)) {
+					trainingFee += bundlePrices[key];
+				}
+			});
+		}
 
 		var total = membershipFee + trainingFee;
 

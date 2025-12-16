@@ -77,6 +77,12 @@
 		var form = $("section[aria-labelledby='promo-registration'] form");
 		if (!form.length) return;
 
+		// Centralized endpoints for promo flows
+		var PROMO_ENDPOINTS = {
+			enter: 'https://script.google.com/macros/s/AKfycbys_Em108LXKUoiQ6VbmECERa32-n5-txdMdmAykllxDuOkMNHdOrmBzqaZs-x4RYkpLA/exec',
+			submit: 'https://script.google.com/macros/s/AKfycbwvqK3kW7XRpL6hZPUX1glj71Miflin5zK5BRU5Nqi_s6iWxPPH_dDtETJjdlh7AtIcxw/exec'
+		};
+
 		// Cache for member trainings and CSV map
 		form.data('memberTrainings', []);
 		form.data('csvMapLoaded', false);
@@ -281,7 +287,7 @@
 			var nametext = buildNameText(firstName, middleInitial, lastName, suffix);
 
 			// Submit to Apps Script endpoint
-			var baseUrl = 'https://script.google.com/macros/s/AKfycbys_Em108LXKUoiQ6VbmECERa32-n5-txdMdmAykllxDuOkMNHdOrmBzqaZs-x4RYkpLA/exec';
+			var baseUrl = PROMO_ENDPOINTS.enter;
 			var url = baseUrl + '?func=nametext&nametext=' + encodeURIComponent(nametext);
 
 			// Disable button while processing
@@ -335,6 +341,7 @@
 								feedback.addClass('mb-2');
 								heading.before(feedback);
 							}
+							// (Removed) Do not lock fields; keep them editable per latest requirements
 						initializeBundleRendering(form);
 						initializeSpecializationOther(form);
 							initializeSubmitValidation(form);
@@ -710,13 +717,191 @@
 
 				if (hasError) return;
 
-				// All validations passed
-				var submitFeedback = form.find('.submit-feedback');
-				if (!submitFeedback.length) {
-					submitFeedback = $('<div class="submit-feedback mt-2 text-success"></div>');
-					submitBtn.after(submitFeedback);
+				// All validations passed: assemble payload and submit
+				function parsePhp(text){
+					var n = parseFloat(String(text || '').replace(/[^0-9\.\-]/g, ''));
+					return isFinite(n) ? n : 0;
 				}
-				submitFeedback.text('All required fields are valid.');
+				function bundleCodeForVal(val){
+					// Map bundle values to certificate code letters
+					switch (val) {
+						case 'physics': return 'P';
+						case 'biology': return 'B';
+						case 'chemistry': return 'C';
+						case 'experiment': return 'G';
+						case 'research': return 'R';
+						case 'systematic': return 'S';
+						default: return '';
+					}
+				}
+				function bundleHeaderText(val){
+					switch (val) {
+						case 'physics': return 'Physics: Vectors, Motion, & Collision';
+						case 'biology': return 'Biology: From Cells to Genetics';
+						case 'chemistry': return 'Chemistry: From Electrons to Reactions';
+						case 'experiment': return 'Guide to Science Experiment';
+						case 'research': return 'Research Writing and Presentation';
+						case 'systematic': return 'Conducting Systematic Reviews';
+						default: return val;
+					}
+				}
+
+				var payload = {
+					timestamp: new Date().toISOString(),
+					email: (emailInput.val() || '').trim(),
+					title: (titleInput.val() || '').trim(),
+					firstname: (firstNameInput.val() || '').trim(),
+					middleinitial: (miInput.val() || '').trim(),
+					lastname: (lastNameInput.val() || '').trim(),
+					suffix: (form.find('#regSuffix').val() || '').trim(),
+					specialization: (function(){
+						var sv = (specSel.val() || '').trim();
+						if (sv === 'Other') { return (specOther.val() || '').trim(); }
+						return sv;
+					})(),
+					school: (schoolName.val() || '').trim(),
+					type: (schoolType.val() || '').trim(),
+					address: (schoolAddr.val() || '').trim(),
+					traininglist: '',
+					memfee: parsePhp(form.find('#feeMembership').text()),
+					regfee: parsePhp(form.find('#feeTraining').text()),
+					totalfee: parsePhp(form.find('#feeTotal').text())
+				};
+
+				// Build traininglist and certificate date keys with clean, sequential numbering
+				var lines = [];
+				var certs = {};
+				var selectedBundlesVals = [];
+				bundleGroup.find('input[type="checkbox"]:checked').each(function(){ selectedBundlesVals.push($(this).val()); });
+				selectedBundlesVals.forEach(function(val){
+					var code = bundleCodeForVal(val);
+					var header = bundleHeaderText(val);
+					lines.push(header);
+
+					// Renumber included webinars starting at 1
+					var seq = 1;
+
+					// find rows for this bundle
+					var rows = form.find('#webinarItems tbody tr').filter(function(){
+						var idSpan = $(this).find('span[id^="lbl-webinarDate-' + val + '-"]');
+						return idSpan.length > 0;
+					});
+					rows.each(function(){
+						var tr = $(this);
+						var isExcluded = tr.hasClass('excluded');
+						var titleText = tr.find('span[id^="lbl-webinarDate-' + val + '-"]').text() || '';
+						// strip exclusion note and any leading number
+						var cleaned = titleText
+							.replace(/—.*$/,'')
+							.replace(/^\s*\d+\.\s*/,'')
+							.trim();
+
+						if (!isExcluded && cleaned) {
+							lines.push(seq + '. ' + cleaned);
+							seq += 1;
+						}
+
+						// certificate date
+						var input = tr.find('input[type="date"]');
+						var dateVal = (input.val() || '').trim();
+						var indexMatch = (input.attr('id') || '').match(/webinarDate-.*-(\d+)/);
+						var idx = indexMatch ? indexMatch[1] : '';
+						var key = code + idx;
+						if (key) { certs[key] = isExcluded ? '' : dateVal; }
+					});
+					// add blank line between bundles
+					lines.push('');
+				});
+				payload.traininglist = lines.join('\n');
+				Object.keys(certs).forEach(function(k){ payload[k] = certs[k]; });
+
+				// Submit to Apps Script (URL-encoded for Apps Script e.parameter)
+				var endpoint = PROMO_ENDPOINTS.submit;
+				submitBtn.prop('disabled', true).text('Submitting...');
+				// Route to the correct server handler
+				payload.func = 'recordpromo';
+				var body = new URLSearchParams();
+				Object.keys(payload).forEach(function(k){ body.append(k, String(payload[k] == null ? '' : payload[k])); });
+				fetch(endpoint, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+					body: body.toString()
+				}).then(function(resp){
+					if (!resp.ok) throw new Error('HTTP ' + resp.status);
+					return resp.text();
+				}).then(function(text){
+					var ok = false;
+					var trimmed = (text || '').trim();
+					try {
+						var json = JSON.parse(trimmed);
+						ok = !!(json && (json.status === 'success' || json.ok === true));
+					} catch(e) {
+						ok = /successful|success/i.test(trimmed);
+					}
+					var msgEl = form.find('.submit-feedback');
+					if (!msgEl.length) {
+						msgEl = $('<div class="submit-feedback mt-2"></div>');
+						submitBtn.after(msgEl);
+					}
+					if (ok) {
+						msgEl.text('Submission successful. Please check your email for the confirmation. Thank you for registering to the promo.').removeClass('text-danger').addClass('text-success');
+						// Hide submit button to prevent immediate re-click; reset after 3 seconds
+						submitBtn.addClass('d-none');
+						setTimeout(function(){
+							// Clear identity fields and additional details (keep enabled)
+							form.find('#regEmail').val('').removeClass('is-locked').siblings('.lock-note').remove();
+							form.find('#regTitle').val('').removeClass('is-locked').siblings('.lock-note').remove();
+							form.find('#regFirstName').val('').removeClass('is-locked').siblings('.lock-note').remove();
+							form.find('#regMI').val('').removeClass('is-locked').siblings('.lock-note').remove();
+							form.find('#regLastName').val('').removeClass('is-locked').siblings('.lock-note').remove();
+							form.find('#regSuffix').val('').removeClass('is-locked').siblings('.lock-note').remove();
+							form.find('#regSpecialization').val('');
+							form.find('#regSpecializationOther').val('').addClass('d-none').removeAttr('required');
+							form.find('#regSchoolName').val('');
+							form.find('#regSchoolType').val('');
+							form.find('#regSchoolAddress').val('');
+
+							// Clear bundles and webinars
+							var bundleGroup = form.find('#bundleGroup');
+							bundleGroup.find('input[type="checkbox"]').prop('checked', false);
+							bundleGroup.find('.bundle-item').removeClass('active');
+							form.find('#webinarItems').empty();
+
+							// Hide expanded section and feedback, reset fees
+							var expanded = form.find('#promoExpanded');
+							if (expanded.length) expanded.addClass('hidden');
+							form.find('.submit-feedback, .submission-feedback').remove();
+							var feesCard = form.find('#feesSummary');
+							form.find('#feeMembership').text('PHP 0');
+							form.find('#feeTraining').text('PHP 0');
+							form.find('#feeTotal').text('PHP 0');
+							feesCard.toggleClass('d-none', true);
+
+							// Clear internal data caches
+							form.data('memberTrainings', []);
+							form.data('csvMapLoaded', false);
+							form.data('csvMap', {});
+
+							// Show Enter button and focus email
+							var enterBtn = form.find('#promoEnterBtn');
+							enterBtn.removeClass('d-none').prop('disabled', false).text('Enter');
+							var emailInput = form.find('#regEmail');
+							try { if (emailInput.length) emailInput[0].focus(); } catch(e){}
+
+							// Reset fees state
+							initializeAutoFees(form, 'OTHER_TEXT');
+						}, 3000);
+					} else {
+						// Surface server response to help diagnose issues
+						msgEl.text(trimmed || 'Submission failed. Please try again or contact support.').removeClass('text-success').addClass('text-danger');
+					}
+				}).catch(function(err){
+					var msgEl = form.find('.submit-feedback');
+					if (!msgEl.length) { msgEl = $('<div class="submit-feedback mt-2"></div>'); submitBtn.after(msgEl); }
+					msgEl.text('Network or server error during submission. ' + (err && err.message ? err.message : 'Please retry.')).removeClass('text-success').addClass('text-danger');
+				}).finally(function(){
+					submitBtn.prop('disabled', false).text('Submit Registration');
+				});
 			});
 		}
 	});

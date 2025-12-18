@@ -155,6 +155,22 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- RowNumber Submit card -->
+		<div class="card" id="rowNumberCard" style="margin-bottom:16px;">
+			<div class="title">2025 Christmas Promo: RowNumber Submit</div>
+			<div class="subtle" style="margin-top:2px;">Send RowNumber to webhook</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field">
+					<label for="rownumber-input">RowNumber</label>
+					<input id="rownumber-input" type="number" min="1" step="1" value="1" inputmode="numeric" />
+				</div>
+			</div>
+			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
+				<button id="rownumber-submit" class="btn" type="button">Submit</button>
+			</div>
+			<div id="rownumber-status" class="status" aria-live="polite"></div>
+		</div>
 		<!-- Members and Tools cards removed per request -->
 
 	</div>
@@ -314,6 +330,8 @@
 		const IDS_GET_URL = 'https://script.google.com/macros/s/AKfycbzqiw4j1ibbbNIEYp_VIwXIQqI4feO3lpseMSGtGG9UeyznBDqaeuzx-pvO0QNCHUEU/exec?func=idget';
 		// IDs endpoint (Write)
 		const IDS_WRITE_BASE = 'https://script.google.com/macros/s/AKfycbzqiw4j1ibbbNIEYp_VIwXIQqI4feO3lpseMSGtGG9UeyznBDqaeuzx-pvO0QNCHUEU/exec?func=idwrite';
+		// RowNumber webhook (POST with query param)
+		const ROWNUMBER_HOOK_URL = 'https://hook.eu1.make.com/kmamevd3lm9xzi73gf19n8fx8pgqjezw';
 
 		// Utils
 		function showToast(msg, type='info', ms=2600, position='top-right'){
@@ -809,6 +827,41 @@
 		});
 		document.getElementById('idsCancelBtn')?.addEventListener('click', closeIdsModal);
 		document.getElementById('idsSaveBtn')?.addEventListener('click', saveFromModal);
+
+		// RowNumber card events
+		function clampRowNumberInput(){
+			const el = document.getElementById('rownumber-input');
+			if (!el) return;
+			let v = parseInt(el.value, 10);
+			if (!Number.isFinite(v) || v < 1) v = 1;
+			el.value = String(v);
+		}
+		async function submitRowNumber(){
+			const input = document.getElementById('rownumber-input');
+			const btn = document.getElementById('rownumber-submit');
+			if (!input || !btn) return;
+			let v = parseInt(String(input.value||'').trim(), 10);
+			if (!Number.isFinite(v) || v < 1) v = 1;
+			input.value = String(v);
+			setPending(btn, true, 'Submitting…');
+			try{
+				const url = ROWNUMBER_HOOK_URL + '?RowNumber=' + encodeURIComponent(String(v));
+				const res = await fetch(url, { method: 'POST' });
+				let text = await res.text();
+				text = (text || '').trim();
+				let success = res.ok || /\baccepted\b/i.test(text);
+				if (!success) { throw new Error(text || 'Submission failed'); }
+				const msg = text ? text : 'accepted';
+				showToast(msg, 'success', 3000, 'top-right');
+			} catch(e){
+				showToast(e?.message || 'Submission failed', 'error', 3200, 'top-right');
+			} finally {
+				setPending(btn, false);
+			}
+		}
+		document.getElementById('rownumber-input')?.addEventListener('change', clampRowNumberInput);
+		document.getElementById('rownumber-input')?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); submitRowNumber(); } });
+		document.getElementById('rownumber-submit')?.addEventListener('click', submitRowNumber);
 
 		// Membership Request modal events
 		document.getElementById('memReqCloseBtn').addEventListener('click', closeMemReqModal);

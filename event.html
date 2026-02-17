@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mastery in Science: Hands-on Workshop - Participant Information</title>
+  <title>Mastery in Science: Training Workshop - Participant Information</title>
   <script src="/_sdk/element_sdk.js"></script>
   <style>
     body {
@@ -288,6 +288,51 @@
   .hero-details .icon { font-size: 1.15rem; line-height: 1; }
     .hero-details .detail strong { color: #ffffff; }
 
+    /* Subtle industry partner line (in hero) */
+    .hero-partner {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+      opacity: 0.95;
+    }
+
+    .hero-partner-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.3px;
+    }
+
+    .hero-partner-name {
+      color: #ffffff;
+      text-decoration: underline;
+      text-decoration-color: rgba(255, 255, 255, 0.6);
+      text-underline-offset: 2px;
+      font-weight: 600;
+    }
+
+    .hero-partner-name:hover {
+      text-decoration-color: #ffffff;
+    }
+
+    .hero-partner-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 2px;
+    }
+
     /* Section Styles */
     section {
       padding: 4rem 1.5rem;
@@ -384,16 +429,29 @@
   #team.team { background: #1f5f49; }
 
     /* Map Section */
+    .venue-map-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      margin: 1.25rem 0 1.75rem;
+    }
+    @media (max-width: 768px) {
+      .venue-map-grid { grid-template-columns: 1fr; }
+    }
+
     .venue-image {
       display: block;
       max-width: 100%;
       height: auto;
+      max-height: 360px;
+      object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      margin: 1rem 0 1.5rem;
+      margin: 0;
     }
     .map-container {
-      margin: 2rem 0;
+      margin: 0;
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -401,8 +459,13 @@
 
     .map-container iframe {
       width: 100%;
-      height: 400px;
+      height: 360px;
       border: none;
+    }
+
+    @media (max-width: 768px) {
+      .map-container iframe { height: 320px; }
+      .venue-image { max-height: 320px; }
     }
 
     .info-cards {
@@ -756,17 +819,23 @@
   <main>
    <section class="hero" id="home">
     <div class="hero-content">
-     <h1 id="eventTitle">Mastery in Science: Hands-on Workshop</h1>
+     <h1 id="eventTitle">Mastery in Science: Training Workshop</h1>
      <p class="hero-subtitle" id="eventSubtitle">Face-to-Face Training</p>
   <div class="hero-details" aria-label="Event details">
-   <div class="detail"><span class="icon" aria-hidden="true">📅</span><strong>Date:</strong> Saturday, November 8, 2025</div>
+   <div class="detail"><span class="icon" aria-hidden="true">📅</span><strong>Date:</strong> Saturday, March 21, 2026</div>
    <div class="detail"><span class="icon" aria-hidden="true">⏰</span><strong>Time:</strong> 8:00 AM – 4:30 PM</div>
    <div class="detail"><span class="icon" aria-hidden="true">📍</span><strong>Venue:</strong> St. Joseph Building, De La Salle University, Taft Avenue, Manila</div>
   </div>
+
+    <div class="hero-partner" aria-label="Industry partner">
+     <span class="hero-partner-badge">Industry Partner</span>
+     <a class="hero-partner-name" href="https://sciencestar.ph/" target="_blank" rel="noopener noreferrer">ScienceStar Corporation</a>
+     <img class="hero-partner-logo" src="images/sciencestarlogo.jpg" alt="ScienceStar Corporation logo" loading="lazy" decoding="async">
+    </div>
      
     </div>
   </section>
-   <section id="partner" class="partner-section" aria-labelledby="partnerBadge">
+     <section id="partner" class="partner-section" aria-labelledby="partnerBadge" hidden>
     <div class="partner-card">
      <span id="partnerBadge" class="partner-badge">Industry Partner</span>
      <p class="partner-copy">ScienceStar Corporation — the Global Science Education Partner<br>(Exclusive Distributor) of PASCO Science</p>
@@ -776,7 +845,7 @@
   <a class="btn btn-partner" href="https://sciencestar.ph/" target="_blank" rel="noopener noreferrer">Learn More</a>
     </div>
    </section>
-     <section id="speakers" class="speakers" aria-labelledby="speakersHeading">
+     <section id="speakers" class="speakers" aria-labelledby="speakersHeading" hidden>
       <h2 id="speakersHeading">Topics &amp; Speakers</h2>
       <div class="speaker-grid">
         <div class="speaker-card">
@@ -858,47 +927,54 @@
      </section>
    <section id="map">
     <h2 id="venueHeading">Venue Map — De La Salle University Manila</h2>
-    <img
-      class="venue-image"
-      src="images/DLSU%20Map.png"
-      alt="Campus map of De La Salle University Manila highlighting venue area"
-      loading="lazy"
-      decoding="async"
-      onerror="this.style.display='none'"
-    />
     <p class="section-intro" id="venueSubtext">Please enter at Gate 2 (in front of Henry Sy Hall) and get your event ID. Then proceed to the Registration at Room 405, 4th floor, St. Joseph Hall.</p>
-    <div class="map-container"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.4489234567!2d120.99358!3d14.56472!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9f3b2f3b2f3%3A0x3b2f3b2f3b2f3b2f!2sDe%20La%20Salle%20University!5e0!3m2!1sen!2sph!4v1234567890" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="De La Salle University Manila location map" aria-label="Interactive map showing De La Salle University Manila location"> </iframe>
-  </div><a href="https://www.google.com/maps/place/De+La+Salle+University+Manila/@14.5647222,120.9935833,17z/data=!4m6!3m5!1s0x3397c97ed286459b:0x5927068d997eae2a!8m2!3d14.5647642!4d120.9931652!16zL20vMDFycjMx?entry=ttu&amp;g_ep=EgoyMDI1MTAyOS4yIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="btn btn-map">Open in Google Maps</a>
+
+    <div class="venue-map-grid" aria-labelledby="venueHeading">
+     <div>
+      <img
+        class="venue-image"
+        src="images/DLSU%20Map.png"
+        alt="Campus map of De La Salle University Manila highlighting venue area"
+        loading="lazy"
+        decoding="async"
+        onerror="this.style.display='none'"
+      />
+     </div>
+
+     <div>
+      <div class="map-container">
+       <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.4489234567!2d120.99358!3d14.56472!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9f3b2f3b2f3%3A0x3b2f3b2f3b2f3b2f!2sDe%20La%20Salle%20University!5e0!3m2!1sen!2sph!4v1234567890" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="De La Salle University Manila location map" aria-label="Interactive map showing De La Salle University Manila location"></iframe>
       </div>
+      <a href="https://www.google.com/maps/place/De+La+Salle+University+Manila/@14.5647222,120.9935833,17z/data=!4m6!3m5!1s0x3397c97ed286459b:0x5927068d997eae2a!8m2!3d14.5647642!4d120.9931652!16zL20vMDFycjMx?entry=ttu&amp;g_ep=EgoyMDI1MTAyOS4yIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="btn btn-map">Open in Google Maps</a>
+     </div>
+    </div>
+
     <div class="info-cards">
      <div class="info-card">
-      <div class="info-card-icon">
-       📍
-      </div>
+      <div class="info-card-icon">📍</div>
       <div class="info-card-content">
        <h3>Registration Area</h3>
        <p>Get your ID at Gate 2 in front of Henry Sy Hall (opens 7:30 AM), then proceed to Room 405, St. Joseph Hall</p>
       </div>
      </div>
+
      <div class="info-card">
-      <div class="info-card-icon">
-       🚗
-      </div>
+      <div class="info-card-icon">🚗</div>
       <div class="info-card-content">
        <h3>Parking</h3>
        <p>Limited slots (contact us if you need a car parking); consider public transport</p>
       </div>
      </div>
+
      <div class="info-card">
-      <div class="info-card-icon">
-       🆔
-      </div>
+      <div class="info-card-icon">🆔</div>
       <div class="info-card-content">
        <h3>Verification</h3>
        <p>Bring ID and digital confirmation (email confirmation of payment) for verification</p>
       </div>
      </div>
-       </section>
+    </div>
+   </section>
    <section id="bring">
     <h2 id="bringHeading">Things to Prepare / Bring</h2>
     <div class="checklist">
@@ -931,7 +1007,7 @@
     </div>
    </section>
    <section id="program">
-    <h2 id="programHeading">Program of the Event — November 8, 2025</h2>
+    <h2 id="programHeading">Program of the Event — March 21, 2026</h2>
     <div class="program-table">
   <table>
    <thead>
@@ -1078,7 +1154,7 @@
       </div>
      </div>
      <div class="contact-card">
-      <h3>Mrs. Verna Lyza Olarves</h3>
+      <h3>Mrs. Verna Lyza Olarve</h3>
       <div class="contact-info">
        <div class="contact-item"><span class="contact-icon">📧</span> <a href="mailto:papsi.seminar@gmail.com">papsi.seminar@gmail.com</a>
        </div>
@@ -1174,15 +1250,15 @@
     </div>
   <script>
     const defaultConfig = {
-      event_title: "Mastery in Science: Hands-on Workshop",
-      event_subtitle: "Face-to-Face Training for Educators — November 8, 2025 — De La Salle University, Manila",
+      event_title: "Mastery in Science: Training Workshop",
+      event_subtitle: "Face-to-Face Training for Educators — March 21, 2026 — De La Salle University, Manila",
       hero_subtext: "Show this page at the gate if needed for quick reference.",
       venue_heading: "Venue Map — De La Salle University Manila",
       venue_subtext: "Main Campus, 2401 Taft Ave, Malate, Manila. Please use the designated gate and proceed to the Registration Area.",
       bring_heading: "Things to Prepare / Bring",
       rules_heading: "Rules & Guidelines",
       rules_intro: "For everyone's safety and a smooth program, please observe the following.",
-      program_heading: "Program of the Event — November 8, 2025",
+      program_heading: "Program of the Event — March 21, 2026",
       contacts_heading: "Contact Persons",
       contacts_subheading: "PAPSI Training Team"
     };

@@ -1647,6 +1647,23 @@
 
         <!-- Hub Page -->
         <div id="hub-page" class="page-content hidden">
+            <!-- Promo Banner (Training Center) -->
+            <div id="trainingPromoBanner" class="mb-4">
+                <div class="bg-papsi-green text-white rounded-lg shadow flex flex-col md:flex-row md:items-center md:justify-between gap-2 p-3">
+                    <div class="flex items-center gap-3">
+                        <div class="hidden md:block h-2 w-2 rounded-full bg-white/70 animate-pulse"></div>
+                        <div class="text-sm md:text-base leading-snug">
+                            <span class="font-semibold">PAPSIPROMO</span>
+                            <span class="opacity-90">— Get 30% off on trainings. Limited time.</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="trainingPromoCopyBtn" type="button" class="text-xs md:text-sm px-3 py-1.5 rounded bg-white/15 hover:bg-white/25">Copy code</button>
+                        <button id="trainingPromoApplyBtn" type="button" class="text-xs md:text-sm px-3 py-1.5 rounded bg-white text-papsi-green font-semibold hover:bg-gray-100">Apply now</button>
+                        <button id="trainingPromoDismissBtn" type="button" class="ml-1 text-white/80 hover:text-white text-lg leading-none" aria-label="Dismiss">&times;</button>
+                    </div>
+                </div>
+            </div>
             <!-- Title, toolbar, and stats inside one white container -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <div class="relative overflow-hidden">
@@ -2068,6 +2085,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     maybeShowCartBarFirstTime();
     if(cartCourses.length){ setTimeout(showCoachMarkOnce, 800); }
+
+    // Training Center promo banner (Copy/Apply)
+    (function(){
+        const CODE = 'PAPSIPROMO';
+        const banner = document.getElementById('trainingPromoBanner');
+        const copyBtn = document.getElementById('trainingPromoCopyBtn');
+        const applyBtn = document.getElementById('trainingPromoApplyBtn');
+        const dismissBtn = document.getElementById('trainingPromoDismissBtn');
+        if(!banner) return;
+
+        if(copyBtn){
+            copyBtn.addEventListener('click', function(){
+                try {
+                    navigator.clipboard.writeText(CODE).then(function(){
+                        try { showToast('Copied code: ' + CODE, 'success', 2500); } catch(e) {}
+                    }).catch(function(){
+                        // Fallback
+                        const ta = document.createElement('textarea');
+                        ta.value = CODE;
+                        document.body.appendChild(ta);
+                        ta.select();
+                        try { document.execCommand('copy'); try { showToast('Copied code: ' + CODE, 'success', 2500); } catch(e) {} }
+                        catch(err){ try { showToast('Promo code: ' + CODE, 'info', 3000); } catch(e) {} }
+                        finally { document.body.removeChild(ta); }
+                    });
+                } catch(err){
+                    try { showToast('Promo code: ' + CODE, 'info', 3000); } catch(e) {}
+                }
+            });
+        }
+
+        if(applyBtn){
+            applyBtn.addEventListener('click', function(){
+                try { openCart(); } catch(e) {}
+                setTimeout(function(){
+                    const input = document.getElementById('voucherInput');
+                    if(input) input.value = CODE;
+                    try { validateVoucher(); } catch(e) {}
+                }, 50);
+            });
+        }
+
+        if(dismissBtn){
+            dismissBtn.addEventListener('click', function(){
+                banner.classList.add('hidden');
+            });
+        }
+    })();
 });
 </script>
         <!-- Sticky Checkout Bar & Coach Mark -->

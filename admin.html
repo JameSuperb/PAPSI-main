@@ -199,7 +199,7 @@
 					<div id="dashTopSchools" class="bar-list"></div>
 				</div>
 				<div>
-					<div class="title" style="font-size:16px;">Top 10 Schools (Regular Members)</div>
+					<div class="title" style="font-size:16px;">Top 10 Schools (Active &amp; Associate)</div>
 					<div id="dashTopSchoolsRegular" class="bar-list"></div>
 				</div>
 			</div>
@@ -762,7 +762,7 @@
 			});
 			const schoolPairs = Array.from(schoolMap.entries()).sort((a,b)=> b[1]-a[1]);
 			renderBarList('dashTopSchools', schoolPairs, 10);
-			// Schools (Top 10 Regular Members: Active + Associate only)
+			// Schools (Top 10 Active & Associate)
 			const regularList = list.filter(m => m.membership === 'Active' || m.membership === 'Associate');
 			const schoolMapRegular = new Map();
 			regularList.forEach(m => {

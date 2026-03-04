@@ -109,6 +109,7 @@
 	<!-- Top actions bar -->
 	<div id="topActions" class="container hidden" style="padding-top:12px;">
 		<button id="retrieveBtn" class="btn" type="button" title="Retrieve membership data">Retrieve</button>
+		<button id="inviteManagerBtn" class="btn ghost" type="button" title="Manage invitation email lists" style="margin-left:8px;">Invitations</button>
 		<span class="subtle" style="margin-left:10px;">Uses the email and password from Administrator Access.</span>
 		<div id="retrieveNotice" class="status info" style="margin-top:6px;"></div>
 	</div>
@@ -257,6 +258,92 @@
 	</div>
 
 	<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+	<!-- Invitation Manager Modal -->
+	<div id="inviteModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inviteModalTitle">
+		<div class="modal" style="width:min(980px, calc(100% - 32px));">
+			<div class="modal-head">
+				<div class="title" id="inviteModalTitle">Invitation Manager</div>
+				<button type="button" class="close-x" id="inviteCloseBtn" aria-label="Close">×</button>
+			</div>
+			<div class="subtle" style="margin-top:4px;">Filter members, copy emails, and mark who you’ve already invited (stored on this device).</div>
+
+			<div class="row" style="margin-top:12px;">
+				<div class="field">
+					<label for="inviteCampaign">Campaign</label>
+					<input id="inviteCampaign" type="text" placeholder="e.g., March 2026 Webinar" />
+				</div>
+				<div class="field" style="min-width:180px;">
+					<label for="inviteMembership">Membership</label>
+					<select id="inviteMembership">
+						<option value="regular" selected>Active + Associate</option>
+						<option value="all">All</option>
+						<option value="active">Active</option>
+						<option value="associate">Associate</option>
+						<option value="expired">Expired</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="row" style="margin-top:10px; align-items:flex-end;">
+				<div class="field" style="min-width:260px;">
+					<label for="inviteSearch">Search</label>
+					<input id="inviteSearch" type="text" placeholder="Name, email, school, specialization, address" />
+				</div>
+				<div class="field" style="min-width:170px;">
+					<label for="inviteRegion">Region</label>
+					<select id="inviteRegion">
+						<option value="all" selected>All</option>
+						<option value="ncr">NCR (Metro Manila)</option>
+						<option value="outside">Outside NCR</option>
+						<option value="unknown">Unknown</option>
+					</select>
+				</div>
+				<div class="field" style="min-width:180px;">
+					<label for="inviteMarkFilter">Show</label>
+					<select id="inviteMarkFilter">
+						<option value="unmarked" selected>Unmarked</option>
+						<option value="all">All</option>
+						<option value="marked">Marked</option>
+					</select>
+				</div>
+				<div class="field" style="min-width:150px;">
+					<label for="inviteSortKey">Sort by</label>
+					<select id="inviteSortKey">
+						<option value="name" selected>Name</option>
+						<option value="region">Region</option>
+					</select>
+				</div>
+				<button id="inviteSortBtn" class="btn ghost" type="button" style="margin-top:22px;">Sort Name Z→A</button>
+			</div>
+
+			<div class="actions" style="margin-top:12px; align-items:center;">
+				<button id="inviteCopyBtn" class="btn ghost" type="button">Copy Unmarked Emails</button>
+				<button id="inviteCopyTsvBtn" class="btn ghost" type="button">Copy TSV</button>
+				<button id="inviteMarkUnmarkedBtn" class="btn" type="button">Mark Unmarked as Sent</button>
+				<button id="inviteClearMarksBtn" class="btn secondary" type="button">Clear Marks (Campaign)</button>
+				<div id="inviteStats" class="status info" style="margin-left:auto;"></div>
+			</div>
+
+			<div style="margin-top:10px; overflow:auto; max-height:50vh; border:1px solid var(--line); border-radius:10px;">
+				<table style="width:100%; border-collapse:collapse; font-size:13px;">
+					<thead>
+						<tr style="text-align:left;">
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:48px;">#</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Name</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">Email</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:110px;">Membership</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:120px;">Region</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">School</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:70px;">Sent</th>
+						</tr>
+					</thead>
+					<tbody id="inviteTbody"></tbody>
+				</table>
+			</div>
+			<div id="inviteEmpty" class="subtle" style="margin-top:8px; display:none;">No members match the current filters.</div>
+		</div>
+	</div>
 
 	<!-- Removed feature modals and cards per request -->
 
@@ -449,8 +536,80 @@
 		// ========= Members Rendering =========
 		let MEMBERS_RAW = [];
 		let MEMBERS_SORT_DIR = 'asc'; // 'asc' | 'desc' (default A→Z)
+		let INVITE_SORT_DIR = 'asc'; // 'asc' | 'desc'
+		let INVITE_MODAL_OPEN = false;
+		const INVITE_STATE_KEY = 'PAPSI_INVITE_STATE_V1';
+		const INVITE_CAMPAIGN_KEY = 'PAPSI_INVITE_CAMPAIGN_V1';
 		function safeStr(v){
 			return typeof v === 'string' ? v.trim() : String(v ?? '').trim();
+		}
+		function normalizePHText(input){
+			const raw = safeStr(input);
+			if (!raw) return '';
+			let s = raw;
+			try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); } catch {}
+			s = s.toLowerCase();
+			s = s.replace(/[^a-z0-9\s-]/g,' ');
+			s = s.replace(/\s+/g,' ').trim();
+			return s;
+		}
+		function toRoman13(n){
+			const r = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'];
+			return r[n] || '';
+		}
+		function detectPHRegion(text){
+			const s = normalizePHText(text);
+			if (!s) return '';
+			// NCR keywords
+			if (/\b(ncr|national capital region|metro manila|metromanila)\b/.test(s)) return 'NCR';
+			if (/\bn\s*c\s*r\b/.test(s)) return 'NCR';
+			// NCR LGUs
+			const ncrPlaces = [
+				'caloocan','las pinas','makati','malabon','mandaluyong','manila','marikina','muntinlupa',
+				'navotas','paranaque','pasay','pasig','pateros','quezon city','taguig','valenzuela','san juan city'
+			];
+			for (const p of ncrPlaces){ if (s.includes(p)) return 'NCR'; }
+			// Named regions / acronyms
+			if (/\bcalabarzon\b/.test(s)) return 'Region IV-A';
+			if (/\bmimaropa\b/.test(s)) return 'Region IV-B';
+			if (/\bsoccsksargen\b/.test(s)) return 'Region XII';
+			if (/\bcaraga\b/.test(s)) return 'Region XIII';
+			if (/\bcordillera\b/.test(s)) return 'CAR';
+			if (/\b(barmm|bangsamoro|armm)\b/.test(s)) return 'BARMM';
+			// Explicit "Region ..." patterns
+			const m = s.match(/\bregion\s*([0-9]{1,2}|xiii|xii|xi|x|ix|viii|vii|vi|v|iv|iii|ii|i)\s*[- ]?([ab])?\b/i);
+			if (m){
+				const mainRaw = String(m[1] || '').toUpperCase();
+				const sub = String(m[2] || '').toUpperCase();
+				let roman = '';
+				if (/^\d{1,2}$/.test(mainRaw)){
+					const n = parseInt(mainRaw,10);
+					if (n === 14) return 'CAR';
+					if (n === 15) return 'BARMM';
+					roman = toRoman13(n);
+				} else {
+					roman = mainRaw;
+				}
+				if (!roman) return '';
+				if (roman === 'IV' && (sub === 'A' || sub === 'B')) return `Region IV-${sub}`;
+				return `Region ${roman}`;
+			}
+			return '';
+		}
+		function extractPHRegion(regionText, addressText){
+			const explicitRaw = safeStr(regionText);
+			if (explicitRaw){
+				const detected = detectPHRegion(explicitRaw);
+				if (detected) return detected;
+				// If a region column exists but is non-standard, keep a short label
+				const cleaned = explicitRaw.replace(/\s+/g,' ').trim();
+				return cleaned ? (cleaned.length > 24 ? cleaned.slice(0,24) : cleaned) : 'Unknown';
+			}
+			const addr = safeStr(addressText);
+			if (!addr) return 'Unknown';
+			const detected = detectPHRegion(addr);
+			if (detected) return detected;
+			return 'Outside NCR';
 		}
 		function normalizeMember(m, idx){
 			const dateRaw = safeStr(m?.date);
@@ -468,6 +627,9 @@
 					membership = 'Expired';
 				}
 			}
+			const address = safeStr(m?.address ?? m?.Address ?? '');
+			const regionSource = safeStr(m?.region ?? m?.Region ?? m?.REGION ?? '');
+			const region = extractPHRegion(regionSource, address);
 			return {
 				idx,
 				// Use column A 'name' strictly; do not source from 'nametext'
@@ -479,6 +641,8 @@
 				type: safeStr(m?.type),
 				mobile: safeStr(m?.mobile),
 				date: dateRaw,
+				address,
+				region,
 				data: m
 			};
 		}
@@ -489,6 +653,324 @@
 			// Build dashboard metrics and show dashboard card
 			try { buildDashboard(MEMBERS_RAW); } catch (e) { console && console.warn && console.warn('Dashboard build failed:', e); }
 			filterAndDrawMembers();
+			try { if (INVITE_MODAL_OPEN) inviteRender(); } catch(e){}
+		}
+
+		function inviteLoadState(){
+			try { return JSON.parse(lsGet(INVITE_STATE_KEY) || '{}') || {}; } catch { return {}; }
+		}
+		function inviteSaveState(state){
+			try { lsSet(INVITE_STATE_KEY, JSON.stringify(state || {})); } catch {}
+		}
+		function inviteNormalizeCampaign(name){
+			let n = safeStr(name || '').replace(/\s+/g,' ').trim();
+			if (!n) n = 'Default';
+			if (n.length > 60) n = n.slice(0,60).trim();
+			return n;
+		}
+		function inviteGetCampaign(){
+			const el = document.getElementById('inviteCampaign');
+			const stored = lsGet(INVITE_CAMPAIGN_KEY) || '';
+			const campaign = inviteNormalizeCampaign(el?.value || stored || 'Default');
+			if (el && el.value !== campaign) el.value = campaign;
+			lsSet(INVITE_CAMPAIGN_KEY, campaign);
+			return campaign;
+		}
+		function inviteEmailKey(email){
+			return safeStr(email).toLowerCase();
+		}
+		function inviteIsMarked(email, campaign){
+			const em = inviteEmailKey(email);
+			if (!isValidEmail(em)) return false;
+			const c = inviteNormalizeCampaign(campaign || inviteGetCampaign());
+			const state = inviteLoadState();
+			return !!(state?.campaigns?.[c]?.[em]);
+		}
+		function inviteBulkSetMarked(emails, marked, campaign){
+			const c = inviteNormalizeCampaign(campaign || inviteGetCampaign());
+			const state = inviteLoadState();
+			if (!state.campaigns) state.campaigns = {};
+			if (!state.campaigns[c]) state.campaigns[c] = {};
+			const map = state.campaigns[c];
+			const now = new Date().toISOString();
+			(emails || []).forEach((e)=>{
+				const em = inviteEmailKey(e);
+				if (!isValidEmail(em)) return;
+				if (marked) map[em] = now; else delete map[em];
+			});
+			inviteSaveState(state);
+		}
+		function inviteClearCampaign(campaign){
+			const c = inviteNormalizeCampaign(campaign || inviteGetCampaign());
+			const state = inviteLoadState();
+			if (state?.campaigns?.[c]){
+				delete state.campaigns[c];
+				inviteSaveState(state);
+			}
+		}
+		function inviteSyncSortButton(){
+			const btn = document.getElementById('inviteSortBtn');
+			if (!btn) return;
+			const key = inviteGetSortKey();
+			const keyLabel = key === 'region' ? 'Region' : 'Name';
+			btn.textContent = INVITE_SORT_DIR === 'asc' ? `Sort ${keyLabel} Z→A` : `Sort ${keyLabel} A→Z`;
+		}
+		function inviteGetMembershipFilter(){
+			return (document.getElementById('inviteMembership')?.value || 'regular');
+		}
+		function inviteGetSearch(){
+			return (document.getElementById('inviteSearch')?.value || '').toLowerCase();
+		}
+		function inviteGetRegionFilter(){
+			return (document.getElementById('inviteRegion')?.value || 'all');
+		}
+		function inviteGetMarkFilter(){
+			return (document.getElementById('inviteMarkFilter')?.value || 'unmarked');
+		}
+		function inviteGetSortKey(){
+			return (document.getElementById('inviteSortKey')?.value || 'name');
+		}
+		function inviteRegionSortKey(region){
+			const r = safeStr(region || 'Unknown');
+			if (!r || r === 'Unknown') return '9|Unknown';
+			if (r === 'NCR') return '0|NCR';
+			if (r === 'Outside NCR') return '8|Outside NCR';
+			return '1|' + r;
+		}
+		function inviteSortValue(member, sortKey){
+			if (sortKey === 'region') return inviteRegionSortKey(member?.region);
+			return safeStr(member?.name);
+		}
+		function inviteGetGroupMembers(){
+			let list = MEMBERS_RAW.slice();
+			const fMembership = inviteGetMembershipFilter();
+			if (fMembership !== 'all'){
+				if (fMembership === 'regular') list = list.filter(m => m.membership === 'Active' || m.membership === 'Associate');
+				else list = list.filter(m => m.membership.toLowerCase() === fMembership);
+			}
+			const search = inviteGetSearch();
+			if (search){
+				list = list.filter(m => {
+					const addr = safeStr(m.address || m.data?.address || '').toLowerCase();
+					const region = safeStr(m.region || '').toLowerCase();
+					return (
+						m.name.toLowerCase().includes(search) ||
+						m.email.toLowerCase().includes(search) ||
+						m.school.toLowerCase().includes(search) ||
+						m.specialization.toLowerCase().includes(search) ||
+						addr.includes(search) ||
+						region.includes(search)
+					);
+				});
+			}
+			const rf = inviteGetRegionFilter();
+			if (rf !== 'all'){
+				list = list.filter(m=>{
+					const r = safeStr(m.region || 'Unknown');
+					if (rf === 'ncr') return r === 'NCR';
+					if (rf === 'outside') return r !== 'NCR' && r !== 'Unknown';
+					if (rf === 'unknown') return r === 'Unknown';
+					return true;
+				});
+			}
+			const sortKey = inviteGetSortKey();
+			list.sort((a,b)=>{
+				const av = String(inviteSortValue(a, sortKey) || '');
+				const bv = String(inviteSortValue(b, sortKey) || '');
+				const cmp = av.localeCompare(bv, undefined, { sensitivity:'base' });
+				if (cmp !== 0) return INVITE_SORT_DIR === 'asc' ? cmp : -cmp;
+				return safeStr(a.name).localeCompare(safeStr(b.name), undefined, { sensitivity:'base' });
+			});
+			return list;
+		}
+		function inviteApplyMarkFilter(list, campaign){
+			const mode = inviteGetMarkFilter();
+			if (mode === 'marked') return list.filter(m => isValidEmail(m.email) && inviteIsMarked(m.email, campaign));
+			if (mode === 'unmarked') return list.filter(m => isValidEmail(m.email) && !inviteIsMarked(m.email, campaign));
+			return list;
+		}
+		function inviteUniqueValidEmails(list){
+			const seen = new Set();
+			const out = [];
+			(list || []).forEach(m=>{
+				const em = safeStr(m.email);
+				if (!isValidEmail(em)) return;
+				const k = em.toLowerCase();
+				if (seen.has(k)) return;
+				seen.add(k);
+				out.push(em);
+			});
+			return out;
+		}
+		async function inviteCopyToClipboard(text){
+			const t = String(text || '');
+			if (!t) return false;
+			try { await navigator.clipboard.writeText(t); return true; } catch {}
+			try {
+				const ta = document.createElement('textarea');
+				ta.value = t;
+				ta.style.position = 'fixed';
+				ta.style.left = '-9999px';
+				document.body.appendChild(ta);
+				ta.focus();
+				ta.select();
+				const ok = document.execCommand('copy');
+				ta.remove();
+				return !!ok;
+			} catch {}
+			try { window.prompt('Copy emails:', t); } catch {}
+			return false;
+		}
+		function inviteUpdateStats(groupList, campaign){
+			let valid = 0;
+			let marked = 0;
+			let invalid = 0;
+			(groupList || []).forEach(m=>{
+				const em = safeStr(m.email);
+				if (!isValidEmail(em)){ invalid++; return; }
+				valid++;
+				if (inviteIsMarked(em, campaign)) marked++;
+			});
+			const unmarked = Math.max(0, valid - marked);
+			const el = document.getElementById('inviteStats');
+			if (el) el.textContent = `${marked} marked • ${unmarked} unmarked • ${invalid} no/invalid email`;
+		}
+		function inviteMakeSentCheckbox(member, campaign){
+			const email = safeStr(member.email);
+			const can = isValidEmail(email);
+			const cb = document.createElement('input');
+			cb.type = 'checkbox';
+			cb.disabled = !can;
+			cb.checked = can ? inviteIsMarked(email, campaign) : false;
+			cb.addEventListener('click', (e)=> e.stopPropagation());
+			cb.addEventListener('change', ()=>{
+				inviteBulkSetMarked([email], cb.checked, campaign);
+				inviteRender();
+			});
+			return cb;
+		}
+		function inviteRender(){
+			const tbody = document.getElementById('inviteTbody');
+			const empty = document.getElementById('inviteEmpty');
+			if (!tbody) return;
+			const campaign = inviteGetCampaign();
+			const groupList = inviteGetGroupMembers();
+			inviteUpdateStats(groupList, campaign);
+			const list = inviteApplyMarkFilter(groupList, campaign);
+			tbody.innerHTML = '';
+			if (list.length === 0){
+				if (empty) empty.style.display = 'block';
+				return;
+			}
+			if (empty) empty.style.display = 'none';
+			const frag = document.createDocumentFragment();
+			list.forEach((m,i)=>{
+				const tr = document.createElement('tr');
+				tr.style.borderBottom = '1px solid var(--line)';
+				const cells = [
+					(i+1).toString(),
+					m.name || '—',
+					m.email || '—',
+					formatMembershipCell(m.membership),
+					m.region || 'Unknown',
+					m.school || '—',
+					inviteMakeSentCheckbox(m, campaign)
+				];
+				cells.forEach((val, ci)=>{
+					const td = document.createElement('td');
+					td.style.padding = '6px 10px';
+					if ((ci===3 || ci===6) && val && typeof val === 'object' && val.nodeType){
+						td.appendChild(val);
+					} else {
+						td.textContent = typeof val === 'string' ? val : String(val ?? '');
+					}
+					tr.appendChild(td);
+				});
+				frag.appendChild(tr);
+			});
+			tbody.appendChild(frag);
+		}
+		function openInviteModal(){
+			const modal = document.getElementById('inviteModal');
+			if (!modal) return;
+			if (INVITE_MODAL_OPEN) return;
+			INVITE_MODAL_OPEN = true;
+			modal.classList.add('show');
+			try {
+				const stored = lsGet(INVITE_CAMPAIGN_KEY) || 'Default';
+				const el = document.getElementById('inviteCampaign');
+				if (el && !safeStr(el.value)) el.value = stored;
+			} catch {}
+			inviteSyncSortButton();
+			inviteRender();
+			setTimeout(()=>{ try{ document.getElementById('inviteSearch')?.focus(); } catch(e){} }, 0);
+			document.addEventListener('keydown', inviteKeyHandler);
+		}
+		function closeInviteModal(){
+			const modal = document.getElementById('inviteModal');
+			if (!modal) return;
+			if (!INVITE_MODAL_OPEN) return;
+			INVITE_MODAL_OPEN = false;
+			modal.classList.remove('show');
+			document.removeEventListener('keydown', inviteKeyHandler);
+		}
+		function inviteKeyHandler(e){
+			if (!INVITE_MODAL_OPEN) return;
+			if (e.key === 'Escape'){
+				e.preventDefault();
+				closeInviteModal();
+			}
+		}
+		async function inviteHandleCopyUnmarked(){
+			const campaign = inviteGetCampaign();
+			const groupList = inviteGetGroupMembers();
+			const emails = inviteUniqueValidEmails(groupList).filter(em => !inviteIsMarked(em, campaign));
+			if (emails.length === 0){ showToast('No unmarked emails in the current group','info'); return; }
+			const ok = await inviteCopyToClipboard(emails.join(', '));
+			showToast(ok ? `Copied ${emails.length} emails` : `Prepared ${emails.length} emails`, ok ? 'success' : 'info');
+		}
+		function tsvCell(v){
+			const s = safeStr(v);
+			return s.replace(/\t/g,' ').replace(/\r?\n/g,' ').trim();
+		}
+		async function inviteHandleCopyTSV(){
+			const campaign = inviteGetCampaign();
+			const groupList = inviteGetGroupMembers();
+			const list = inviteApplyMarkFilter(groupList, campaign);
+			if (!Array.isArray(list) || list.length === 0){ showToast('Nothing to copy','info'); return; }
+			const header = ['Name','Email','Membership','Region','School','Sent'].join('\t');
+			const rows = list.map(m=>{
+				const email = safeStr(m.email);
+				const sent = isValidEmail(email) ? (inviteIsMarked(email, campaign) ? 'YES' : 'NO') : '';
+				return [
+					tsvCell(m.name),
+					tsvCell(email),
+					tsvCell(m.membership),
+					tsvCell(m.region || 'Unknown'),
+					tsvCell(m.school),
+					tsvCell(sent)
+				].join('\t');
+			});
+			const tsv = [header, ...rows].join('\r\n');
+			const ok = await inviteCopyToClipboard(tsv);
+			showToast(ok ? `Copied ${rows.length} rows (TSV)` : `Prepared ${rows.length} rows (TSV)`, ok ? 'success' : 'info');
+		}
+		function inviteHandleMarkUnmarked(){
+			const campaign = inviteGetCampaign();
+			const groupList = inviteGetGroupMembers();
+			const emails = inviteUniqueValidEmails(groupList).filter(em => !inviteIsMarked(em, campaign));
+			if (emails.length === 0){ showToast('Nothing to mark','info'); return; }
+			inviteBulkSetMarked(emails, true, campaign);
+			inviteRender();
+			showToast(`Marked ${emails.length} as sent`, 'success');
+		}
+		function inviteHandleClearMarks(){
+			const campaign = inviteGetCampaign();
+			const ok = window.confirm(`Clear ALL invite marks for campaign "${campaign}" on this device?`);
+			if (!ok) return;
+			inviteClearCampaign(campaign);
+			inviteRender();
+			showToast('Marks cleared','success');
 		}
 
 		function filterAndDrawMembers(){
@@ -1196,6 +1678,7 @@
 					}
 				}
 		function adminLogout(){
+			try { closeInviteModal(); } catch(e){}
 			// Clear any session/local keys
 			try { sessionStorage.removeItem(ADMIN_SESSION_KEY); } catch(e){}
 			try { sessionStorage.removeItem(ADMIN_EMAIL_KEY); } catch(e){}
@@ -1323,6 +1806,25 @@
 		document.getElementById('adminLogoutBtn')?.addEventListener('click', adminLogout);
 		// Retrieve button
 		document.getElementById('retrieveBtn')?.addEventListener('click', retrieveMembershipData);
+		// Invitation Manager
+		document.getElementById('inviteManagerBtn')?.addEventListener('click', openInviteModal);
+		document.getElementById('inviteCloseBtn')?.addEventListener('click', closeInviteModal);
+		document.getElementById('inviteModal')?.addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeInviteModal(); });
+		document.getElementById('inviteCampaign')?.addEventListener('change', ()=> inviteRender());
+		document.getElementById('inviteMembership')?.addEventListener('change', ()=> inviteRender());
+		document.getElementById('inviteSearch')?.addEventListener('input', ()=> inviteRender());
+		document.getElementById('inviteRegion')?.addEventListener('change', ()=> inviteRender());
+		document.getElementById('inviteMarkFilter')?.addEventListener('change', ()=> inviteRender());
+		document.getElementById('inviteSortKey')?.addEventListener('change', ()=>{ inviteSyncSortButton(); inviteRender(); });
+		document.getElementById('inviteSortBtn')?.addEventListener('click', ()=>{
+			INVITE_SORT_DIR = INVITE_SORT_DIR === 'asc' ? 'desc' : 'asc';
+			inviteSyncSortButton();
+			inviteRender();
+		});
+		document.getElementById('inviteCopyBtn')?.addEventListener('click', inviteHandleCopyUnmarked);
+		document.getElementById('inviteCopyTsvBtn')?.addEventListener('click', inviteHandleCopyTSV);
+		document.getElementById('inviteMarkUnmarkedBtn')?.addEventListener('click', inviteHandleMarkUnmarked);
+		document.getElementById('inviteClearMarksBtn')?.addEventListener('click', inviteHandleClearMarks);
 		// Action cards
 		function activateButtonCard(el, onClick){
 			if(!el) return;

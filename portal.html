@@ -4335,8 +4335,17 @@ document.addEventListener('DOMContentLoaded', () => {
         function openImageViewer(src, alt) {
             var v = document.getElementById('imageViewer');
             var img = document.getElementById('viewerImage');
-            if(!viewerImages || !viewerImages.length){ viewerImages = collectGalleryImages(); }
-            var startIdx = viewerImages.indexOf(src);
+            // Rebuild the gallery list on each open (filters/pagination can change the DOM)
+            viewerImages = collectGalleryImages();
+            var requestedSrc = src;
+            try { requestedSrc = new URL(String(src||''), document.baseURI).href; } catch(_) {}
+            var startIdx = viewerImages.indexOf(requestedSrc);
+            if(startIdx < 0){ startIdx = viewerImages.indexOf(src); }
+            if(startIdx < 0 && requestedSrc){
+                // Ensure the clicked image is shown even if matching fails for any reason
+                viewerImages = [requestedSrc].concat(viewerImages.filter(function(s){ return s !== requestedSrc; }));
+                startIdx = 0;
+            }
             viewerIndex = startIdx >= 0 ? startIdx : 0;
             if(img){ img.alt = alt || 'Training Image'; }
             resetViewerTransform();
@@ -4562,7 +4571,8 @@ function audioRegisterNow() {
             var nodes = Array.from(document.querySelectorAll('.training-image'));
             var items = [];
             nodes.forEach(function(node){
-                var src = node && node.getAttribute('src');
+                // Use the resolved src so it matches what click handlers pass (this.src)
+                var src = node && (node.currentSrc || node.src || node.getAttribute('src'));
                 if(src && items.indexOf(src) === -1){ items.push(src); }
             });
             return items;

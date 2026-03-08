@@ -1352,6 +1352,9 @@
             // Clear My Learning state and UI
             try { myLearning = []; filteredLearningCourses = []; learningCurrentPage = 1; } catch {}
             try { renderLearningCourses(); updateLearningCounters(); renderLearningStats(); } catch {}
+            // Reset Training Center list/filters for logged-out state
+            try { if (typeof refreshTrainingCenterFilters === 'function') refreshTrainingCenterFilters(); } catch {}
+            try { if (typeof filterCourses === 'function') filterCourses(); } catch {}
             const overlay = document.getElementById('authOverlay');
             if (overlay) overlay.classList.remove('hidden');
             showAuthPage('validate');
@@ -2744,6 +2747,151 @@ document.addEventListener('DOMContentLoaded', () => {
         let allCourses = [];
         let filteredCourses = [];
 
+        // ===== Training Center: exclude already-attended trainings =====
+        function splitTrainingsField(raw) {
+            const s = String(raw ?? '').trim();
+            if (!s) return [];
+            // Prefer pipe-delimited because we submit trainingtext joined by " | "
+            if (s.includes('|')) {
+                return s.split('|').map(v => v.trim()).filter(Boolean);
+            }
+            // Fallback: newline/semicolon/comma separated
+            return s.split(/[\n;,]+/).map(v => v.trim()).filter(Boolean);
+        }
+
+        function pushTrainingTitle(list, v) {
+            const s = String(v ?? '').trim();
+            if (s) list.push(s);
+        }
+
+        // Pull attended/registered training titles from profile.trainings (primary), with safe fallbacks.
+        function getProfileTrainingTitles(profile) {
+            const titles = [];
+            if (!profile || typeof profile !== 'object') return titles;
+
+            const trainingsRaw = profile.trainings ?? profile.training ?? profile.Trainings ?? profile.Training ?? null;
+            if (Array.isArray(trainingsRaw)) {
+                trainingsRaw.forEach(it => {
+                    if (typeof it === 'string') pushTrainingTitle(titles, it);
+                    else if (it && typeof it === 'object') pushTrainingTitle(titles, it.title || it.training || it.name);
+                });
+            } else if (typeof trainingsRaw === 'string') {
+                splitTrainingsField(trainingsRaw).forEach(t => pushTrainingTitle(titles, t));
+            }
+
+            // Fallback: trainingtext/trainingjson if backend returns them
+            const trainingText = profile.trainingtext ?? profile.trainingText ?? null;
+            if (typeof trainingText === 'string') {
+                splitTrainingsField(trainingText).forEach(t => pushTrainingTitle(titles, t));
+            }
+            const trainingJson = profile.trainingjson ?? profile.trainingJson ?? null;
+            if (Array.isArray(trainingJson)) {
+                trainingJson.forEach(it => pushTrainingTitle(titles, it?.title || it?.training || it?.name));
+            }
+
+            // Optional fallback: attended list used by My Learning
+            try {
+                const attended = Array.isArray(profile.Attended) ? profile.Attended : (Array.isArray(profile.attended) ? profile.attended : null);
+                if (Array.isArray(attended)) attended.forEach(it => pushTrainingTitle(titles, it?.title || it?.training || it?.name));
+            } catch {}
+
+            return Array.from(new Set(titles));
+        }
+
+        function extractPartNumberFromTitle(title) {
+            // Treat Day 1/2/3 as equivalent to Part 1/2/3 for matching purposes
+            const m = String(title || '').toLowerCase().match(/\b(?:part|pt|day)\s*[-.:]?\s*(1|2|3|i|ii|iii)\b/);
+            if (!m) return null;
+            const v = m[1];
+            if (v === '1' || v === 'i') return 1;
+            if (v === '2' || v === 'ii') return 2;
+            if (v === '3' || v === 'iii') return 3;
+            return null;
+        }
+
+        // Normalize titles so "Some Training", "Some Training Part 1", "Some Training (Part I)" match.
+        function normalizeTrainingTitleBase(title) {
+            return String(title || '')
+                .toLowerCase()
+                .replace(/&/g, ' and ')
+                // Make possessives and smart quotes stable: Beginner's / Beginner’s -> beginners
+                .replace(/[’']/g, '')
+                // Strip common date suffixes so titles match even if one side includes (05-31-2025)
+                .replace(/\(\s*\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}\s*\)/g, ' ')
+                .replace(/\(\s*\d{4}[\/.-]\d{1,2}[\/.-]\d{1,2}\s*\)/g, ' ')
+                .replace(/\b\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}\b/g, ' ')
+                .replace(/\b\d{4}[\/.-]\d{1,2}[\/.-]\d{1,2}\b/g, ' ')
+                .replace(/\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?(?:,\s*)?\d{2,4}\b/g, ' ')
+                // Strip Part/Pt/Day markers from the base title (day/part number itself is handled separately)
+                .replace(/\b(?:part|pt|day)\s*[-.:]?\s*(?:1|2|3|i|ii|iii)\b/gi, ' ')
+                .replace(/[^a-z0-9]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        // Index attended titles by base title; preserve part numbers when present.
+        function buildAttendedTrainingIndex(profile) {
+            const index = new Map(); // base -> { any:boolean, parts:Set<number> }
+            const titles = getProfileTrainingTitles(profile);
+            titles.forEach(t => {
+                const base = normalizeTrainingTitleBase(t);
+                if (!base) return;
+                const part = extractPartNumberFromTitle(t);
+                const rec = index.get(base) || { any: false, parts: new Set() };
+                if (part) rec.parts.add(part);
+                else rec.any = true;
+                index.set(base, rec);
+            });
+            return index;
+        }
+
+        function isCourseAttendedForTrainingCenter(courseTitle, attendedIndex) {
+            if (!attendedIndex || attendedIndex.size === 0) return false;
+            const base = normalizeTrainingTitleBase(courseTitle);
+            if (!base) return false;
+            const rec = attendedIndex.get(base);
+            if (!rec) return false;
+            if (rec.any) return true;
+            const part = extractPartNumberFromTitle(courseTitle);
+            // If the Training Center item has no explicit part but user attended some part(s), hide it.
+            if (!part) return rec.parts.size > 0;
+            // If both have explicit parts, require part match.
+            return rec.parts.has(part);
+        }
+
+        function getAvailableTrainingCenterCourses() {
+            const list = Array.isArray(allCourses) ? allCourses : [];
+            const profile = (window && window.PAPSI_PROFILE) ? window.PAPSI_PROFILE : null;
+            const idx = buildAttendedTrainingIndex(profile);
+            if (!idx || idx.size === 0) return list;
+            return list.filter(c => !isCourseAttendedForTrainingCenter(c?.title, idx));
+        }
+
+        function refreshTrainingCenterFilters() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const speakerFilter = document.getElementById('speakerFilter');
+            if (!categoryFilter || !speakerFilter) return;
+
+            const source = getAvailableTrainingCenterCourses();
+            const categories = Array.from(new Set(source.map(c => c.category).filter(Boolean))).sort();
+            const speakers = Array.from(new Set(source.map(c => c.instructor).filter(Boolean))).sort();
+
+            const selectedCategory = categoryFilter.value;
+            const selectedSpeaker = speakerFilter.value;
+
+            categoryFilter.innerHTML = '<option value="all">All Categories</option>' +
+                categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            speakerFilter.innerHTML = '<option value="all">All Speakers</option>' +
+                speakers.map(spk => `<option value="${spk}">${spk}</option>`).join('');
+
+            // Restore selection if possible
+            if (selectedCategory && (selectedCategory === 'all' || categories.includes(selectedCategory))) categoryFilter.value = selectedCategory;
+            else categoryFilter.value = 'all';
+            if (selectedSpeaker && (selectedSpeaker === 'all' || speakers.includes(selectedSpeaker))) speakerFilter.value = selectedSpeaker;
+            else speakerFilter.value = 'all';
+        }
+        // ===== End Training Center exclusion =====
+
         // --- Audio URL helpers ---
         function getFirstUrlFromText(text) {
             if (!text || typeof text !== 'string') return '';
@@ -2973,38 +3121,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     duration: item.hours + ' hours'
                 })) : [];
 
-                // Populate category and speaker filters dynamically
-                populateCourseFilters();
-                filteredCourses = [...allCourses];
-                renderCourses();
-                updateCounters();
-
-        // Populate category and speaker filter dropdowns dynamically
-        function populateCourseFilters() {
-            const categoryFilter = document.getElementById('categoryFilter');
-            const speakerFilter = document.getElementById('speakerFilter');
-            if (!categoryFilter || !speakerFilter) return;
-
-            // Get unique categories and speakers from allCourses
-            const categories = Array.from(new Set(allCourses.map(c => c.category).filter(Boolean))).sort();
-            const speakers = Array.from(new Set(allCourses.map(c => c.instructor).filter(Boolean))).sort();
-
-            // Save current selections
-            const selectedCategory = categoryFilter.value;
-            const selectedSpeaker = speakerFilter.value;
-
-            // Populate categories
-            categoryFilter.innerHTML = '<option value="all">All Categories</option>' +
-                categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-            // Restore selection if possible
-            if (categories.includes(selectedCategory)) categoryFilter.value = selectedCategory;
-
-            // Populate speakers
-            speakerFilter.innerHTML = '<option value="all">All Speakers</option>' +
-                speakers.map(spk => `<option value="${spk}">${spk}</option>`).join('');
-            // Restore selection if possible
-            if (speakers.includes(selectedSpeaker)) speakerFilter.value = selectedSpeaker;
-        }
+                // Populate category and speaker filters dynamically (excluding attended trainings when possible)
+                try { refreshTrainingCenterFilters(); } catch {}
+                // Run canonical pipeline (search/filter/sort + attended exclusion)
+                filterCourses();
             } catch (e) {
                 grid.innerHTML = `<div class="col-span-full text-center py-12 text-red-500">Failed to load courses.</div>`;
                 counter.textContent = "Showing 0 of 0 courses";
@@ -3022,7 +3142,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const yearFilter = window.trainingYearFilter || null;
 
             // Filter courses
-            filteredCourses = allCourses.filter(course => {
+            const baseCourses = getAvailableTrainingCenterCourses();
+            filteredCourses = baseCourses.filter(course => {
                 const matchesSearch = !searchTerm || 
                     course.title.toLowerCase().includes(searchTerm) ||
                     course.instructor.toLowerCase().includes(searchTerm) ||
@@ -3244,9 +3365,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const categoryFilter = document.getElementById('categoryFilter').value;
             const speakerFilter = document.getElementById('speakerFilter').value;
+            const yearFilter = window.trainingYearFilter || null;
+            const baseCourses = getAvailableTrainingCenterCourses();
             
             // Calculate total available courses for current filters (including search)
-            let totalAvailable = allCourses.filter(course => {
+            let totalAvailable = baseCourses.filter(course => {
                 const matchesSearch = !searchTerm || 
                     course.title.toLowerCase().includes(searchTerm) ||
                     course.instructor.toLowerCase().includes(searchTerm) ||
@@ -3254,8 +3377,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
                 const matchesSpeaker = speakerFilter === 'all' || course.instructor === speakerFilter;
+                const matchesYear = !yearFilter || (course.date instanceof Date && !isNaN(course.date) && course.date.getFullYear() === yearFilter);
 
-                return matchesSearch && matchesCategory && matchesSpeaker;
+                return matchesSearch && matchesCategory && matchesSpeaker && matchesYear;
             }).length;
             
             const startIdx = (currentPage - 1) * coursesPerPage;
@@ -4029,12 +4153,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const grid = document.getElementById('trainingStatsGrid');
             const yearBars = document.getElementById('trainingYearBars');
             if (!grid) return;
-            const total = allCourses.length;
-            const categories = allCourses.reduce((acc, c) => {
+            const sourceCourses = getAvailableTrainingCenterCourses();
+            const total = sourceCourses.length;
+            const categories = sourceCourses.reduce((acc, c) => {
                 const key = c.category || 'Other';
                 acc[key] = (acc[key] || 0) + 1; return acc;
             }, {});
-            const totalHours = allCourses.reduce((sum, c) => sum + (c.hoursNum || 0), 0);
+            const totalHours = sourceCourses.reduce((sum, c) => sum + (c.hoursNum || 0), 0);
             const parts = [
                 `<div class="text-center"><div class="text-2xl font-bold text-papsi-green">${total}</div><div class="text-sm text-gray-600">Total Courses</div></div>`,
                 `<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">${totalHours}</div><div class="text-sm text-gray-600">Total Hours</div></div>`,
@@ -4065,7 +4190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (yearBars) {
-                const yearCounts = allCourses.reduce((acc,c)=>{
+                const yearCounts = sourceCourses.reduce((acc,c)=>{
                     if (c.date instanceof Date && !isNaN(c.date)) {
                         const y = c.date.getFullYear();
                         acc[y] = (acc[y]||0)+1;
@@ -5086,6 +5211,14 @@ function audioRegisterNow() {
             try {
                 const attended = Array.isArray(p.Attended) ? p.Attended : (Array.isArray(p.attended) ? p.attended : (Array.isArray(window.PAPSI_ATTENDED) ? window.PAPSI_ATTENDED : null));
                 if (attended) setMyLearning(attended);
+            } catch {}
+
+            // Training Center: exclude trainings already attended (from profile.trainings)
+            try {
+                if (Array.isArray(allCourses) && allCourses.length) {
+                    try { if (typeof refreshTrainingCenterFilters === 'function') refreshTrainingCenterFilters(); } catch {}
+                    try { if (typeof filterCourses === 'function') filterCourses(); } catch {}
+                }
             } catch {}
         }
 

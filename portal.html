@@ -105,64 +105,49 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .image-viewer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Image Viewer */
+        .image-viewer { position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 3000; display: none; align-items: center; justify-content: center; }
+        .image-viewer.open { display: flex; }
+        .image-container { position: relative; max-width: 90%; max-height: 90%; overflow: hidden; cursor: grab; }
+        .image-container:active { cursor: grabbing; }
+        .viewer-image { max-width: 100%; max-height: 100%; transition: transform .2s ease; user-select: none; }
+
+        /* Image viewer controls */
+        .viewer-close {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(255,255,255,.14); color: #fff;
+            width: 36px; height: 36px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25);
+            display: inline-flex; align-items: center; justify-content: center;
         }
-        .image-container {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-            overflow: hidden;
-            cursor: grab;
+        .viewer-close:hover { background: rgba(255,255,255,.22); }
+
+        .viewer-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,.14); color: #fff;
+            width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25);
+            display: inline-flex; align-items: center; justify-content: center;
         }
-        .image-container:active {
-            cursor: grabbing;
-        }
-        .viewer-image {
-            max-width: 100%;
-            max-height: 100%;
-            transition: transform 0.2s ease;
-            user-select: none;
-        }
+        .viewer-prev { left: 16px; }
+        .viewer-next { right: 16px; }
+        .viewer-nav:hover { background: rgba(255,255,255,.22); }
+        .viewer-nav[disabled] { opacity: .4; cursor: not-allowed; }
+
         .viewer-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
+            position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; gap: 10px; align-items: center;
+            background: rgba(17,24,39,.55);
+            padding: 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,.15);
         }
+        .viewer-controls-row { display: flex; gap: 10px; }
         .viewer-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: rgba(255,255,255,.14); color: #fff;
+            width: 36px; height: 36px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25);
+            display: inline-flex; align-items: center; justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
         }
-        .viewer-btn:hover {
-            background: white;
-        }
-        .zoom-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-        }
+        .viewer-btn:hover { background: rgba(255,255,255,.22); }
+        .viewer-btn:disabled { opacity: .4; cursor: not-allowed; }
         .training-image {
             cursor: pointer;
             transition: opacity 0.2s;
@@ -2622,34 +2607,41 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Add bottom padding to prevent content from being hidden behind nav -->
     <div class="h-20"></div>
 
-    <!-- Image Viewer Modal -->
-    <div id="imageViewer" class="image-viewer hidden">
-        <div class="viewer-controls">
-            <button class="viewer-btn" onclick="closeImageViewer()">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
-            </button>
+    <!-- Image Viewer -->
+    <div id="imageViewer" class="image-viewer" onclick="if(event.target===this) closeImageViewer()">
+        <button class="viewer-close" aria-label="Close image" onclick="event.stopPropagation(); closeImageViewer()">&times;</button>
+        <button id="viewerPrevBtn" class="viewer-nav viewer-prev" aria-label="Previous image" onclick="event.stopPropagation(); prevImage()">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L8.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div class="image-container" onclick="event.stopPropagation()">
+            <img id="viewerImage" class="viewer-image" src="" alt="Training Image" draggable="false">
         </div>
-        <div class="image-container" id="imageContainer">
-            <img id="viewerImage" class="viewer-image" src="" alt="Training Image">
-        </div>
-        <div class="zoom-controls">
-            <button class="viewer-btn" onclick="zoomOut()">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
-                </svg>
-            </button>
-            <button class="viewer-btn" onclick="resetZoom()">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-                </svg>
-            </button>
-            <button class="viewer-btn" onclick="zoomIn()">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
-                </svg>
-            </button>
+        <button id="viewerNextBtn" class="viewer-nav viewer-next" aria-label="Next image" onclick="event.stopPropagation(); nextImage()">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 4.293a1 1 0 011.414 0L13.707 9.293a1 1 0 010 1.414L8.707 15.707a1 1 0 01-1.414-1.414L11.586 10 7.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div class="viewer-controls" onclick="event.stopPropagation()">
+            <div class="viewer-controls-row">
+                <button class="viewer-btn" aria-label="Zoom out" onclick="zoomOut()">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg>
+                </button>
+                <button id="viewerPanUpBtn" class="viewer-btn" aria-label="Pan up" onclick="panUp()">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                </button>
+                <button class="viewer-btn" aria-label="Zoom in" onclick="zoomIn()">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 010 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                </button>
+            </div>
+            <div class="viewer-controls-row">
+                <button id="viewerPanLeftBtn" class="viewer-btn" aria-label="Pan left" onclick="panLeft()">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L8.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                </button>
+                <button id="viewerPanDownBtn" class="viewer-btn" aria-label="Pan down" onclick="panDown()">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+                <button id="viewerPanRightBtn" class="viewer-btn" aria-label="Pan right" onclick="panRight()">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 4.293a1 1 0 011.414 0L13.707 9.293a1 1 0 010 1.414L8.707 15.707a1 1 0 01-1.414-1.414L11.586 10 7.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -2735,9 +2727,17 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <script>
-        let currentZoom = 1;
-        let isDragging = false;
-        let startX, startY, translateX = 0, translateY = 0;
+        // Image viewer with controls
+        let viewerImages = [];
+        let viewerIndex = 0;
+        let viewerScale = 1;
+        let viewerTranslateX = 0;
+        let viewerTranslateY = 0;
+        let viewerIsDragging = false;
+        let viewerDragStartX = 0;
+        let viewerDragStartY = 0;
+        let viewerDragStartTranslateX = 0;
+        let viewerDragStartTranslateY = 0;
         let audioPlaying = false;
         let audioProgress = 0;
         let audioInterval;
@@ -4333,31 +4333,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function openImageViewer(src, alt) {
-            const viewer = document.getElementById('imageViewer');
-            const image = document.getElementById('viewerImage');
-            
-            image.src = src;
-            image.alt = alt;
-            viewer.classList.remove('hidden');
-            
-            // Reset zoom and position
-            currentZoom = 1;
-            translateX = 0;
-            translateY = 0;
-            updateImageTransform();
-            
-            // Prevent body scroll when viewer is open
-            document.body.style.overflow = 'hidden';
-            try { updateCartBar(); } catch {}
+            var v = document.getElementById('imageViewer');
+            var img = document.getElementById('viewerImage');
+            if(!viewerImages || !viewerImages.length){ viewerImages = collectGalleryImages(); }
+            var startIdx = viewerImages.indexOf(src);
+            viewerIndex = startIdx >= 0 ? startIdx : 0;
+            if(img){ img.alt = alt || 'Training Image'; }
+            resetViewerTransform();
+            showViewerImage(viewerIndex);
+            if(v){ v.classList.add('open'); }
+            document.body.style.overflow='hidden';
+            try { updateCartBar(); } catch(_) {}
         }
 
         function closeImageViewer() {
-            const viewer = document.getElementById('imageViewer');
-            viewer.classList.add('hidden');
-            
-            // Restore body scroll
-            document.body.style.overflow = 'auto';
-            try { updateCartBar(); } catch {}
+            var v=document.getElementById('imageViewer');
+            if(v){ v.classList.remove('open'); }
+            viewerIsDragging = false;
+            try { var c = document.querySelector('#imageViewer .image-container'); if(c) c.style.cursor = 'grab'; } catch(_) {}
+            document.body.style.overflow='auto';
+            try { updateCartBar(); } catch(_) {}
         }
 
     let aboutCourseId = null;
@@ -4562,90 +4557,138 @@ function audioRegisterNow() {
             console.log('Volume set to:', value);
         }
 
-        function zoomIn() {
-            currentZoom = Math.min(currentZoom * 1.2, 5);
-            updateImageTransform();
+        function collectGalleryImages(){
+            // Collect unique srcs from currently rendered training images
+            var nodes = Array.from(document.querySelectorAll('.training-image'));
+            var items = [];
+            nodes.forEach(function(node){
+                var src = node && node.getAttribute('src');
+                if(src && items.indexOf(src) === -1){ items.push(src); }
+            });
+            return items;
         }
 
-        function zoomOut() {
-            currentZoom = Math.max(currentZoom / 1.2, 0.5);
-            updateImageTransform();
+        function applyViewerTransform(){
+            var img = document.getElementById('viewerImage');
+            if(!img) return;
+            img.style.transformOrigin = 'center center';
+            img.style.transform = 'translate(' + viewerTranslateX + 'px, ' + viewerTranslateY + 'px) scale(' + viewerScale + ')';
+            updateViewerPanButtons();
         }
 
-        function resetZoom() {
-            currentZoom = 1;
-            translateX = 0;
-            translateY = 0;
-            updateImageTransform();
+        function updateViewerPanButtons(){
+            var disabled = !(viewerScale > 1);
+            ['viewerPanUpBtn','viewerPanDownBtn','viewerPanLeftBtn','viewerPanRightBtn'].forEach(function(id){
+                var btn = document.getElementById(id);
+                if(btn) btn.disabled = disabled;
+            });
         }
 
-        function updateImageTransform() {
-            const image = document.getElementById('viewerImage');
-            image.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
+        function resetViewerTransform(){ viewerScale = 1; viewerTranslateX = 0; viewerTranslateY = 0; applyViewerTransform(); }
+
+        function showViewerImage(index){
+            if(!viewerImages || !viewerImages.length){ viewerImages = collectGalleryImages(); }
+            if(!viewerImages.length) return;
+            if(index < 0) index = viewerImages.length - 1;
+            if(index >= viewerImages.length) index = 0;
+            viewerIndex = index;
+            var img = document.getElementById('viewerImage');
+            if(img){ img.src = viewerImages[viewerIndex]; }
+            applyViewerTransform();
         }
 
-        // Mouse drag functionality
-        document.getElementById('imageContainer').addEventListener('mousedown', function(e) {
-            if (currentZoom > 1) {
-                isDragging = true;
-                startX = e.clientX - translateX;
-                startY = e.clientY - translateY;
+        function prevImage(){ showViewerImage(viewerIndex - 1); }
+        function nextImage(){ showViewerImage(viewerIndex + 1); }
+        function zoomIn(){ viewerScale = Math.min(viewerScale * 1.25, 10); applyViewerTransform(); }
+        function zoomOut(){
+            viewerScale = Math.max(viewerScale / 1.25, 0.1);
+            if(viewerScale <= 1){ viewerTranslateX = 0; viewerTranslateY = 0; }
+            applyViewerTransform();
+        }
+        function panBy(dx, dy){
+            if(!(viewerScale > 1)) return;
+            viewerTranslateX += dx;
+            viewerTranslateY += dy;
+            applyViewerTransform();
+        }
+        function viewerPanStep(){ return 80; }
+        function panUp(){ panBy(0, -viewerPanStep()); }
+        function panDown(){ panBy(0, viewerPanStep()); }
+        function panLeft(){ panBy(-viewerPanStep(), 0); }
+        function panRight(){ panBy(viewerPanStep(), 0); }
+
+        // Drag-to-pan (mouse + touch) when zoomed in
+        (function wireViewerDrag(){
+            var container = document.querySelector('#imageViewer .image-container');
+            var img = document.getElementById('viewerImage');
+            if(img){
+                img.addEventListener('dragstart', function(e){ try{ e.preventDefault(); }catch(_){} });
+            }
+            if(!container) return;
+
+            // Mouse wheel / trackpad scroll zoom
+            container.addEventListener('wheel', function(e){
+                try {
+                    var v = document.getElementById('imageViewer');
+                    if (v && !v.classList.contains('open')) return;
+                } catch(_) {}
                 e.preventDefault();
-            }
-        });
+                if (e.deltaY < 0) zoomIn();
+                else zoomOut();
+            }, { passive: false });
 
-        document.addEventListener('mousemove', function(e) {
-            if (isDragging && currentZoom > 1) {
-                translateX = e.clientX - startX;
-                translateY = e.clientY - startY;
-                updateImageTransform();
-            }
-        });
-
-        document.addEventListener('mouseup', function() {
-            isDragging = false;
-        });
-
-        // Touch drag functionality for mobile
-        document.getElementById('imageContainer').addEventListener('touchstart', function(e) {
-            if (currentZoom > 1 && e.touches.length === 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX - translateX;
-                startY = e.touches[0].clientY - translateY;
+            container.addEventListener('mousedown', function(e){
+                if(!(viewerScale > 1)) return;
+                viewerIsDragging = true;
+                viewerDragStartX = e.clientX;
+                viewerDragStartY = e.clientY;
+                viewerDragStartTranslateX = viewerTranslateX;
+                viewerDragStartTranslateY = viewerTranslateY;
+                try { container.style.cursor = 'grabbing'; } catch(_) {}
                 e.preventDefault();
-            }
-        });
+            });
 
-        document.addEventListener('touchmove', function(e) {
-            if (isDragging && currentZoom > 1 && e.touches.length === 1) {
-                translateX = e.touches[0].clientX - startX;
-                translateY = e.touches[0].clientY - startY;
-                updateImageTransform();
+            document.addEventListener('mousemove', function(e){
+                if(!viewerIsDragging) return;
+                viewerTranslateX = viewerDragStartTranslateX + (e.clientX - viewerDragStartX);
+                viewerTranslateY = viewerDragStartTranslateY + (e.clientY - viewerDragStartY);
+                applyViewerTransform();
+            });
+
+            document.addEventListener('mouseup', function(){
+                if(!viewerIsDragging) return;
+                viewerIsDragging = false;
+                try { container.style.cursor = 'grab'; } catch(_) {}
+            });
+
+            container.addEventListener('touchstart', function(e){
+                if(!(viewerScale > 1)) return;
+                if(!e.touches || e.touches.length !== 1) return;
+                viewerIsDragging = true;
+                viewerDragStartX = e.touches[0].clientX;
+                viewerDragStartY = e.touches[0].clientY;
+                viewerDragStartTranslateX = viewerTranslateX;
+                viewerDragStartTranslateY = viewerTranslateY;
                 e.preventDefault();
-            }
-        });
+            }, { passive: false });
 
-        document.addEventListener('touchend', function() {
-            isDragging = false;
-        });
+            document.addEventListener('touchmove', function(e){
+                if(!viewerIsDragging) return;
+                if(!e.touches || e.touches.length !== 1) return;
+                viewerTranslateX = viewerDragStartTranslateX + (e.touches[0].clientX - viewerDragStartX);
+                viewerTranslateY = viewerDragStartTranslateY + (e.touches[0].clientY - viewerDragStartY);
+                applyViewerTransform();
+                e.preventDefault();
+            }, { passive: false });
 
-        // Mouse wheel zoom
-        document.getElementById('imageContainer').addEventListener('wheel', function(e) {
-            e.preventDefault();
-            if (e.deltaY < 0) {
-                zoomIn();
-            } else {
-                zoomOut();
-            }
-        });
+            document.addEventListener('touchend', function(){
+                if(!viewerIsDragging) return;
+                viewerIsDragging = false;
+                try { container.style.cursor = 'grab'; } catch(_) {}
+            });
+        })();
 
         // Close modals when clicking outside
-        document.getElementById('imageViewer').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeImageViewer();
-            }
-        });
-
         document.getElementById('aboutModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeAbout();
@@ -4673,20 +4716,26 @@ function audioRegisterNow() {
             const calendarModal = document.getElementById('calendarModal');
             const verifyModal = document.getElementById('verifyModal');
             
-            if (!imageViewer.classList.contains('hidden')) {
+            if (imageViewer.classList.contains('open')) {
                 switch(e.key) {
                     case 'Escape':
                         closeImageViewer();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        prevImage();
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        nextImage();
                         break;
                     case '+':
                     case '=':
                         zoomIn();
                         break;
                     case '-':
+                    case '_':
                         zoomOut();
-                        break;
-                    case '0':
-                        resetZoom();
                         break;
                 }
             } else if (!aboutModal.classList.contains('hidden')) {

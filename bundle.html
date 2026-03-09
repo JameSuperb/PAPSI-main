@@ -118,6 +118,24 @@
 	</div>
 	<div id="promoSpacer" class="h-0"></div>
 	<!-- End of Promo Banner -->
+
+	<!-- Bundle startup email gate -->
+	<div id="bundleEmailOverlay" class="fixed inset-0 z-[3600] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="bundleEmailTitle">
+		<div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+			<div class="px-5 py-4 border-b">
+				<h3 id="bundleEmailTitle" class="text-lg font-semibold text-papsi-dark">Start</h3>
+			</div>
+			<div class="px-5 py-4">
+				<label for="bundleEmailInput" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+				<input id="bundleEmailInput" type="email" autocomplete="email" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="you@example.com">
+				<p class="mt-2 text-xs text-gray-600">If you are a PAPSI member, then use the email address recorded in our database. Otherwise, use your primary email address</p>
+				<div id="bundleEmailStatus" class="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2" role="status" aria-live="polite"></div>
+			</div>
+			<div class="px-5 py-4 border-t flex justify-end">
+				<button id="bundleEmailStartBtn" type="button" class="bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors">Start</button>
+			</div>
+		</div>
+	</div>
 	<div class="max-w-6xl mx-auto px-4 py-6">
 		<!-- Page Title with logo placed above the white container -->
 		<div class="flex items-center gap-3 mb-4">
@@ -127,39 +145,39 @@
 			<h1 class="text-2xl font-bold text-papsi-dark">Center for Teacher Excellence</h1>
 		</div>
 
-		<!-- Segmented toolbar (filters & stats) -->
-		<div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-			<div class="flex items-center gap-2 mb-2">
-				<div class="inline-flex rounded-md overflow-hidden border border-gray-200 bg-white/70">
-					<button id="trainingFiltersMobileBtn" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white hover:bg-gray-50 text-gray-700 focus:outline-none rounded-none border-r border-gray-200" aria-expanded="false" aria-controls="trainingFiltersDrawer">
-						<svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M3 4.5A1.5 1.5 0 014.5 3h11A1.5 1.5 0 0117 4.5v.382a1.5 1.5 0 01-.44 1.06l-4.56 4.56v4.248a1 1 0 01-1.37.93l-2-.75A1 1 0 017 13.996v-3.494L2.44 5.942A1.5 1.5 0 012 4.882V4.5z"/></svg>
-						<span>Filters</span>
-						<span id="trainingFiltersActiveCount" class="hidden text-[10px] bg-gray-100 text-gray-600 px-1 rounded">0</span>
-					</button>
-					<button id="trainingStatsToggle" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-white hover:bg-gray-50 text-gray-700 focus:outline-none rounded-none" aria-controls="trainingStatsSection" aria-expanded="false">
-						<svg class="w-4 h-4 text-gray-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M4 12a1 1 0 011-1h1a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM9 9a1 1 0 011-1h1a1 1 0 011 1v6a1 1 0 01-1 1h-1a1 1 0 01-1-1V9zM14 6a1 1 0 011-1h1a1 1 0 011 1v9a1 1 0 01-1 1h-1a1 1 0 01-1-1V6z"/></svg>
-						<span>Show Stats</span>
-					</button>
-				</div>
-				<button id="trainingClearFilters" type="button" class="hidden text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Clear</button>
-			</div>
-			<div id="trainingFilterChips" class="flex flex-wrap items-center gap-2 mb-4 hidden"></div>
-			<div id="trainingStatsSection" class="hidden">
-				<div id="trainingStatsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4"></div>
-				<div id="trainingYearBars" class="space-y-2 mb-2"></div>
+		<!-- Category buttons (bundle.html) -->
+		<div class="bg-white rounded-lg shadow-sm p-6 mb-4">
+			<div id="bundleCategoryBar" class="flex flex-wrap items-center gap-2">
+				<button type="button" data-bundle-cat="all" aria-pressed="true" class="bundle-cat-btn inline-flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-papsi-green border-papsi-green text-white">
+					<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M4 3a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V4a1 1 0 00-1-1H4zM4 11a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1v-4a1 1 0 00-1-1H4zM12 3a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V4a1 1 0 00-1-1h-4zM12 11a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1v-4a1 1 0 00-1-1h-4z"/></svg>
+					<span>All Category</span>
+				</button>
+				<button type="button" data-bundle-cat="Biology" aria-pressed="false" class="bundle-cat-btn inline-flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-white border-gray-200 text-gray-700 hover:bg-gray-50">
+					<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.5 2.1a.9.9 0 00-1 0C6.4 4.5 4 7.6 4 10.8 4 14.6 7.1 18 11 18c3.3 0 5-2.8 5-5.2 0-3.1-2.8-6.5-5.5-10.7z"/><path d="M7 12.3c1.9-.6 3.6-1.8 4.9-3.5.3-.4.2-1-.2-1.3-.4-.3-1-.2-1.3.2-1.1 1.4-2.5 2.4-4.1 3-.5.2-.8.7-.6 1.2.2.5.7.8 1.3.6z"/></svg>
+					<span>Biology</span>
+				</button>
+				<button type="button" data-bundle-cat="Chemistry" aria-pressed="false" class="bundle-cat-btn inline-flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-white border-gray-200 text-gray-700 hover:bg-gray-50">
+					<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7 2a1 1 0 000 2v4.586l-2.707 2.707A1 1 0 004 12v3a3 3 0 003 3h6a3 3 0 003-3v-3a1 1 0 00-.293-.707L13 8.586V4a1 1 0 100-2H7zm2 2h2v5a1 1 0 00.293.707L14 12.414V15a1 1 0 01-1 1H7a1 1 0 01-1-1v-2.586l2.707-2.707A1 1 0 009 9V4z"/></svg>
+					<span>Chemistry</span>
+				</button>
+				<button type="button" data-bundle-cat="Physics" aria-pressed="false" class="bundle-cat-btn inline-flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-white border-gray-200 text-gray-700 hover:bg-gray-50">
+					<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2c1.9 0 3.8 1.7 5 4.2 1.2 2.5 1.2 5.9 0 8.4-1.2 2.5-3.1 4.2-5 4.2s-3.8-1.7-5-4.2c-1.2-2.5-1.2-5.9 0-8.4C6.2 3.7 8.1 2 10 2zm0 2c-1.1 0-2.4 1.2-3.2 3-1 2.1-1 5 0 7.1.8 1.8 2.1 3 3.2 3s2.4-1.2 3.2-3c1-2.1 1-5 0-7.1C12.4 5.2 11.1 4 10 4z"/><path d="M4.6 6.1c1.6-1 4-1.7 6.4-1.7s4.8.6 6.4 1.7c.5.3.6.9.3 1.4-.3.5-.9.6-1.4.3-1.3-.8-3.4-1.3-5.3-1.3S6.9 7 5.6 7.8c-.5.3-1.1.2-1.4-.3-.3-.5-.2-1.1.4-1.4z"/><path d="M4.9 13.9c.3-.5.9-.6 1.4-.3 1.3.8 3.4 1.3 5.3 1.3s4-.5 5.3-1.3c.5-.3 1.1-.2 1.4.3.3.5.2 1.1-.3 1.4-1.6 1-4 1.7-6.4 1.7s-4.8-.6-6.4-1.7c-.6-.3-.7-.9-.3-1.4z"/></svg>
+					<span>Physics</span>
+				</button>
+				<button type="button" data-bundle-cat="Research" aria-pressed="false" class="bundle-cat-btn inline-flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-white border-gray-200 text-gray-700 hover:bg-gray-50">
+					<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h5a1 1 0 100-2H6V4h8v5a1 1 0 102 0V4a2 2 0 00-2-2H6z" clip-rule="evenodd"/><path d="M12.5 10a3.5 3.5 0 102.2 6.2l1.55 1.55a1 1 0 001.42-1.42l-1.55-1.55A3.5 3.5 0 0012.5 10zm-1.5 3.5a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/></svg>
+					<span>Research</span>
+				</button>
+				<button type="button" data-bundle-cat="Statistics" aria-pressed="false" class="bundle-cat-btn inline-flex items-center gap-2 px-3 py-2 rounded-full border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-white border-gray-200 text-gray-700 hover:bg-gray-50">
+					<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M3 3a1 1 0 011 1v11h12a1 1 0 110 2H4a2 2 0 01-2-2V4a1 1 0 011-1z"/><path d="M7 13a1 1 0 01-1-1V9a1 1 0 112 0v3a1 1 0 01-1 1zM11 13a1 1 0 01-1-1V6a1 1 0 112 0v6a1 1 0 01-1 1zM15 13a1 1 0 01-1-1V8a1 1 0 112 0v4a1 1 0 01-1 1z"/></svg>
+					<span>Statistics</span>
+				</button>
 			</div>
 		</div>
 
-		<!-- Filters Drawer and controls -->
-		<div id="trainingFiltersDrawer" class="filters-drawer md:bg-white md:rounded-lg md:shadow-sm md:p-4 mb-6" role="dialog" aria-modal="true" aria-labelledby="trainingFiltersHeading">
-			<div class="filters-drawer-header md:hidden">
-				<h3 id="trainingFiltersHeading" class="font-semibold text-papsi-dark text-sm">Training Filters</h3>
-				<button type="button" class="filters-drawer-close-btn text-gray-500 hover:text-gray-700 hover:bg-gray-100" aria-label="Close filters" onclick="closeFiltersDrawer()">
-					<svg class="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l8 8M6 14L14 6"/></svg>
-				</button>
-			</div>
-			<div class="filters-drawer-body md:p-0">
-				<div class="flex flex-col md:flex-row gap-4 items-center">
+		<!-- Search + filters (bundle.html) -->
+		<div id="trainingFiltersDrawer" class="bg-white rounded-lg shadow-sm p-6 mb-6">
+			<div class="flex flex-col md:flex-row gap-4 items-center">
 					<div class="flex-1 relative">
 						<input type="text" id="searchInput" placeholder="Search courses, speakers, or topics..." class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green">
 						<svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
@@ -167,16 +185,14 @@
 							<svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
 						</button>
 					</div>
-					<select id="categoryFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green"><option value="all">All Categories</option></select>
 					<select id="speakerFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green"><option value="all">All Speakers</option></select>
 					<select id="dateSort" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-papsi-green"><option value="newest">Newest First</option><option value="oldest">Oldest First</option></select>
-				</div>
-				<div class="mt-4 text-sm text-gray-600"><div id="resultsCounter" class="font-medium">Showing 0 of 0 courses</div></div>
 			</div>
+			<div class="mt-4 text-sm text-gray-600"><div id="resultsCounter" class="font-medium">Showing 0 of 0 courses</div></div>
 		</div>
 
-		<!-- Courses grid and pagination -->
-		<div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+		<!-- Courses list and pagination -->
+		<div id="coursesGrid" class="space-y-4"></div>
 		<div id="coursesPagination" class="w-full flex justify-center mt-6 mb-3"></div>
 		<div id="trainingBottomSpacer" class="h-0"></div>
 	</div>
@@ -215,6 +231,9 @@
 							<button id="validateVoucherBtn" onclick="validateVoucher()" class="bg-papsi-dark text-white px-3 py-2 rounded hover:bg-gray-800 transition-colors shrink-0">Validate</button>
 						</div>
 						<div id="voucherStatus" class="mt-1 text-sm"></div>
+						<div id="voucherPromoHint" class="mt-2 text-xs text-gray-700">
+							<span class="font-medium">Code:</span> <span class="font-semibold">PAPSIPROMO</span> — Get 30% off on trainings. Limited time.
+						</div>
 					</div>
 					<div class="flex-1 text-right mt-2 md:mt-0">
 						<div class="text-sm text-gray-600">Subtotal: <span id="cartSubtotal" class="font-semibold text-papsi-dark">₱0.00</span></div>
@@ -400,16 +419,282 @@
 		var AUTH_BASE = 'https://script.google.com/macros/s/AKfycbydRAAaO83lKJpCpu7a48YlncAX9R5N1KvRx5LqMofd6Dd-O1S_Mnp9tGysVGFV7q6dZQ/exec';
 		var TRAININGS_URL = 'https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec?SH=training&func=training';
 		var VOUCHER_BASE = 'https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec';
+		var EMAIL_TRAINING_URL = 'https://script.google.com/macros/s/AKfycby0argBdzpZ1ykRxSubg8k8QnKjVmXIjUkkEhFv52YihQmziRUXk3wD3Hej2_eaOUj8Mw/exec';
 		var CART_STORAGE_KEY = 'PAPSI_CART_ITEMS';
 		var TRAINING_STATS_VISIBLE_KEY = 'PAPSI_TRAINING_STATS_VISIBLE';
+		var BUNDLE_EMAIL_STORAGE_KEY = 'PAPSI_BUNDLE_EMAIL';
+		var BUNDLE_EMAIL_STATUS_STORAGE_KEY = 'PAPSI_BUNDLE_EMAIL_STATUS';
+		var BUNDLE_ATTENDED_TRAININGS_STORAGE_KEY = 'PAPSI_BUNDLE_ATTENDED_TRAININGS';
 
 		var allCourses = [];
 		var filteredCourses = [];
 		var cartCourses = [];
 		var appliedVoucher = null; // { code, percentage }
+		var bundleUserEmail = '';
+		var attendedTrainingKeys = {}; // { normalizedTitle: 1 }
 
 		var currentPage = 1;
 		var coursesPerPage = 8;
+
+		// --- Bundle allowlist (bundle.html should only show these trainings) ---
+		var BUNDLE_TRAINING_ALLOWLIST = {
+			'Chemistry': [
+				'Chemistry and Light: Energy Transitions in Matter',
+				'Molecular Geometry: Predicting the 3D Shapes of Molecules',
+				'Quantum Clarity: Mastering Orbital Diagrams and the Rules that Govern Them',
+				'React Right: Understanding and Classifying Chemical Reactions with Confidence',
+				'Stoichiometry Essentials: From Moles to Chemical Equations',
+				'Mastering Chemistry: Atomic Theories, Chemical Bonding & Intermolecular Forces'
+			],
+			'Biology': [
+				'Photosynthesis and Light: Energy Conversion in Living Systems',
+				'Mendelian and Non-Mendelian Genetics and Inheritance',
+				'Molecules of Life: Mastering Carbs Proteins Lipids Nucleic Acids and Enzymes',
+				'Metabolic Mystery: Teaching Cell Metabolism with Clarity and Context',
+				'Cell Essentials: Theory, Structure, and Function',
+				'Mastering Genetics and Molecular Biology: From Principles and Applications'
+			],
+			'Physics': [
+				'Optics and Light: From Rays to Vision and Imaging',
+				'Impact in Motion: Understanding Momentum and Collisions through Real-World Examples',
+				'Gamified Motion: Graphical and Computational Analysis of Kinematics & Projectile',
+				'Twist and Turn: Exploring the Laws Behind Rotational Systems',
+				'Vector Essentials: Building a Strong Foundation in Physics',
+				'Mastering Physics: Electric Circuits Demystified (DC & AC Analysis)'
+			],
+			'Research': [
+				'Practical Strategies & Tools for Effective Thesis Writing',
+				'Thesis Writing Decoded: Understanding the Purpose Behind Every Section',
+				'Beyond the Paper: Formatting and Referencing the Full Thesis Document',
+				'The Research Writer’s Workshop: Manuscript Essentials for Success',
+				'The Research Presenter’s Workshop: A Guide to Oral Presentations'
+			],
+			'Statistics': [
+				'Through the Lens of Repetition: Unlocking Insights in Testing Significant Differences with Repeated Measurements',
+				'Non-Assumption of Equality: Statistical Tests for Heterogeneity of Group Comparisons',
+				'Let’s Limit the Error: The Post-Hoc Analysis Tests (Extension of Analysis of Variance)',
+				'One-Way ANOVA (Fisher and Welch): Multivariate Analysis for Test of Difference',
+				'Mastering the Likert-Scale Survey Method: A Comprehensive Guide for Educators',
+				'Statistics for Science Experiments: A Comprehensive Training Guide',
+				'Statistics At Work: Demystifying Quantitative Research',
+				'Statistics in Action: Webinar Training Series'
+			]
+		};
+		var BUNDLE_TRAINING_TITLE_TO_CATEGORY = null;
+
+		function normalizeCourseKey(str){
+			var s = String(str || '');
+			try{ if(s && s.normalize){ s = s.normalize('NFKC'); } } catch(e){}
+			// Apps Script attended-training titles may include a trailing date like "(09-27-2025)".
+			// Strip ONLY that trailing date so we can match against bundle titles.
+			s = s.replace(/\s*\(\s*\d{1,2}[-\/]\d{1,2}[-\/]\d{4}\s*\)\s*$/g, '');
+			return s
+				.replace(/[’‘]/g, "'")
+				.replace(/[“”]/g, '"')
+				.replace(/\s+/g, ' ')
+				.trim()
+				.toLowerCase();
+		}
+
+		function getBundleTitleToCategory(){
+			if(BUNDLE_TRAINING_TITLE_TO_CATEGORY) return BUNDLE_TRAINING_TITLE_TO_CATEGORY;
+			var map = {};
+			var cats = Object.keys(BUNDLE_TRAINING_ALLOWLIST || {});
+			for(var i=0;i<cats.length;i++){
+				var cat = cats[i];
+				var titles = BUNDLE_TRAINING_ALLOWLIST[cat] || [];
+				for(var j=0;j<titles.length;j++){
+					var key = normalizeCourseKey(titles[j]);
+					if(key) map[key] = cat;
+				}
+			}
+			BUNDLE_TRAINING_TITLE_TO_CATEGORY = map;
+			return map;
+		}
+
+		function applyBundleTrainingAllowlist(){
+			var allow = getBundleTitleToCategory();
+			allCourses = (allCourses || []).filter(function(course){
+				var key = normalizeCourseKey(course && course.title);
+				var cat = allow[key];
+				if(!cat) return false;
+				// Enforce the bundle categories for consistent badges/filters.
+				course.category = cat;
+				return true;
+			});
+		}
+
+		function pruneCartToAvailableCourses(){
+			if(!Array.isArray(cartCourses) || cartCourses.length===0) return;
+			var available = {};
+			for(var i=0;i<allCourses.length;i++){
+				if(allCourses[i] && allCourses[i].id){ available[allCourses[i].id] = 1; }
+			}
+			var next = [];
+			for(var j=0;j<cartCourses.length;j++){
+				var id = cartCourses[j];
+				if(available[id]) next.push(id);
+			}
+			if(next.length !== cartCourses.length){
+				cartCourses = next;
+				persistCart();
+				updateCartCount();
+			}
+		}
+
+		// --- Bundle email check (attended trainings) ---
+		function setBundleUserEmail(email){
+			bundleUserEmail = String(email||'').trim();
+			try{ localStorage.setItem(BUNDLE_EMAIL_STORAGE_KEY, bundleUserEmail); }catch(e){}
+			var checkoutEmail = document.getElementById('checkoutEmail');
+			if(checkoutEmail){
+				checkoutEmail.value = bundleUserEmail;
+				try{ updateEmailFieldState(); }catch(e){}
+			}
+		}
+		function splitAttendedTrainings(raw){
+			var t = String(raw||'').trim();
+			if(!t) return [];
+			return t.split(/\s*\|\s*/).map(function(s){ return String(s||'').trim(); }).filter(function(s){ return !!s; });
+		}
+		function setAttendedTrainings(list){
+			attendedTrainingKeys = {};
+			var unique = [];
+			for(var i=0;i<(list||[]).length;i++){
+				var title = String(list[i]||'').trim();
+				if(!title) continue;
+				var key = normalizeCourseKey(title);
+				if(!key || attendedTrainingKeys[key]) continue;
+				attendedTrainingKeys[key] = 1;
+				unique.push(title);
+			}
+			try{ localStorage.setItem(BUNDLE_ATTENDED_TRAININGS_STORAGE_KEY, JSON.stringify(unique)); }catch(e){}
+		}
+		function applyAttendedTrainingExclusion(){
+			var hasAny = false;
+			for(var k in attendedTrainingKeys){ if(attendedTrainingKeys.hasOwnProperty(k)){ hasAny = true; break; } }
+			if(!hasAny) return;
+			allCourses = (allCourses || []).filter(function(course){
+				var key = normalizeCourseKey(course && course.title);
+				return !attendedTrainingKeys[key];
+			});
+		}
+		function openBundleEmailOverlay(){
+			var overlay = document.getElementById('bundleEmailOverlay');
+			if(!overlay) return;
+			overlay.classList.remove('hidden');
+			try{ overlay.removeAttribute('aria-busy'); }catch(e){}
+			document.body.style.overflow = 'hidden';
+			var status = document.getElementById('bundleEmailStatus');
+			if(status){ status.innerHTML = ''; }
+			var btn = document.getElementById('bundleEmailStartBtn');
+			if(btn){ btn.disabled = false; btn.classList.remove('opacity-60','cursor-not-allowed'); btn.textContent = 'Start'; }
+			var input = document.getElementById('bundleEmailInput');
+			if(input){
+				input.disabled = false;
+				input.classList.remove('bg-gray-100');
+				if(!String(input.value||'').trim()){
+					try{ var saved = localStorage.getItem(BUNDLE_EMAIL_STORAGE_KEY) || ''; if(saved) input.value = saved; }catch(e){}
+				}
+				setTimeout(function(){ try{ input.focus(); input.select(); }catch(e){} }, 50);
+			}
+		}
+		function closeBundleEmailOverlay(){
+			var overlay = document.getElementById('bundleEmailOverlay');
+			if(overlay) overlay.classList.add('hidden');
+			document.body.style.overflow = '';
+		}
+		async function fetchAttendedTrainingsForEmail(email){
+			var url = EMAIL_TRAINING_URL + '?func=emailtraining&email=' + encodeURIComponent(String(email||'').trim());
+			var res = await fetch(url, { method:'GET' });
+			return await res.text();
+		}
+		async function startBundleEmailCheck(){
+			var input = document.getElementById('bundleEmailInput');
+			var status = document.getElementById('bundleEmailStatus');
+			var btn = document.getElementById('bundleEmailStartBtn');
+			var overlay = document.getElementById('bundleEmailOverlay');
+			var email = input ? String(input.value||'').trim() : '';
+			setBundleUserEmail(email);
+			if(!email){
+				if(status) status.innerHTML = '<span class="text-red-600 font-semibold">Please enter an email address.</span>';
+				return;
+			}
+			if(overlay){ try{ overlay.setAttribute('aria-busy','true'); }catch(e){} }
+			if(input){ input.disabled = true; input.classList.add('bg-gray-100'); }
+			if(btn){ btn.disabled = true; btn.classList.add('opacity-60','cursor-not-allowed'); btn.textContent = 'Checking…'; }
+			if(status){
+				status.innerHTML = '<div class="flex items-center gap-2 text-papsi-dark font-semibold">'+
+					'<svg class="w-5 h-5 animate-spin text-papsi-green" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
+						'<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>'+
+						'<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v2.2A5.8 5.8 0 006.2 12H4z"></path>'+
+					'</svg>'+
+					'<span>Checking email…</span>'+
+				'</div>'+
+				'<div class="mt-1 text-xs text-gray-600">This may take a few seconds.</div>';
+			}
+			var result = '';
+			var emailStatus = 'failed';
+			try{
+				result = await fetchAttendedTrainingsForEmail(email);
+				var trimmed = String(result||'').trim();
+				var lower = trimmed.toLowerCase();
+				if(lower === 'invalid email'){
+					emailStatus = 'invalid';
+					setAttendedTrainings([]);
+				} else if(lower === 'duplicate email'){
+					emailStatus = 'duplicate';
+					setAttendedTrainings([]);
+				} else {
+					emailStatus = 'ok';
+					setAttendedTrainings(splitAttendedTrainings(trimmed));
+				}
+			} catch(e){
+				emailStatus = 'failed';
+				setAttendedTrainings([]);
+			}
+			try{ localStorage.setItem(BUNDLE_EMAIL_STATUS_STORAGE_KEY, emailStatus); }catch(e){}
+			closeBundleEmailOverlay();
+			if(btn){ btn.disabled = false; btn.classList.remove('opacity-60','cursor-not-allowed'); btn.textContent = 'Start'; }
+			if(input){ input.disabled = false; input.classList.remove('bg-gray-100'); }
+			loadTrainingCourses();
+		}
+
+		// --- Bundle category buttons (top bar) ---
+		var bundleCategoryFilter = 'all';
+		function updateBundleCategoryButtons(){
+			var bar = document.getElementById('bundleCategoryBar');
+			if(!bar) return;
+			var btns = bar.querySelectorAll('[data-bundle-cat]');
+			for(var i=0;i<btns.length;i++){
+				var btn = btns[i];
+				var val = btn.getAttribute('data-bundle-cat') || 'all';
+				var active = String(val).toLowerCase() === String(bundleCategoryFilter || 'all').toLowerCase();
+				btn.setAttribute('aria-pressed', String(!!active));
+				if(active){
+					btn.classList.add('bg-papsi-green','border-papsi-green','text-white');
+					btn.classList.remove('bg-white','border-gray-200','text-gray-700','hover:bg-gray-50');
+				} else {
+					btn.classList.remove('bg-papsi-green','border-papsi-green','text-white');
+					btn.classList.add('bg-white','border-gray-200','text-gray-700','hover:bg-gray-50');
+				}
+			}
+		}
+		function initBundleCategoryButtons(){
+			var bar = document.getElementById('bundleCategoryBar');
+			if(!bar) return;
+			bar.addEventListener('click', function(e){
+				var t = e && e.target ? e.target : null;
+				while(t && t !== bar && !(t.getAttribute && t.getAttribute('data-bundle-cat'))){
+					t = t.parentNode;
+				}
+				if(!t || t === bar) return;
+				bundleCategoryFilter = t.getAttribute('data-bundle-cat') || 'all';
+				updateBundleCategoryButtons();
+				filterCourses();
+			});
+			updateBundleCategoryButtons();
+		}
 
 		// --- Toast ---
 		function ensureToastContainer(){
@@ -496,6 +781,14 @@
 		function persistCart(){ try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartCourses)); } catch(e){} }
 		function loadCart(){ try{ var saved=JSON.parse(localStorage.getItem(CART_STORAGE_KEY)||'[]'); if(Array.isArray(saved)) cartCourses=saved; }catch(e){} }
 
+		function updateVoucherPromoHint(){
+			var hint = document.getElementById('voucherPromoHint');
+			if(!hint) return;
+			var isApplied = !!(appliedVoucher && typeof appliedVoucher.percentage==='number' && appliedVoucher.percentage>0);
+			if(isApplied) hint.classList.add('hidden');
+			else hint.classList.remove('hidden');
+		}
+
 		function openCart(){
 			// Render cart items
 			var cartList = document.getElementById('cartList');
@@ -525,6 +818,7 @@
 			var vRow = document.getElementById('cartVoucherRow'); var vEl = document.getElementById('cartVoucher');
 			if(vRow && vEl){ if(totals.voucherDiscount>0){ vRow.classList.remove('hidden'); vEl.textContent='-'+formatMoney(totals.voucherDiscount).replace('₱','₱'); } else { vRow.classList.add('hidden'); vEl.textContent='-₱0.00'; } }
 			document.getElementById('cartTotal').textContent = formatMoney(totals.total);
+			updateVoucherPromoHint();
 
 			var m = document.getElementById('cartModal'); if(m) m.classList.add('open'); document.body.style.overflow='hidden';
 			updateCartBar();
@@ -594,7 +888,19 @@
 		}
 
 		function addToCart(id){ var wasEmpty = cartCourses.length===0; if(cartCourses.indexOf(id)===-1){ cartCourses.push(id); renderCourses(); updateCartCount(); persistCart(); try{ var c=findCourse(id); showToast((c && c.title) ? (c.title+' added to cart') : 'Added to cart','success',3000);}catch(e){} updateCartBar(); if(wasEmpty){ setTimeout(updateCartBar, 300); } } }
-		function removeFromCart(id){ var idx = cartCourses.indexOf(id); if(idx!==-1){ cartCourses.splice(idx,1); openCart(); updateCartCount(); renderCourses(); persistCart(); updateCartBar(); } }
+		function removeFromCart(id){
+			var idx = cartCourses.indexOf(id);
+			if(idx!==-1){
+				cartCourses.splice(idx,1);
+				// Only refresh/open the cart modal if it is already open.
+				var cm = document.getElementById('cartModal');
+				if(cm && cm.classList.contains('open')){ openCart(); }
+				updateCartCount();
+				renderCourses();
+				persistCart();
+				updateCartBar();
+			}
+		}
 
 		function findCourse(id){ for(var i=0;i<allCourses.length;i++){ if(allCourses[i].id===id) return allCourses[i]; } return null; }
 
@@ -605,7 +911,7 @@
 		async function loadTrainingCourses(){
 			var grid = document.getElementById('coursesGrid');
 			var counter = document.getElementById('resultsCounter');
-			grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">Loading courses...</div>';
+			grid.innerHTML = '<div class="w-full text-center py-12 text-gray-500">Loading courses...</div>';
 			try{
 				var res = await fetch(TRAININGS_URL);
 				var data = await res.json();
@@ -626,96 +932,101 @@
 						duration: (item.hours ? (item.hours+' hours') : '')
 					};
 				}) : [];
+				applyBundleTrainingAllowlist();
+				applyAttendedTrainingExclusion();
+				pruneCartToAvailableCourses();
 				populateCourseFilters();
 				filteredCourses = allCourses.slice();
 				renderCourses();
 				updateCounters();
-			} catch(e){ grid.innerHTML = '<div class="col-span-full text-center py-12 text-red-500">Failed to load courses.</div>'; if(counter) counter.textContent = 'Showing 0 of 0 courses'; allCourses=[]; filteredCourses=[]; }
+			} catch(e){ grid.innerHTML = '<div class="w-full text-center py-12 text-red-500">Failed to load courses.</div>'; if(counter) counter.textContent = 'Showing 0 of 0 courses'; allCourses=[]; filteredCourses=[]; }
 		}
 
 		function populateCourseFilters(){
-			var categoryFilter = document.getElementById('categoryFilter');
 			var speakerFilter = document.getElementById('speakerFilter');
-			if(!categoryFilter || !speakerFilter) return;
-			var catsMap = {}; var spMap = {}; var i;
-			for(i=0;i<allCourses.length;i++){ var c=allCourses[i]; if(c.category){ catsMap[c.category]=1; } if(c.instructor){ spMap[c.instructor]=1; } }
-			var cats = Object.keys(catsMap).sort(); var sps = Object.keys(spMap).sort();
-			var selCat = categoryFilter.value; var selSp = speakerFilter.value;
-			categoryFilter.innerHTML = '<option value="all">All Categories</option>' + cats.map(function(cat){ return '<option value="'+escapeHtml(cat)+'">'+escapeHtml(cat)+'</option>'; }).join('');
-			if(cats.indexOf(selCat)!==-1) categoryFilter.value = selCat; else categoryFilter.value = 'all';
+			if(!speakerFilter) return;
+			var spMap = {}; var i;
+			for(i=0;i<allCourses.length;i++){ var c=allCourses[i]; if(c.instructor){ spMap[c.instructor]=1; } }
+			var sps = Object.keys(spMap).sort();
+			var selSp = speakerFilter.value;
 			speakerFilter.innerHTML = '<option value="all">All Speakers</option>' + sps.map(function(sp){ return '<option value="'+escapeHtml(sp)+'">'+escapeHtml(sp)+'</option>'; }).join('');
 			if(sps.indexOf(selSp)!==-1) speakerFilter.value = selSp; else speakerFilter.value = 'all';
 		}
 
 		function filterCourses(){
 			var searchTerm = String(document.getElementById('searchInput').value||'').toLowerCase();
-			var catVal = document.getElementById('categoryFilter').value;
+			var catVal = String(bundleCategoryFilter || 'all');
 			var spVal = document.getElementById('speakerFilter').value;
 			var sortVal = document.getElementById('dateSort').value;
-			var yearFilter = window.trainingYearFilter || null;
 			filteredCourses = allCourses.filter(function(course){
 				var matchesSearch = !searchTerm || course.title.toLowerCase().indexOf(searchTerm)!==-1 || (course.instructor||'').toLowerCase().indexOf(searchTerm)!==-1 || (course.description||'').toLowerCase().indexOf(searchTerm)!==-1;
-				var matchesCategory = (catVal==='all') || course.category===catVal;
+				var matchesCategory = (String(catVal).toLowerCase()==='all') || String(course.category||'').toLowerCase()===String(catVal).toLowerCase();
 				var matchesSpeaker = (spVal==='all') || course.instructor===spVal;
-				var matchesYear = !yearFilter || (course.date instanceof Date && !isNaN(course.date) && course.date.getFullYear()===yearFilter);
-				return matchesSearch && matchesCategory && matchesSpeaker && matchesYear;
+				return matchesSearch && matchesCategory && matchesSpeaker;
 			});
 			filteredCourses.sort(function(a,b){ return (sortVal==='newest') ? (b.date - a.date) : (a.date - b.date); });
-			currentPage = 1; renderCourses(); updateCounters(); renderTrainingStats(); try{ renderTrainingFilterChips(); }catch(e){}
+			currentPage = 1; renderCourses(); updateCounters();
 		}
 
 		function renderCourses(){
 			var grid = document.getElementById('coursesGrid'); var pag = document.getElementById('coursesPagination');
-			if(filteredCourses.length===0){ grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No courses found.</div>'; if(pag) pag.innerHTML=''; return; }
+			if(filteredCourses.length===0){ grid.innerHTML = '<div class="w-full text-center py-12 text-gray-500">No courses found.</div>'; if(pag) pag.innerHTML=''; return; }
 			var total = filteredCourses.length; var totalPages = Math.ceil(total / coursesPerPage);
 			if(currentPage>totalPages) currentPage=totalPages; if(currentPage<1) currentPage=1;
 			var startIdx = (currentPage-1)*coursesPerPage; var endIdx=startIdx+coursesPerPage; var items = filteredCourses.slice(startIdx, endIdx);
 			var html = '';
 			for(var i=0;i<items.length;i++){
 				var course = items[i];
-				var discountVal=0, regVal=0, promoVal=0;
-				if(course.originalPrice && course.price){ regVal=parseFloat(String(course.originalPrice).replace(/[^0-9.]/g,'')); promoVal=parseFloat(String(course.price).replace(/[^0-9.]/g,'')); discountVal = (regVal||0) - (promoVal||0); }
 				var inCart = cartCourses.indexOf(course.id)!==-1;
+				var fees = parseCourseFees(course);
+				var hasDiscount = !!(course.originalPrice && course.price);
+				var regText = (fees.reg>0) ? formatMoney(fees.reg) : '—';
+				var promoText = (fees.promo>0) ? formatMoney(fees.promo) : '—';
+				var hoursText = course.hours ? (String(course.hours).trim() + ' hours') : '—';
+				var checkboxId = 'register-' + course.id;
+				var rowClass = 'group rounded-lg shadow-sm border p-4 transition-colors focus-within:ring-2 focus-within:ring-papsi-green/30 ' +
+					(inCart ? 'bg-green-50/40 border-green-200 ring-1 ring-papsi-green/10' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200');
+				var registerPill = inCart ? 'bg-green-50 border-green-200 text-papsi-green' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50';
+				var registerText = inCart ? 'Added' : 'Register';
+				var discountedValClass = hasDiscount ? 'text-papsi-green font-semibold' : 'text-gray-800 font-medium';
+				var webinarValClass = hasDiscount ? 'text-red-600 line-through' : 'text-gray-800 font-medium';
 				html += ''+
-				'<div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">'+
-					'<div class="relative bg-white overflow-hidden">'+
-						'<img src="'+escapeAttr(course.image)+'" alt="'+escapeAttr(course.title)+'" class="block w-full h-auto object-contain training-image" loading="lazy" decoding="async" onclick="openImageViewer(this.src, this.alt)" onerror="this.src=\'\'; this.alt=\'Image failed to load\'; this.style.display=\'none\';">'+
-						'<div class="absolute top-2 left-2"><span class="'+categoryBadgeClasses(course.category)+' px-2 py-1 rounded text-xs font-medium">'+escapeHtml(course.category || 'Other')+'</span></div>'+
-						'<div class="absolute top-2 right-2 flex space-x-1">'+
-							'<button onclick="showAbout(\''+course.id+'\')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all" aria-label="About">'+
-								'<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>'+
-							'</button>'+
-							'<button onclick="playAudio(\''+course.id+'\')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all '+(!course.audio?'opacity-50 cursor-not-allowed':'')+'" '+(!course.audio?'disabled':'')+' aria-label="Audio Preview">'+
-								'<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>'+
-							'</button>'+
-						'</div>'+
-						'<div class="absolute left-2 right-2 bottom-2 bg-white rounded-md shadow px-3 py-2">'+
-							'<div class="text-papsi-dark font-semibold text-sm">'+escapeHtml(course.title)+'</div>'+
-							'<div class="text-gray-600 text-xs mt-0.5">'+escapeHtml(course.instructor||'')+'</div>'+
-						'</div>'+
-						'<div class="absolute bottom-2 right-2 flex items-center gap-2">'+
-							'<div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">'+
-								'<span class="text-papsi-gold font-semibold">'+escapeHtml(course.price||'')+'</span>'+
-								(course.originalPrice ? ('<span class="text-gray-400 line-through ml-1">'+escapeHtml(course.originalPrice)+'</span>') : '')+
-							'</div>'+
-							(discountVal>0 ? ('<div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">₱'+String(discountVal) +' OFF</div>') : '')+
-							'<div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">'+escapeHtml(course.duration||'')+'</div>'+
+				'<div class="'+rowClass+' flex flex-col sm:flex-row sm:items-start gap-4">'+
+					'<div class="flex-shrink-0">'+
+						'<div class="w-16 h-16 rounded-lg bg-white border '+(inCart?'border-green-200':'border-gray-200')+' overflow-hidden relative flex items-center justify-center">'+
+							'<svg class="w-7 h-7 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a1 1 0 01.447.105l7 3.5A1 1 0 0118 6.5v7a1 1 0 01-.553.895l-7 3.5a1 1 0 01-.894 0l-7-3.5A1 1 0 012 13.5v-7a1 1 0 01.553-.895l7-3.5A1 1 0 0110 2zm0 2.118L4.236 7 10 9.882 15.764 7 10 4.118z"/></svg>'+
+							(course.image ? ('<img src="'+escapeAttr(course.image)+'" alt="'+escapeAttr(course.title)+'" class="absolute inset-0 w-full h-full object-contain training-image" loading="lazy" decoding="async" onclick="openImageViewer(this.src, this.alt)" onerror="this.style.display=\'none\';">') : '')+
 						'</div>'+
 					'</div>'+
-					'<div class="p-4">'+
-						(inCart ? (
-							'<div class="added-success-banner added-banner-animate w-full rounded-md bg-green-50 border border-green-200 p-3 flex flex-col gap-3" role="status" aria-live="polite">'+
-								'<div class="flex items-start gap-3">'+
-									'<div class="flex-shrink-0 w-8 h-8 rounded-full bg-papsi-green text-white flex items-center justify-center">'+
-										'<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a1 1 0 00-1.414-1.414L9 10.414 7.557 8.97a1 1 0 10-1.414 1.415l2.121 2.12a1 1 0 001.414 0l4.179-4.314z" clip-rule="evenodd"/></svg>'+
-									'</div>'+
-									'<div class="flex-1"><p class="text-sm font-semibold text-papsi-green leading-snug">Added to cart</p><p class="text-xs text-green-700 mt-0.5">Proceed to checkout when you\'re ready.</p></div>'+
-								'</div>'+
-								'<div><button type="button" onclick="openCart(); event.stopPropagation();" class="w-full inline-flex items-center justify-center gap-2 bg-papsi-green hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded-md shadow-sm transition"><span>View Cart</span></button></div>'+
-							'</div>'
-						) : (
-							'<button class="w-full py-2 rounded bg-papsi-green hover:bg-green-700 text-white text-sm font-medium" onclick="addToCart(\''+course.id+'\'); event.stopPropagation();">Register Now</button>'
-						))+
+					'<div class="flex-1 min-w-0">'+
+						'<div class="flex items-start justify-between gap-3">'+
+							'<button type="button" class="min-w-0 flex-1 text-left text-papsi-dark font-semibold leading-snug hover:underline focus:outline-none focus:ring-2 focus:ring-papsi-green/40 rounded" onclick="showAbout(\''+course.id+'\')">'+escapeHtml(course.title)+'</button>'+
+							'<span class="'+categoryBadgeClasses(course.category)+' px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap">'+escapeHtml(course.category || 'Other')+'</span>'+
+						'</div>'+
+						'<div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3">'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">Speaker</div>'+
+								'<div class="mt-0.5 text-sm text-gray-800 font-medium truncate">'+(course.instructor ? escapeHtml(course.instructor) : '—')+'</div>'+
+							'</div>'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">Webinar fee</div>'+
+								'<div class="mt-0.5 text-sm tabular-nums whitespace-nowrap '+webinarValClass+'">'+regText+'</div>'+
+							'</div>'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">Discounted fee</div>'+
+								'<div class="mt-0.5 text-sm tabular-nums whitespace-nowrap '+discountedValClass+'">'+promoText+'</div>'+
+							'</div>'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">No. of hours</div>'+
+								'<div class="mt-0.5 text-sm text-gray-800 font-medium whitespace-nowrap">'+(hoursText ? escapeHtml(hoursText) : '—')+'</div>'+
+							'</div>'+
+						'</div>'+
+					'</div>'+
+					'<div class="flex-shrink-0 sm:pt-0.5">'+
+						'<label class="inline-flex items-center gap-2 px-3 py-2 rounded-md border '+registerPill+' transition-colors cursor-pointer select-none" for="'+checkboxId+'">'+
+							'<input id="'+checkboxId+'" type="checkbox" class="h-4 w-4 accent-papsi-green" '+(inCart?'checked':'')+' onchange="if(this.checked){ addToCart(\''+course.id+'\'); } else { removeFromCart(\''+course.id+'\'); }">'+
+							'<span class="text-sm font-semibold">'+registerText+'</span>'+
+						'</label>'+
 					'</div>'+
 				'</div>';
 			}
@@ -733,7 +1044,13 @@
 		}
 
 		function changeCoursesPage(delta){ var totalPages=Math.ceil(filteredCourses.length/coursesPerPage); currentPage += delta; if(currentPage<1) currentPage=1; if(currentPage>totalPages) currentPage=totalPages; renderCourses(); updateCounters(); }
-		function updateCounters(){ var searchTerm=String(document.getElementById('searchInput').value||'').toLowerCase(); var catVal=document.getElementById('categoryFilter').value; var spVal=document.getElementById('speakerFilter').value; var totalAvailable = 0; for(var i=0;i<allCourses.length;i++){ var c=allCourses[i]; var matchesSearch=!searchTerm || c.title.toLowerCase().indexOf(searchTerm)!==-1 || (c.instructor||'').toLowerCase().indexOf(searchTerm)!==-1 || (c.description||'').toLowerCase().indexOf(searchTerm)!==-1; var matchesCategory=(catVal==='all')||c.category===catVal; var matchesSpeaker=(spVal==='all')||c.instructor===spVal; if(matchesSearch && matchesCategory && matchesSpeaker){ totalAvailable++; } } var startIdx=(currentPage-1)*coursesPerPage; var shown=Math.max(0, Math.min(coursesPerPage, filteredCourses.length - startIdx)); var rc=document.getElementById('resultsCounter'); if(rc){ rc.textContent='Showing '+shown+' of '+totalAvailable+' courses'; } updateCartCount(); }
+		function updateCounters(){
+			var startIdx=(currentPage-1)*coursesPerPage;
+			var shown=Math.max(0, Math.min(coursesPerPage, filteredCourses.length - startIdx));
+			var rc=document.getElementById('resultsCounter');
+			if(rc){ rc.textContent='Showing '+shown+' of '+filteredCourses.length+' courses'; }
+			updateCartCount();
+		}
 
 		function renderTrainingStats(){
 			var grid = document.getElementById('trainingStatsGrid'); var yearBars = document.getElementById('trainingYearBars'); if(!grid) return;
@@ -1343,12 +1660,15 @@
 			// Stats toggle
 			var statsBtn = document.getElementById('trainingStatsToggle'); if(statsBtn){ statsBtn.addEventListener('click', toggleTrainingStats); }
 			updateStatsToggleUI(getSavedStatsVisible());
-			document.getElementById('clearSearch').addEventListener('click', clearSearch);
+			initBundleCategoryButtons();
+			var clearSearchBtn = document.getElementById('clearSearch'); if(clearSearchBtn){ clearSearchBtn.addEventListener('click', clearSearch); }
 			var clearAllBtn = document.getElementById('trainingClearFilters'); if(clearAllBtn){ clearAllBtn.addEventListener('click', clearAllTrainingFilters); }
-			document.getElementById('searchInput').addEventListener('input', function(e){ var btn=document.getElementById('clearSearch'); if(e && e.target && e.target.value){ btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); } filterCourses(); });
-			document.getElementById('categoryFilter').addEventListener('change', filterCourses);
-			document.getElementById('speakerFilter').addEventListener('change', filterCourses);
-			document.getElementById('dateSort').addEventListener('change', filterCourses);
+			var searchInput = document.getElementById('searchInput');
+			if(searchInput){
+				searchInput.addEventListener('input', function(e){ var btn=document.getElementById('clearSearch'); if(btn){ if(e && e.target && e.target.value){ btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); } } filterCourses(); });
+			}
+			var speakerFilter = document.getElementById('speakerFilter'); if(speakerFilter){ speakerFilter.addEventListener('change', filterCourses); }
+			var dateSort = document.getElementById('dateSort'); if(dateSort){ dateSort.addEventListener('change', filterCourses); }
 			// Email guidance on input
 			try{ var em=document.getElementById('checkoutEmail'); if(em){ em.addEventListener('input', function(){ updateEmailFieldState(); clearFieldError(em); }); } }catch(e){}
 			// Clear error mark on required fields as user edits
@@ -1360,7 +1680,11 @@
 			try{ var ssel=document.getElementById('checkoutSpecializationSelect'); if(ssel){ ssel.addEventListener('change', function(){ clearFieldError(ssel); }); } }catch(e){}
 
 			loadCart();
-			loadTrainingCourses();
+			// Require email at start, then load trainings.
+			var startBtn = document.getElementById('bundleEmailStartBtn'); if(startBtn){ startBtn.addEventListener('click', startBundleEmailCheck); }
+			var emailInput = document.getElementById('bundleEmailInput');
+			if(emailInput){ emailInput.addEventListener('keydown', function(e){ if(e && (e.key==='Enter' || e.keyCode===13)){ try{ e.preventDefault(); }catch(err){} startBundleEmailCheck(); } }); }
+			openBundleEmailOverlay();
 			// Keep the reserved bottom space accurate on viewport changes
 			window.addEventListener('resize', function(){
 				try{ updateCartBar(); } catch(e){}

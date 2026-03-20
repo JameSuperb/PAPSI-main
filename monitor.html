@@ -1,0 +1,1716 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAPSI Event Monitoring Dashboard</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    .dashboard-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+      background: #f8fafc;
+    }
+
+    .header-section {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: white;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .header-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+    }
+
+    .header-refresh-btn {
+      padding: 0.65rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .header-refresh-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .header-refresh-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .header-subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-bottom: 1rem;
+    }
+
+    .stats-line {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.5;
+    }
+
+    .stats-line span {
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 500;
+    }
+
+    .tabs-section {
+      padding: 0 2rem;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+
+    .tab-button {
+      padding: 1rem 1.5rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #64748b;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover {
+      color: #1e293b;
+      background: #f8fafc;
+    }
+
+    .tab-button.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+
+    .controls-section {
+      padding: 1.5rem 2rem;
+      background: white;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      width: 18px;
+      height: 18px;
+    }
+
+    .filter-select {
+      padding: 0.75rem 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+      font-size: 0.95rem;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+
+
+    .table-section {
+      flex: 1;
+      overflow: auto;
+      padding: 1.5rem 2rem;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      background: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #1e293b;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+      transition: all 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+      box-shadow: inset 0 0 0 1px #e2e8f0;
+    }
+
+    tbody tr.updated {
+      animation: highlight 0.8s ease-out;
+    }
+
+    @keyframes highlight {
+      0% {
+        background: #fef08a;
+      }
+      100% {
+        background: transparent;
+      }
+    }
+
+    td {
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #334155;
+    }
+
+    .name-cell {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .name-trigger {
+      background: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .name-trigger:hover {
+      text-decoration: underline;
+    }
+
+    .dashboard-wrapper.is-busy {
+      pointer-events: none;
+      user-select: none;
+    }
+
+    body.is-busy {
+      cursor: progress;
+    }
+
+    /* Progress Modal (blocking) */
+    .progress-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1400;
+      padding: 1rem;
+    }
+
+    .progress-modal.open {
+      display: flex;
+    }
+
+    .progress-modal__overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .progress-modal__content {
+      position: relative;
+      z-index: 1;
+      width: min(440px, 94vw);
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .progress-modal__spinner {
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      border: 3px solid #cbd5e1;
+      border-top-color: #3b82f6;
+      animation: progress-spin 0.9s linear infinite;
+      flex: 0 0 auto;
+    }
+
+    @keyframes progress-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .progress-modal__title {
+      font-weight: 800;
+      color: #1e293b;
+      font-size: 0.95rem;
+      line-height: 1.25;
+    }
+
+    .progress-modal__message {
+      margin-top: 0.15rem;
+      color: #334155;
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    /* Participant Details Modal */
+    .participant-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1200;
+      padding: 1rem;
+    }
+
+    .participant-modal.open {
+      display: flex;
+    }
+
+    .participant-modal__overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .participant-modal__content {
+      position: relative;
+      z-index: 1;
+      width: min(760px, 96vw);
+      max-height: 86vh;
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .participant-modal__header {
+      background: #1e293b;
+      color: white;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .participant-modal__title {
+      font-weight: 800;
+      font-size: 1rem;
+      line-height: 1.25;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    .participant-modal__close {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .participant-modal__close:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .participant-modal__body {
+      padding: 1rem;
+      overflow: auto;
+      background: #f8fafc;
+    }
+
+    .participant-details {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .participant-details__row {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.65rem;
+      padding: 0.75rem 0.85rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+
+    .participant-details__label {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .participant-details__value {
+      font-size: 0.95rem;
+      color: #0f172a;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .school-cell {
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .payment-badge {
+      display: inline-block;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .payment-badge.paid {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .payment-badge.unpaid {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-cell {
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-badge.present {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.absent {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .status-badge.claimed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.unclaimed {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: default;
+      transition: all 0.2s ease;
+    }
+
+    .status-icon.claimed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-icon.unclaimed {
+      background: #f3f4f6;
+      color: #9ca3af;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      background: white;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      color: #1e293b;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f1f5f9;
+    }
+
+    .btn-success {
+      background: #d1fae5;
+      border-color: #10b981;
+      color: #065f46;
+    }
+
+    .btn-success:disabled {
+      background: #d1fae5;
+    }
+
+    .btn-warning {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
+    }
+
+
+
+    .icon-small {
+      width: 16px;
+      height: 16px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      text-align: center;
+      color: #94a3b8;
+    }
+
+    .empty-state i {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-section {
+        padding: 1.5rem;
+      }
+
+      .header-title {
+        font-size: 1.5rem;
+      }
+
+      .controls-section {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .search-box, .filter-select {
+        width: 100%;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .table-section {
+        padding: 1rem;
+      }
+
+      table {
+        font-size: 0.85rem;
+      }
+
+      td, th {
+        padding: 0.75rem 0.5rem;
+      }
+
+      .action-buttons {
+        gap: 0.25rem;
+      }
+
+      .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body>
+  <div class="dashboard-wrapper" id="dashboardWrapper">
+   <!-- Header -->
+   <div class="header-section">
+    <div class="header-top">
+     <div class="header-meta">
+      <div class="header-title" id="dashboardTitle">
+       PAPSI Event Monitoring Dashboard
+      </div>
+      <div class="header-subtitle" id="dashboardSubtitle">
+       Mastery in Science Hands-on Workshop
+      </div>
+     </div>
+     <div class="header-actions">
+      <button id="refreshBtn" class="header-refresh-btn" type="button">Update</button>
+     </div>
+    </div><!-- Stats Summary Line -->
+    <div class="stats-line">Showing <span id="shownParticipants">0</span> of <span id="totalParticipants">0</span> Participants • <span id="amAttendance">0</span> AM Present • <span id="pmAttendance">0</span> PM Present • <span id="amSnacks">0</span> AM Snacks • <span id="lunch">0</span> Lunch • <span id="pmSnacks">0</span> PM Snacks
+    </div>
+   </div><!-- Tabs -->
+   <div class="tabs-section">
+    <button class="tab-button active" data-tab="all-participants">All Participants</button> <button class="tab-button" data-tab="am-attendance">AM Attendance</button> <button class="tab-button" data-tab="pm-attendance">PM Attendance</button> <button class="tab-button" data-tab="am-snacks">AM Snacks</button> <button class="tab-button" data-tab="lunch">Lunch</button> <button class="tab-button" data-tab="pm-snacks">PM Snacks</button> <button class="tab-button" data-tab="certificates">Certificates</button> <button class="tab-button" data-tab="receipts">Receipts</button>
+   </div><!-- Controls -->
+   <div class="controls-section">
+    <div class="search-box">
+     <i class="search-icon" data-lucide="search"></i> <input type="text" id="searchInput" placeholder="Search by full name...">
+    </div><select id="paymentFilter" class="filter-select"> <option value="">All Payment Status</option> <option value="Paid">Paid</option> <option value="Unpaid">Unpaid</option> </select><select id="schoolFilter" class="filter-select"> <option value="">All Schools</option> </select><select id="sortFilter" class="filter-select"> <option value="first-name">Sort: First Name (A-Z)</option> <option value="last-name">Sort: Last Name (A-Z)</option> </select>
+   </div><!-- Table Section -->
+   <div class="table-section">
+    <div class="table-wrapper">
+     <table id="participantTable">
+      <thead>
+       <tr>
+        <th>Full Name</th>
+        <th>School</th>
+        <th>Payment</th>
+        <th id="actionHeader">Action</th>
+       </tr>
+      </thead>
+      <tbody id="tableBody">
+      </tbody>
+     </table>
+    </div>
+    <div class="empty-state" id="emptyState" style="display: none;">
+     <i data-lucide="inbox"></i>
+     <p>No participants found</p>
+    </div>
+   </div>
+
+    <!-- Participant Details Modal -->
+    <div id="participantModal" class="participant-modal" aria-hidden="true" role="dialog" aria-labelledby="participantModalTitle">
+     <div class="participant-modal__overlay" data-close="true"></div>
+     <div class="participant-modal__content" role="document">
+      <div class="participant-modal__header">
+      <h2 id="participantModalTitle" class="participant-modal__title">Participant Details</h2>
+      <button id="participantModalClose" class="participant-modal__close" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="participant-modal__body">
+      <div id="participantModalBody" class="participant-details"></div>
+      </div>
+     </div>
+    </div>
+  </div>
+
+  <!-- Progress Modal (blocking) -->
+  <div id="progressModal" class="progress-modal" aria-hidden="true" role="alertdialog" aria-live="assertive">
+    <div class="progress-modal__overlay"></div>
+    <div class="progress-modal__content" tabindex="-1">
+      <div class="progress-modal__spinner" aria-hidden="true"></div>
+      <div class="progress-modal__text">
+        <div class="progress-modal__title" id="progressModalTitle">Updating…</div>
+        <div class="progress-modal__message" id="progressModalMessage">Please wait.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== CONFIGURATION =====
+    const defaultConfig = {
+      dashboard_title: "PAPSI Event Monitoring Dashboard",
+      dashboard_subtitle: "Mastery in Science Hands-on Workshop"
+    };
+
+    // Data source: Google Apps Script endpoints
+    // Read (JSON):  ?func=readall
+    // Write:        ?func=writeentry&column=...&rownumber=...&value=...
+    const APPS_SCRIPT_BASE_URL = 'https://script.google.com/macros/s/AKfycbzB6rT-9SDEtQkC9kxyVSxuu5urTXG0_o-IXhv2wlL9OM6eGGtNbtzRf97mXYEE-i7PIQ/exec';
+    const READ_ALL_ENDPOINT_URL = `${APPS_SCRIPT_BASE_URL}?func=readall`;
+    const WRITE_ENTRY_ENDPOINT_URL = `${APPS_SCRIPT_BASE_URL}?func=writeentry`;
+
+    // Enable updating the Google Sheet from the dashboard actions.
+    const ENABLE_SHEET_WRITES = true;
+
+    let config = { ...defaultConfig };
+    let allParticipants = [];
+    let filteredParticipants = [];
+    let currentTab = 'all-participants';
+    let currentSortFilter = 'first-name';
+
+    // ===== BUSY / PROGRESS MODAL (BLOCKING) =====
+    let busyCount = 0;
+
+    function isBusy() {
+      return busyCount > 0;
+    }
+
+    function beginBusy(message) {
+      busyCount += 1;
+
+      const modal = document.getElementById('progressModal');
+      const titleEl = document.getElementById('progressModalTitle');
+      const messageEl = document.getElementById('progressModalMessage');
+      const wrapper = document.getElementById('dashboardWrapper');
+
+      if (titleEl) titleEl.textContent = 'Updating…';
+      if (messageEl) messageEl.textContent = String(message || 'Please wait.');
+
+      if (modal) {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        const content = modal.querySelector('.progress-modal__content');
+        if (content && typeof content.focus === 'function') content.focus();
+      }
+
+      if (wrapper) {
+        wrapper.classList.add('is-busy');
+        wrapper.setAttribute('aria-busy', 'true');
+        wrapper.setAttribute('inert', '');
+      }
+
+      document.body.classList.add('is-busy');
+    }
+
+    function endBusy() {
+      busyCount = Math.max(0, busyCount - 1);
+      if (busyCount !== 0) return;
+
+      const modal = document.getElementById('progressModal');
+      const wrapper = document.getElementById('dashboardWrapper');
+
+      if (modal) {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      if (wrapper) {
+        wrapper.classList.remove('is-busy');
+        wrapper.removeAttribute('aria-busy');
+        wrapper.removeAttribute('inert');
+      }
+
+      document.body.classList.remove('is-busy');
+    }
+
+    // ===== ELEMENT SDK INITIALIZATION =====
+    if (window.elementSdk && typeof window.elementSdk.init === 'function') {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = newConfig;
+          document.getElementById('dashboardTitle').textContent = config.dashboard_title || defaultConfig.dashboard_title;
+          document.getElementById('dashboardSubtitle').textContent = config.dashboard_subtitle || defaultConfig.dashboard_subtitle;
+        },
+        mapToCapabilities: () => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: () => new Map([
+          ['dashboard_title', config.dashboard_title || defaultConfig.dashboard_title],
+          ['dashboard_subtitle', config.dashboard_subtitle || defaultConfig.dashboard_subtitle]
+        ])
+      });
+    }
+
+    // ===== DATA LOADING (DISPLAY-FIRST) =====
+    function setEmptyStateMessage(message) {
+      const emptyState = document.getElementById('emptyState');
+      if (!emptyState) return;
+      const p = emptyState.querySelector('p');
+      if (p) p.textContent = message;
+    }
+
+    function normalizeHeader(header) {
+      return String(header || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, ' ');
+    }
+
+    function buildHeaderMap(row) {
+      const headerMap = new Map();
+      Object.keys(row || {}).forEach((key) => {
+        headerMap.set(normalizeHeader(key), key);
+      });
+      return headerMap;
+    }
+
+    function getRowValue(row, headerMap, candidates) {
+      for (const candidate of candidates) {
+        const originalKey = headerMap.get(normalizeHeader(candidate));
+        if (originalKey != null) {
+          const value = row[originalKey];
+          if (value !== undefined && value !== null && String(value).trim() !== '') {
+            return value;
+          }
+        }
+      }
+      return '';
+    }
+
+    function parseExcelBoolean(value) {
+      if (value === true || value === false) return value;
+      if (value === 1 || value === 0) return Boolean(value);
+      if (typeof value === 'number') return value !== 0;
+      const s = String(value || '').trim().toLowerCase();
+      if (!s) return false;
+      // Common symbols / combined strings like "✔ Present"
+      if (s.includes('✔') || s.includes('✓')) return true;
+      if (s.includes('✖')) return false;
+
+      // Exact tokens
+      if (['yes', 'y', 'true', '1', 'present', 'claimed', 'done', 'issued', 'checked'].includes(s)) return true;
+      if (['no', 'n', 'false', '0', 'absent', 'unclaimed', 'pending'].includes(s)) return false;
+
+      // Substring fallback for values like "✔ present" / "present (am)"
+      if (s.includes('present') || s.includes('claimed') || s.includes('issued') || s.includes('done') || s.includes('checked')) return true;
+      if (s.includes('absent') || s.includes('unclaimed') || s.includes('pending')) return false;
+      return false;
+    }
+
+    function normalizePaymentStatus(value) {
+      const s = String(value || '').trim().toLowerCase();
+      if (!s) return 'Unpaid';
+      if (s.includes('unpaid')) return 'Unpaid';
+      if (s.includes('paid')) return 'Paid';
+      if (['yes', 'y', 'true', '1', 'paid'].includes(s)) return 'Paid';
+      if (['no', 'n', 'false', '0', 'unpaid', 'pending'].includes(s)) return 'Unpaid';
+      return 'Unpaid';
+    }
+
+    function parseNumber(value) {
+      if (value === undefined || value === null || value === '') return 0;
+      if (typeof value === 'number') return value;
+      const cleaned = String(value).replace(/,/g, '').trim();
+      const n = Number(cleaned);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function parseRowNumber(value) {
+      if (value === undefined || value === null || value === '') return null;
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      const n = parseInt(String(value).trim(), 10);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function formatExcelDate(value) {
+      if (value === undefined || value === null) return '';
+      if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
+        // ISO date only (yyyy-mm-dd)
+        return value.toISOString().slice(0, 10);
+      }
+      // Excel serial date fallback
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        // Excel dates are days since 1899-12-30 (with 1900 leap-year bug baked in)
+        const base = new Date(Date.UTC(1899, 11, 30));
+        const days = Math.floor(value);
+        base.setUTCDate(base.getUTCDate() + days);
+        return base.toISOString().slice(0, 10);
+      }
+      return String(value).trim();
+    }
+
+    function normalizeWhitespace(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function parseNamePartsFromFullName(fullName) {
+      const cleaned = normalizeWhitespace(fullName);
+      if (!cleaned) return { first_name: '', last_name: '' };
+
+      // If already in "LAST, FIRST" format
+      const commaIndex = cleaned.indexOf(',');
+      if (commaIndex !== -1) {
+        const last = normalizeWhitespace(cleaned.slice(0, commaIndex));
+        const rest = normalizeWhitespace(cleaned.slice(commaIndex + 1));
+        const restParts = rest ? rest.split(' ') : [];
+        const first = restParts.length ? restParts[0] : '';
+        return { first_name: first, last_name: last };
+      }
+
+      // Fallback: assume "FIRST ... LAST" and take first + last tokens only
+      const parts = cleaned.split(' ').filter(Boolean);
+      if (parts.length === 1) return { first_name: parts[0], last_name: '' };
+      return { first_name: parts[0], last_name: parts[parts.length - 1] };
+    }
+
+    function getDisplayName(participant, sortFilter) {
+      const first = normalizeWhitespace(participant && participant.first_name);
+      const last = normalizeWhitespace(participant && participant.last_name);
+
+      let display;
+      if (sortFilter === 'last-name') {
+        if (first && last) display = `${last}, ${first}`;
+        else display = last || first || normalizeWhitespace(participant && participant.full_name);
+      } else {
+        if (first && last) display = `${first} ${last}`;
+        else display = first || last || normalizeWhitespace(participant && participant.full_name);
+      }
+
+      return String(display || '').toUpperCase();
+    }
+
+    function extractFullName(row, headerMap) {
+      const full = getRowValue(row, headerMap, ['Full Name', 'Fullname', 'Name', 'Participant', 'Participant Name', 'full_name']);
+      if (String(full || '').trim()) return String(full).trim();
+
+      const first = getRowValue(row, headerMap, ['First Name', 'Firstname', 'Given Name']);
+      const middle = getRowValue(row, headerMap, ['Middle Initial', 'Middle Initial (e.g.  B. )', 'Middle', 'Middle Name', 'MI']);
+      const last = getRowValue(row, headerMap, ['Last Name', 'Lastname', 'Surname']);
+      const suffix = getRowValue(row, headerMap, ['Suffix', 'Suffix (e.g. Jr.)']);
+
+      const parts = [];
+      if (String(first || '').trim()) parts.push(String(first).trim());
+      if (String(middle || '').trim()) parts.push(String(middle).trim());
+      if (String(last || '').trim()) parts.push(String(last).trim());
+      if (String(suffix || '').trim()) parts.push(String(suffix).trim());
+      return parts.join(' ').trim();
+    }
+
+    function isRowEmpty(row) {
+      const values = Object.values(row || {});
+      if (values.length === 0) return true;
+      return values.every(v => String(v ?? '').trim() === '');
+    }
+
+    function mapRowsToParticipants(rows) {
+      const cleaned = (rows || []).filter(r => !isRowEmpty(r));
+      return cleaned.map((row, index) => {
+        const headerMap = buildHeaderMap(row);
+        const fullName = extractFullName(row, headerMap);
+
+        const firstRaw = getRowValue(row, headerMap, ['First Name', 'Firstname', 'Given Name', 'GivenName']);
+        const lastRaw = getRowValue(row, headerMap, ['Last Name', 'Lastname', 'Surname', 'Family Name', 'FamilyName']);
+        const parsed = parseNamePartsFromFullName(fullName);
+        const first_name = normalizeWhitespace(firstRaw) || parsed.first_name;
+        const last_name = normalizeWhitespace(lastRaw) || parsed.last_name;
+
+        const school = String(getRowValue(row, headerMap, [
+          'School',
+          'Institution',
+          'Affiliation',
+          'Name of School/ University/ Company',
+          'Name of School/University/Company',
+          'School/ University/ Company',
+          'School/University/Company'
+        ]))
+          .trim();
+        const address = String(getRowValue(row, headerMap, [
+          'Address',
+          'City',
+          'Province',
+          'Region',
+          'Address of School/ University/ Company',
+          'Address of School/University/Company'
+        ]))
+          .trim();
+        const paymentDateRaw = getRowValue(row, headerMap, ['Payment Date', 'Date Paid', 'Paid Date', 'PaymentDate']);
+        const payment_date = formatExcelDate(paymentDateRaw);
+
+        const paymentStatusRaw = getRowValue(row, headerMap, ['Payment Status', 'Payment', 'Paid', 'PaymentStatus']);
+        let payment_status = normalizePaymentStatus(paymentStatusRaw);
+        // If the sheet doesn't have an explicit status column, infer Paid when a payment date exists.
+        if ((payment_status === 'Unpaid' || !payment_status) && String(payment_date || '').trim() !== '') {
+          payment_status = 'Paid';
+        }
+        const total_fee = parseNumber(getRowValue(row, headerMap, ['Total Fee', 'Fee', 'Amount', 'Total']));
+
+        const idCandidate = String(getRowValue(row, headerMap, [
+          'ID',
+          'Code',
+          'Participant ID',
+          'Member ID',
+          'Membership ID',
+          'Registration ID',
+          'Invoice Number',
+          'rownumber'
+        ]))
+          .trim();
+        const baseId = idCandidate || `${fullName || 'row'}-${index + 2}`;
+
+        const sheet_rownumber = parseRowNumber(getRowValue(row, headerMap, ['rownumber', 'Row Number', 'row number']));
+
+        return {
+          __backendId: `${baseId}__${index}`,
+          __raw: row,
+          sheet_rownumber,
+          full_name: String(fullName || '').trim(),
+          first_name: String(first_name || '').trim(),
+          last_name: String(last_name || '').trim(),
+          school,
+          address,
+          total_fee,
+          payment_date,
+          payment_status,
+          am_attendance: parseExcelBoolean(getRowValue(row, headerMap, ['AM Attendance', 'Attendance AM', 'AM Present', 'AM'])),
+          pm_attendance: parseExcelBoolean(getRowValue(row, headerMap, ['PM Attendance', 'Attendance PM', 'PM Present', 'PM'])),
+          snacks_am: parseExcelBoolean(getRowValue(row, headerMap, ['AM Snacks', 'AM Snack', 'Snacks AM', 'Snacks (AM)'])),
+          lunch: parseExcelBoolean(getRowValue(row, headerMap, ['Lunch', 'Lunch Claimed'])),
+          snacks_pm: parseExcelBoolean(getRowValue(row, headerMap, ['PM Snacks', 'PM Snack', 'Snacks PM', 'Snacks (PM)'])),
+          certificates: parseExcelBoolean(getRowValue(row, headerMap, ['Certificate', 'Certificates', 'Certificate Issued'])),
+          receipts: parseExcelBoolean(getRowValue(row, headerMap, ['Receipt', 'Receipts', 'Receipt Issued']))
+        };
+      }).filter(p => (p.full_name || '').trim() !== '');
+    }
+
+    function withCacheBust(url) {
+      const sep = url.includes('?') ? '&' : '?';
+      return `${url}${sep}ts=${Date.now()}`;
+    }
+
+    function extractRowsFromEndpointResponse(json) {
+      if (Array.isArray(json)) return json;
+      if (json && Array.isArray(json.data)) return json.data;
+      if (json && Array.isArray(json.rows)) return json.rows;
+      if (json && Array.isArray(json.items)) return json.items;
+      if (json && Array.isArray(json.result)) return json.result;
+      return [];
+    }
+
+    async function tryLoadParticipantsFromEndpoint() {
+      const url = withCacheBust(READ_ALL_ENDPOINT_URL);
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const rows = extractRowsFromEndpointResponse(json);
+      const participants = mapRowsToParticipants(rows);
+      console.info(`Loaded ${participants.length} participant(s) from endpoint.`);
+      return participants;
+    }
+
+    async function writeSheetEntry(params) {
+      const column = params && params.column;
+      const rownumber = params && params.rownumber;
+      const value = params && params.value;
+
+      const url = new URL(WRITE_ENTRY_ENDPOINT_URL);
+      url.searchParams.set('column', String(column || ''));
+      url.searchParams.set('rownumber', String(rownumber || ''));
+      url.searchParams.set('value', String(value || ''));
+      url.searchParams.set('ts', String(Date.now()));
+
+      const res = await fetch(url.toString(), { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const text = await res.text();
+      // Endpoint may respond with JSON or plain text
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (e) {
+        parsed = null;
+      }
+
+      if (parsed && (parsed.isOk === false || parsed.ok === false || parsed.success === false)) {
+        throw new Error(parsed.error || parsed.message || 'Write failed');
+      }
+
+      return parsed || text;
+    }
+
+    function setParticipants(participants) {
+      allParticipants = Array.isArray(participants) ? participants : [];
+      updateSchoolOptions();
+      applyFilters();
+      updateStats();
+    }
+
+    async function refreshData(options) {
+      if (isBusy()) return;
+
+      const opts = options || {};
+      const preserveExistingOnFail = opts.preserveExistingOnFail !== false;
+
+      const refreshBtn = document.getElementById('refreshBtn');
+      const previousParticipants = allParticipants.slice();
+
+      if (refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = 'Updating...';
+      }
+
+      beginBusy(allParticipants.length ? 'Updating participants…' : 'Loading participants…');
+
+      try {
+        setEmptyStateMessage('Loading participants...');
+        const participants = await tryLoadParticipantsFromEndpoint();
+        setParticipants(participants);
+        setEmptyStateMessage('No participants found');
+      } catch (err) {
+        if (!preserveExistingOnFail) {
+          setParticipants([]);
+        } else {
+          allParticipants = previousParticipants;
+          applyFilters();
+          updateStats();
+        }
+        setEmptyStateMessage('Failed to load participants from the server.');
+        console.error('Failed to load participants from endpoint:', err);
+      } finally {
+        endBusy();
+        if (refreshBtn) {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = 'Update';
+        }
+        lucide.createIcons();
+      }
+    }
+
+    // ===== INITIALIZE DASHBOARD =====
+    (async () => {
+      await refreshData({ preserveExistingOnFail: false });
+    })();
+
+    // ===== UPDATE BUTTON =====
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => refreshData({ preserveExistingOnFail: true }));
+    }
+
+    // ===== UPDATE STATS =====
+    function updateStats() {
+      const total = allParticipants.length;
+      const shown = Array.isArray(filteredParticipants) ? filteredParticipants.length : 0;
+      const amPresent = allParticipants.filter(p => p.am_attendance).length;
+      const pmPresent = allParticipants.filter(p => p.pm_attendance).length;
+      const amSnacksClaimed = allParticipants.filter(p => p.snacks_am).length;
+      const lunchClaimed = allParticipants.filter(p => p.lunch).length;
+      const pmSnacksClaimed = allParticipants.filter(p => p.snacks_pm).length;
+
+      document.getElementById('totalParticipants').textContent = total;
+      const shownEl = document.getElementById('shownParticipants');
+      if (shownEl) shownEl.textContent = shown;
+      document.getElementById('amAttendance').textContent = amPresent;
+      document.getElementById('pmAttendance').textContent = pmPresent;
+      document.getElementById('amSnacks').textContent = amSnacksClaimed;
+      document.getElementById('lunch').textContent = lunchClaimed;
+      document.getElementById('pmSnacks').textContent = pmSnacksClaimed;
+    }
+
+    // ===== FILTER AND SEARCH =====
+    function applyFilters() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const paymentFilter = document.getElementById('paymentFilter').value;
+      const schoolFilter = document.getElementById('schoolFilter').value;
+      const sortFilter = document.getElementById('sortFilter').value;
+
+      currentSortFilter = sortFilter;
+
+      filteredParticipants = allParticipants.filter(p => {
+        const nameHaystack = [
+          String(p.full_name || ''),
+          String(p.first_name || ''),
+          String(p.last_name || ''),
+          getDisplayName(p, 'first-name'),
+          getDisplayName(p, 'last-name')
+        ].join(' ').toLowerCase();
+        const school = String(p.school || '');
+        const paymentStatus = String(p.payment_status || 'Unpaid');
+        const matchSearch = nameHaystack.includes(searchTerm);
+        const matchPayment = !paymentFilter || paymentStatus === paymentFilter;
+        const matchSchool = !schoolFilter || school === schoolFilter;
+        return matchSearch && matchPayment && matchSchool;
+      });
+
+      // Sort based on selection
+      if (sortFilter === 'last-name') {
+        filteredParticipants.sort((a, b) => {
+          const lastA = String(a.last_name || '').trim().toUpperCase();
+          const lastB = String(b.last_name || '').trim().toUpperCase();
+          const cmpLast = lastA.localeCompare(lastB);
+          if (cmpLast !== 0) return cmpLast;
+
+          const firstA = String(a.first_name || '').trim().toUpperCase();
+          const firstB = String(b.first_name || '').trim().toUpperCase();
+          const cmpFirst = firstA.localeCompare(firstB);
+          if (cmpFirst !== 0) return cmpFirst;
+
+          return String(a.full_name || '').trim().toUpperCase()
+            .localeCompare(String(b.full_name || '').trim().toUpperCase());
+        });
+      } else {
+        // Default: sort by first name
+        filteredParticipants.sort((a, b) => {
+          const firstA = String(a.first_name || '').trim().toUpperCase();
+          const firstB = String(b.first_name || '').trim().toUpperCase();
+          const cmpFirst = firstA.localeCompare(firstB);
+          if (cmpFirst !== 0) return cmpFirst;
+
+          const lastA = String(a.last_name || '').trim().toUpperCase();
+          const lastB = String(b.last_name || '').trim().toUpperCase();
+          const cmpLast = lastA.localeCompare(lastB);
+          if (cmpLast !== 0) return cmpLast;
+
+          return String(a.full_name || '').trim().toUpperCase()
+            .localeCompare(String(b.full_name || '').trim().toUpperCase());
+        });
+      }
+
+      renderTable();
+      updateStats();
+    }
+
+    // ===== UPDATE SCHOOL FILTER OPTIONS =====
+    function updateSchoolOptions() {
+      const schoolSelect = document.getElementById('schoolFilter');
+      const currentValue = schoolSelect.value;
+
+      // Clear all options except the first one
+      schoolSelect.querySelectorAll('option:not(:first-child)').forEach(o => o.remove());
+
+      const schools = [...new Set(allParticipants.map(p => String(p.school || '').trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+
+      schools.forEach(school => {
+        const option = document.createElement('option');
+        option.value = school;
+        option.textContent = school;
+        schoolSelect.appendChild(option);
+      });
+
+      if (currentValue && schools.includes(currentValue)) {
+        schoolSelect.value = currentValue;
+      } else {
+        schoolSelect.value = '';
+      }
+    }
+
+    // ===== RENDER TABLE =====
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      const emptyState = document.getElementById('emptyState');
+
+      if (filteredParticipants.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'flex';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      tbody.innerHTML = filteredParticipants.map((p, idx) => createTableRow(p, idx)).join('');
+      lucide.createIcons();
+    }
+
+    // ===== CREATE TABLE ROW =====
+    function createTableRow(participant, indexInView) {
+      const paymentClass = participant.payment_status === 'Paid' ? 'paid' : 'unpaid';
+      const paymentIcon = participant.payment_status === 'Paid' ? '✔' : '✖';
+      const rowNumber = (typeof indexInView === 'number' && isFinite(indexInView)) ? (indexInView + 1) : '';
+
+      let actionColumn = '';
+
+      if (currentTab === 'all-participants') {
+        // Show all status badges - text for AM/PM, icons for meals/docs
+        const amBadge = `<span class="status-badge ${participant.am_attendance ? 'present' : 'absent'}">AM ${participant.am_attendance ? '✔' : '✖'}</span>`;
+        const pmBadge = `<span class="status-badge ${participant.pm_attendance ? 'present' : 'absent'}">PM ${participant.pm_attendance ? '✔' : '✖'}</span>`;
+        const amSnacksIcon = `<span class="status-icon ${participant.snacks_am ? 'claimed' : 'unclaimed'}" title="AM Snacks"><i data-lucide="croissant" style="width: 18px; height: 18px;"></i></span>`;
+        const lunchIcon = `<span class="status-icon ${participant.lunch ? 'claimed' : 'unclaimed'}" title="Lunch"><i data-lucide="utensils" style="width: 18px; height: 18px;"></i></span>`;
+        const pmSnacksIcon = `<span class="status-icon ${participant.snacks_pm ? 'claimed' : 'unclaimed'}" title="PM Snacks"><i data-lucide="coffee" style="width: 18px; height: 18px;"></i></span>`;
+        const certIcon = `<span class="status-icon ${participant.certificates ? 'claimed' : 'unclaimed'}" title="Certificate"><i data-lucide="award" style="width: 18px; height: 18px;"></i></span>`;
+        const receiptIcon = `<span class="status-icon ${participant.receipts ? 'claimed' : 'unclaimed'}" title="Receipt"><i data-lucide="file-text" style="width: 18px; height: 18px;"></i></span>`;
+        actionColumn = `<div class="action-buttons" style="justify-content: flex-start; gap: 0.5rem; flex-wrap: wrap;">${amBadge} ${pmBadge} ${amSnacksIcon} ${lunchIcon} ${pmSnacksIcon} ${certIcon} ${receiptIcon}</div>`;
+      } else if (currentTab === 'am-attendance') {
+        actionColumn = `
+          <button class="btn ${participant.am_attendance ? 'btn-success' : ''}" onclick="markAttendance('${participant.__backendId}', 'am', this)" ${participant.am_attendance ? 'disabled' : ''}>
+            <i data-lucide="check" class="icon-small"></i>
+            ${participant.am_attendance ? 'Marked' : 'Mark'}
+          </button>
+        `;
+      } else if (currentTab === 'pm-attendance') {
+        actionColumn = `
+          <button class="btn ${participant.pm_attendance ? 'btn-success' : ''}" onclick="markAttendance('${participant.__backendId}', 'pm', this)" ${participant.pm_attendance ? 'disabled' : ''}>
+            <i data-lucide="check" class="icon-small"></i>
+            ${participant.pm_attendance ? 'Marked' : 'Mark'}
+          </button>
+        `;
+      } else if (currentTab === 'am-snacks') {
+        actionColumn = `
+          <button class="btn ${participant.snacks_am ? 'btn-success' : ''}" onclick="claimMeal('${participant.__backendId}', 'snacks_am', this)" ${participant.snacks_am ? 'disabled' : ''}>
+            <i data-lucide="utensils" class="icon-small"></i>
+            ${participant.snacks_am ? 'Claimed' : 'Claim'}
+          </button>
+        `;
+      } else if (currentTab === 'lunch') {
+        actionColumn = `
+          <button class="btn ${participant.lunch ? 'btn-success' : ''}" onclick="claimMeal('${participant.__backendId}', 'lunch', this)" ${participant.lunch ? 'disabled' : ''}>
+            <i data-lucide="utensils" class="icon-small"></i>
+            ${participant.lunch ? 'Claimed' : 'Claim'}
+          </button>
+        `;
+      } else if (currentTab === 'pm-snacks') {
+        actionColumn = `
+          <button class="btn ${participant.snacks_pm ? 'btn-success' : ''}" onclick="claimMeal('${participant.__backendId}', 'snacks_pm', this)" ${participant.snacks_pm ? 'disabled' : ''}>
+            <i data-lucide="utensils" class="icon-small"></i>
+            ${participant.snacks_pm ? 'Claimed' : 'Claim'}
+          </button>
+        `;
+      } else if (currentTab === 'certificates') {
+        actionColumn = `
+          <button class="btn ${participant.certificates ? 'btn-success' : 'btn-warning'}" onclick="issueDocument('${participant.__backendId}', 'certificates', this)" ${participant.certificates ? 'disabled' : ''}>
+            <i data-lucide="file-text" class="icon-small"></i>
+            ${participant.certificates ? 'Issued' : 'Issue'}
+          </button>
+        `;
+      } else if (currentTab === 'receipts') {
+        actionColumn = `
+          <button class="btn ${participant.receipts ? 'btn-success' : 'btn-warning'}" onclick="issueDocument('${participant.__backendId}', 'receipts', this)" ${participant.receipts ? 'disabled' : ''}>
+            <i data-lucide="receipt" class="icon-small"></i>
+            ${participant.receipts ? 'Issued' : 'Issue'}
+          </button>
+        `;
+      }
+
+      return `
+        <tr data-id="${participant.__backendId}">
+          <td class="name-cell"><button type="button" class="name-trigger" data-participant-id="${participant.__backendId}">${rowNumber}. ${getDisplayName(participant, currentSortFilter)}</button></td>
+          <td class="school-cell">${participant.school}</td>
+          <td><span class="payment-badge ${paymentClass}">${paymentIcon} ${participant.payment_status}</span></td>
+          <td class="status-cell">
+            ${actionColumn}
+          </td>
+        </tr>
+      `;
+    }
+
+    // ===== MARK ATTENDANCE =====
+    async function markAttendance(id, period, buttonEl) {
+      if (isBusy()) return;
+
+      const participant = allParticipants.find(p => p.__backendId === id);
+      if (!participant) return;
+
+      const field = period === 'am' ? 'am_attendance' : 'pm_attendance';
+
+      if (participant[field]) return;
+
+      const rownumber = participant.sheet_rownumber != null
+        ? participant.sheet_rownumber
+        : parseRowNumber(participant.__raw && participant.__raw.rownumber);
+      if (!rownumber) {
+        alert('Cannot update: missing rownumber for this participant.');
+        return;
+      }
+
+      const column = period === 'am' ? 'Attendance AM' : 'Attendance PM';
+      const value = '✔ Present';
+
+      if (buttonEl) buttonEl.disabled = true;
+
+      beginBusy('Saving attendance…');
+
+      try {
+        if (ENABLE_SHEET_WRITES) {
+          await writeSheetEntry({ column, rownumber, value });
+        }
+
+        const updated = {
+          ...participant,
+          [field]: true,
+          __raw: { ...(participant.__raw || {}), [column]: value }
+        };
+        applyLocalUpdate(updated);
+      } catch (err) {
+        if (buttonEl) buttonEl.disabled = false;
+        alert('Failed to update attendance');
+        console.error('Attendance update failed:', err);
+      } finally {
+        endBusy();
+      }
+    }
+
+    // ===== CLAIM MEAL =====
+    async function claimMeal(id, mealType, buttonEl) {
+      if (isBusy()) return;
+
+      const participant = allParticipants.find(p => p.__backendId === id);
+      if (!participant) return;
+
+      if (participant[mealType]) return;
+
+      const rownumber = participant.sheet_rownumber != null
+        ? participant.sheet_rownumber
+        : parseRowNumber(participant.__raw && participant.__raw.rownumber);
+      if (!rownumber) {
+        alert('Cannot update: missing rownumber for this participant.');
+        return;
+      }
+
+      const columnMap = {
+        snacks_am: 'AM Snack',
+        lunch: 'Lunch',
+        snacks_pm: 'PM Snack'
+      };
+      const column = columnMap[mealType];
+      const value = '✔ Claimed';
+      if (!column) return;
+
+      if (buttonEl) buttonEl.disabled = true;
+
+      beginBusy('Saving meal claim…');
+
+      try {
+        if (ENABLE_SHEET_WRITES) {
+          await writeSheetEntry({ column, rownumber, value });
+        }
+        const updated = {
+          ...participant,
+          [mealType]: true,
+          __raw: { ...(participant.__raw || {}), [column]: value }
+        };
+        applyLocalUpdate(updated);
+      } catch (err) {
+        if (buttonEl) buttonEl.disabled = false;
+        alert('Failed to claim meal');
+        console.error('Meal claim failed:', err);
+      } finally {
+        endBusy();
+      }
+    }
+
+    // ===== ISSUE DOCUMENT =====
+    async function issueDocument(id, docType, buttonEl) {
+      if (isBusy()) return;
+
+      const participant = allParticipants.find(p => p.__backendId === id);
+      if (!participant) return;
+
+      if (participant[docType]) return;
+
+      const rownumber = participant.sheet_rownumber != null
+        ? participant.sheet_rownumber
+        : parseRowNumber(participant.__raw && participant.__raw.rownumber);
+      if (!rownumber) {
+        alert('Cannot update: missing rownumber for this participant.');
+        return;
+      }
+
+      const columnMap = {
+        certificates: 'Certificates',
+        receipts: 'Receipts'
+      };
+      const column = columnMap[docType];
+      const value = '✔ Issued';
+      if (!column) return;
+
+      if (buttonEl) buttonEl.disabled = true;
+
+      beginBusy('Saving document issuance…');
+
+      try {
+        if (ENABLE_SHEET_WRITES) {
+          await writeSheetEntry({ column, rownumber, value });
+        }
+        const updated = {
+          ...participant,
+          [docType]: true,
+          __raw: { ...(participant.__raw || {}), [column]: value }
+        };
+        applyLocalUpdate(updated);
+      } catch (err) {
+        if (buttonEl) buttonEl.disabled = false;
+        alert('Failed to issue document');
+        console.error('Document issue failed:', err);
+      } finally {
+        endBusy();
+      }
+    }
+
+    function applyLocalUpdate(updated) {
+      const idx = allParticipants.findIndex(p => p.__backendId === updated.__backendId);
+      if (idx === -1) return;
+      allParticipants[idx] = updated;
+      applyFilters();
+      updateStats();
+      highlightRow(updated.__backendId);
+    }
+
+    // ===== PARTICIPANT DETAILS MODAL =====
+    function getParticipantValueForDisplay(value) {
+      if (value === null || value === undefined) return '—';
+      if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
+        return value.toISOString();
+      }
+      if (typeof value === 'object') {
+        try {
+          return JSON.stringify(value, null, 2);
+        } catch (e) {
+          return String(value);
+        }
+      }
+      const s = String(value).trim();
+      if (!s) return '—';
+      if (s === '-') return '—';
+      return s;
+    }
+
+    function openParticipantModalById(participantId) {
+      const participant = allParticipants.find(p => p.__backendId === participantId);
+      if (!participant) return;
+
+      const modal = document.getElementById('participantModal');
+      const titleEl = document.getElementById('participantModalTitle');
+      const bodyEl = document.getElementById('participantModalBody');
+      if (!modal || !titleEl || !bodyEl) return;
+
+      titleEl.textContent = getDisplayName(participant, currentSortFilter);
+
+      // Clear
+      while (bodyEl.firstChild) bodyEl.removeChild(bodyEl.firstChild);
+
+      const raw = participant.__raw && typeof participant.__raw === 'object' ? participant.__raw : {};
+      const keys = Object.keys(raw);
+
+      // Render all fields using exact headers
+      keys.forEach((key) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'participant-details__row';
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'participant-details__label';
+        labelEl.textContent = key;
+
+        const valueEl = document.createElement('div');
+        valueEl.className = 'participant-details__value';
+        valueEl.textContent = getParticipantValueForDisplay(raw[key]);
+
+        rowEl.appendChild(labelEl);
+        rowEl.appendChild(valueEl);
+        bodyEl.appendChild(rowEl);
+      });
+
+      // If raw is empty, fall back to known normalized fields
+      if (keys.length === 0) {
+        const fallback = {
+          'Full Name': getDisplayName(participant, currentSortFilter),
+          'School': participant.school,
+          'Payment Status': participant.payment_status,
+          'Payment Date': participant.payment_date,
+          'Total Fee': participant.total_fee,
+          'Address': participant.address
+        };
+        Object.keys(fallback).forEach((key) => {
+          const rowEl = document.createElement('div');
+          rowEl.className = 'participant-details__row';
+
+          const labelEl = document.createElement('div');
+          labelEl.className = 'participant-details__label';
+          labelEl.textContent = key;
+
+          const valueEl = document.createElement('div');
+          valueEl.className = 'participant-details__value';
+          valueEl.textContent = getParticipantValueForDisplay(fallback[key]);
+
+          rowEl.appendChild(labelEl);
+          rowEl.appendChild(valueEl);
+          bodyEl.appendChild(rowEl);
+        });
+      }
+
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeParticipantModal() {
+      const modal = document.getElementById('participantModal');
+      if (!modal) return;
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    (function initParticipantModal() {
+      const modal = document.getElementById('participantModal');
+      const closeBtn = document.getElementById('participantModalClose');
+      const tbody = document.getElementById('tableBody');
+
+      if (closeBtn) closeBtn.addEventListener('click', closeParticipantModal);
+
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target && e.target.getAttribute && e.target.getAttribute('data-close') === 'true') {
+            closeParticipantModal();
+          }
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        const isOpen = modal && modal.classList.contains('open');
+        if (isOpen && e.key === 'Escape') {
+          closeParticipantModal();
+        }
+      });
+
+      // Event delegation for name clicks
+      if (tbody) {
+        tbody.addEventListener('click', (e) => {
+          const trigger = e.target && e.target.closest ? e.target.closest('.name-trigger') : null;
+          if (!trigger) return;
+          const participantId = trigger.getAttribute('data-participant-id');
+          if (!participantId) return;
+          openParticipantModalById(participantId);
+        });
+      }
+    })();
+
+    // ===== SEARCH AND FILTER EVENTS =====
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('paymentFilter').addEventListener('change', applyFilters);
+    document.getElementById('schoolFilter').addEventListener('change', applyFilters);
+    document.getElementById('sortFilter').addEventListener('change', applyFilters);
+
+    // ===== TAB NAVIGATION =====
+    document.querySelectorAll('.tab-button').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTab = e.target.dataset.tab;
+        applyFilters();
+      });
+    });
+
+    // ===== HIGHLIGHT UPDATED ROWS =====
+    function highlightRow(id) {
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        row.classList.add('updated');
+        setTimeout(() => row.classList.remove('updated'), 800);
+      }
+    }
+
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9df3f00bf2fd6e8d',t:'MTc3NDAwMTUzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

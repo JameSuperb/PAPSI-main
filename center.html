@@ -94,6 +94,32 @@
 		@media (prefers-reduced-motion: reduce) {
 			.animate-pulse { animation: none !important; }
 		}
+
+		/* Category bar mobile scan behavior */
+		#bundleCategoryBar { scrollbar-width: thin; }
+		#bundleCategoryBar::-webkit-scrollbar { height: 6px; }
+		#bundleCategoryBar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 999px; }
+		@media (max-width: 767px) {
+			#bundleCategoryBar {
+				display: flex;
+				flex-wrap: nowrap;
+				overflow-x: auto;
+				scroll-snap-type: x mandatory;
+				-webkit-overflow-scrolling: touch;
+			}
+			#bundleCategoryBar .bundle-cat-btn {
+				flex: 0 0 auto;
+				scroll-snap-align: start;
+				white-space: nowrap;
+			}
+		}
+		@media (min-width: 768px) {
+			#bundleCategoryBar {
+				flex-wrap: wrap;
+				overflow: visible;
+				scroll-snap-type: none;
+			}
+		}
 	</style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -127,6 +153,15 @@
 			<h1 class="text-2xl font-bold text-papsi-dark">Center for Teacher Excellence</h1>
 		</div>
 
+		<!-- Category bar -->
+		<div class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4">
+			<div id="bundleCategoryBar" class="flex flex-nowrap md:flex-wrap items-center gap-2 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-1 -mb-1 md:pb-0 md:mb-0">
+				<button type="button" data-bundle-cat="all" aria-pressed="true" class="bundle-cat-btn shrink-0 snap-start whitespace-nowrap inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full border text-xs sm:text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-papsi-green border-papsi-green text-white">
+					All Category
+				</button>
+			</div>
+		</div>
+
 		<!-- Segmented toolbar (filters & stats) -->
 		<div class="bg-white rounded-lg shadow-sm p-6 mb-6">
 			<div class="flex items-center gap-2 mb-2">
@@ -141,7 +176,7 @@
 						<span>Show Stats</span>
 					</button>
 				</div>
-				<button id="trainingClearFilters" type="button" class="hidden text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Clear</button>
+				<button id="trainingClearFilters" type="button" onclick="clearAllTrainingFilters()" class="hidden text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Clear</button>
 			</div>
 			<div id="trainingFilterChips" class="flex flex-wrap items-center gap-2 mb-4 hidden"></div>
 			<div id="trainingStatsSection" class="hidden">
@@ -175,8 +210,8 @@
 			</div>
 		</div>
 
-		<!-- Courses grid and pagination -->
-		<div id="coursesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+		<!-- Courses list -->
+		<div id="coursesGrid" class="space-y-4"></div>
 		<div id="coursesPagination" class="w-full flex justify-center mt-6 mb-3"></div>
 		<div id="trainingBottomSpacer" class="h-0"></div>
 	</div>
@@ -260,7 +295,7 @@
 				</button>
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-				<input id="checkoutEmail" type="email" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="name@example.com" aria-describedby="checkoutEmailHelp checkoutEmailAssist">
+				<input id="checkoutEmail" type="email" maxlength="120" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="name@example.com" aria-describedby="checkoutEmailHelp checkoutEmailAssist">
 				<div id="checkoutEmailAssist" class="text-xs text-gray-600 -mt-1 mb-1"></div>
 				<select id="checkoutTitleSelect" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" onchange="handleTitleChange()">
 					<option value="">Select Title</option>
@@ -272,13 +307,13 @@
 					<option>Other</option>
 				</select>
 				<div id="checkoutTitleOtherContainer" class="md:col-span-2 hidden">
-					<input id="checkoutTitleOther" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Type your title">
+					<input id="checkoutTitleOther" type="text" maxlength="40" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Type your title">
 				</div>
-				<input id="checkoutFirstname" type="text" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="First Name">
-				<input id="checkoutMiddleinitial" type="text" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Middle Initial (*Leave blank if not applicable)">
-				<input id="checkoutLastname" type="text" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Last Name">
-				<input id="checkoutSuffix" type="text" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Suffix (*Leave blank if not applicable)">
-				<input id="checkoutMobile" type="text" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Mobile Number">
+				<input id="checkoutFirstname" type="text" maxlength="60" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="First Name">
+				<input id="checkoutMiddleinitial" type="text" maxlength="3" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Middle Initial (*Leave blank if not applicable)">
+				<input id="checkoutLastname" type="text" maxlength="60" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Last Name">
+				<input id="checkoutSuffix" type="text" maxlength="15" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Suffix (*Leave blank if not applicable)">
+				<input id="checkoutMobile" type="text" inputmode="numeric" maxlength="15" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Mobile Number">
 				<select id="checkoutSpecializationSelect" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" onchange="handleSpecializationChange()">
 					<option value="">Select Specialization</option>
 					<option>Physics</option>
@@ -292,15 +327,15 @@
 					<option>Other</option>
 				</select>
 				<div id="checkoutSpecializationOtherContainer" class="md:col-span-2 hidden">
-					<input id="checkoutSpecializationOther" type="text" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Type your specialization">
+					<input id="checkoutSpecializationOther" type="text" maxlength="80" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Type your specialization">
 				</div>
-				<input id="checkoutSchool" type="text" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Name of School">
+				<input id="checkoutSchool" type="text" maxlength="120" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Name of School">
 				<select id="checkoutType" class="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green">
 					<option value="">Select Type</option>
 					<option>Private</option>
 					<option>Public</option>
 				</select>
-				<input id="checkoutAddress" type="text" class="md:col-span-2 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Address of School">
+				<input id="checkoutAddress" type="text" maxlength="200" class="md:col-span-2 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-papsi-green" placeholder="Address of School">
 				<div id="checkoutEmailHelp" class="md:col-span-2 text-xs text-gray-500">We'll send the payment instructions to this email. Use a format like name@example.com.</div>
 			</div>
 			<div class="mt-4 flex gap-2 justify-end">
@@ -402,6 +437,7 @@
 		var VOUCHER_BASE = 'https://script.google.com/macros/s/AKfycbz8awvt1aQpxA-7vfyp7WJRQLODyHdhVlaMfn7KsRnGIBaLaeQ_7ZYED4qI4kL0CpmXsw/exec';
 		var CART_STORAGE_KEY = 'PAPSI_CART_ITEMS';
 		var TRAINING_STATS_VISIBLE_KEY = 'PAPSI_TRAINING_STATS_VISIBLE';
+		var TRAINING_COURSES_CACHE_KEY = 'PAPSI_TRAINING_COURSES_CACHE';
 
 		var allCourses = [];
 		var filteredCourses = [];
@@ -564,33 +600,58 @@
 		}
 
 		// Voucher
+		function setVoucherStatus(statusEl, message, tone){
+			if(!statusEl) return;
+			var css = 'text-gray-700';
+			if(tone==='error') css = 'text-red-600';
+			if(tone==='success') css = 'text-green-700';
+			statusEl.innerHTML = '<span class="'+css+'">'+escapeHtml(String(message||''))+'</span>';
+		}
 		async function validateVoucher(){
 			var input = document.getElementById('voucherInput');
 			var status = document.getElementById('voucherStatus');
+			var btn = document.getElementById('validateVoucherBtn');
 			if(!status) return;
 			var code = '';
 			if(input && typeof input.value === 'string') code = input.value.trim().toUpperCase();
-			if(!code){ status.innerHTML = '<span class="text-red-600">Please enter a voucher code.</span>'; appliedVoucher=null; openCart(); return; }
-			status.innerHTML = '<span class="text-gray-600">Validating voucher…</span>';
+			if(!code){ setVoucherStatus(status, 'Please enter a voucher code.', 'error'); appliedVoucher=null; openCart(); return; }
+			if(btn){ btn.disabled = true; btn.classList.add('opacity-60','cursor-not-allowed'); }
+			setVoucherStatus(status, 'Validating voucher...', 'info');
 			var url = VOUCHER_BASE + '?SH=voucher&func=voucher&code=' + encodeURIComponent(code);
 			try{
-				var res = await fetch(url, { method:'GET' });
+				var controller = (typeof AbortController!=='undefined') ? new AbortController() : null;
+				var timeoutId = null;
+				if(controller){ timeoutId = setTimeout(function(){ try{ controller.abort(); }catch(e){} }, 12000); }
+				var res = await fetch(url, controller ? { method:'GET', signal: controller.signal } : { method:'GET' });
+				if(timeoutId){ clearTimeout(timeoutId); }
 				var text = await res.text();
+				if(!res.ok){
+					setVoucherStatus(status, normalizeEndpointMessage(text, 'Unable to validate voucher right now.'), 'error');
+					appliedVoucher = null;
+					openCart();
+					return;
+				}
 				try{
 					var data = JSON.parse(text);
 					var pct = Number(data.percentage);
 					if(isNaN(pct) || pct<=0) throw new Error('Invalid voucher percentage.');
 					appliedVoucher = { code: (data.code || code), percentage: pct };
-					status.innerHTML = '<span class="text-green-700">Voucher applied: '+appliedVoucher.percentage+'% off</span>';
+					setVoucherStatus(status, 'Voucher applied: '+appliedVoucher.percentage+'% off', 'success');
 					openCart();
 				} catch(e){
-					var msg = (text||'').trim();
-					if(/expired/i.test(msg)) status.innerHTML = '<span class="text-red-600">Voucher expired.</span>';
-					else if(/invalid/i.test(msg)) status.innerHTML = '<span class="text-red-600">Error: Invalid code.</span>';
-					else status.innerHTML = '<span class="text-red-600">'+(msg||'Unable to validate voucher.')+'</span>';
+					var msg = normalizeEndpointMessage(text, 'Unable to validate voucher.');
+					if(/expired/i.test(msg)) setVoucherStatus(status, 'Voucher expired.', 'error');
+					else if(/invalid/i.test(msg)) setVoucherStatus(status, 'Error: Invalid code.', 'error');
+					else setVoucherStatus(status, msg, 'error');
 					appliedVoucher = null; openCart();
 				}
-			} catch(err){ status.innerHTML = '<span class="text-red-600">'+(err && err.message ? err.message : 'Network error validating voucher.')+'</span>'; appliedVoucher=null; openCart(); }
+			} catch(err){
+				if(err && err.name==='AbortError'){ setVoucherStatus(status, 'Voucher validation timed out. Please try again.', 'error'); }
+				else { setVoucherStatus(status, normalizeEndpointMessage((err && err.message) || '', 'Network error validating voucher.'), 'error'); }
+				appliedVoucher=null; openCart();
+			} finally {
+				if(btn){ btn.disabled = false; btn.classList.remove('opacity-60','cursor-not-allowed'); }
+			}
 		}
 
 		function addToCart(id){ var wasEmpty = cartCourses.length===0; if(cartCourses.indexOf(id)===-1){ cartCourses.push(id); renderCourses(); updateCartCount(); persistCart(); try{ var c=findCourse(id); showToast((c && c.title) ? (c.title+' added to cart') : 'Added to cart','success',3000);}catch(e){} updateCartBar(); if(wasEmpty){ setTimeout(updateCartBar, 300); } } }
@@ -605,32 +666,58 @@
 		async function loadTrainingCourses(){
 			var grid = document.getElementById('coursesGrid');
 			var counter = document.getElementById('resultsCounter');
-			grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">Loading courses...</div>';
-			try{
-				var res = await fetch(TRAININGS_URL);
-				var data = await res.json();
-				allCourses = Array.isArray(data) ? data.map(function(item, idx){
+			grid.innerHTML = '<div class="w-full text-center py-12 text-gray-500">Loading courses...</div>';
+
+			function normalizeCourseRows(rows){
+				return Array.isArray(rows) ? rows.map(function(item, idx){
 					return {
-						id: 'course-'+idx,
+						id: item.id || ('course-'+idx),
 						title: item.title,
 						date: new Date(item.date),
 						hours: item.hours,
 						hoursNum: parseFloat(item.hours)||0,
-						instructor: item.speaker,
-						image: (typeof item.poster==='string' && item.poster.indexOf('http')===0) ? item.poster : '',
+						instructor: item.instructor || item.speaker,
+						image: (typeof item.image==='string' && item.image.indexOf('http')===0) ? item.image : ((typeof item.poster==='string' && item.poster.indexOf('http')===0) ? item.poster : ''),
 						category: item.category,
-						price: item.promo_fee ? ('₱'+item.promo_fee) : '',
-						originalPrice: item.regular_fee ? ('₱'+item.regular_fee) : '',
-						description: item.about,
+						price: item.price ? String(item.price) : (item.promo_fee ? ('₱'+item.promo_fee) : ''),
+						originalPrice: item.originalPrice ? String(item.originalPrice) : (item.regular_fee ? ('₱'+item.regular_fee) : ''),
+						description: item.description || item.about,
 						audio: (item.audio && typeof item.audio==='string') ? item.audio : '',
-						duration: (item.hours ? (item.hours+' hours') : '')
+						duration: item.duration || (item.hours ? (item.hours+' hours') : '')
 					};
 				}) : [];
+			}
+
+			function useCourses(rows){
+				allCourses = rows;
 				populateCourseFilters();
 				filteredCourses = allCourses.slice();
 				renderCourses();
 				updateCounters();
-			} catch(e){ grid.innerHTML = '<div class="col-span-full text-center py-12 text-red-500">Failed to load courses.</div>'; if(counter) counter.textContent = 'Showing 0 of 0 courses'; allCourses=[]; filteredCourses=[]; }
+			}
+
+			try{
+				var res = await fetch(TRAININGS_URL);
+				var data = await res.json();
+				var rows = normalizeCourseRows(data);
+				if(!rows.length){ throw new Error('No course data from source'); }
+				useCourses(rows);
+				try{ localStorage.setItem(TRAINING_COURSES_CACHE_KEY, JSON.stringify(rows)); }catch(cacheSetErr){}
+			} catch(e){
+				var cached = null;
+				try{ cached = JSON.parse(localStorage.getItem(TRAINING_COURSES_CACHE_KEY)||'[]'); }catch(cacheReadErr){ cached = null; }
+				var cachedRows = normalizeCourseRows(cached);
+				if(cachedRows.length){
+					useCourses(cachedRows);
+					try{ showToast('Loaded cached courses due to network issue.','info',3500); }catch(toastErr){}
+					return;
+				}
+				grid.innerHTML = '<div class="w-full text-center py-12 text-red-500">Failed to load courses.</div>';
+				try{ showToast(normalizeEndpointMessage((e && e.message) || '', 'Failed to load courses.'), 'error', 4500); }catch(toastErr2){}
+				if(counter) counter.textContent = 'Showing 0 of 0 courses';
+				allCourses=[];
+				filteredCourses=[];
+			}
 		}
 
 		function populateCourseFilters(){
@@ -645,6 +732,111 @@
 			if(cats.indexOf(selCat)!==-1) categoryFilter.value = selCat; else categoryFilter.value = 'all';
 			speakerFilter.innerHTML = '<option value="all">All Speakers</option>' + sps.map(function(sp){ return '<option value="'+escapeHtml(sp)+'">'+escapeHtml(sp)+'</option>'; }).join('');
 			if(sps.indexOf(selSp)!==-1) speakerFilter.value = selSp; else speakerFilter.value = 'all';
+			try{ rebuildBundleCategoryBar(); updateBundleCategoryButtons(categoryFilter.value); }catch(e){}
+		}
+
+		function updateBundleCategoryButtons(activeCategory){
+			var bar = document.getElementById('bundleCategoryBar');
+			if(!bar) return;
+			var btns = bar.querySelectorAll('[data-bundle-cat]');
+			var current = String(activeCategory || ((document.getElementById('categoryFilter')||{}).value) || 'all').toLowerCase();
+			var activeBtn = null;
+			for(var i=0;i<btns.length;i++){
+				var btn = btns[i];
+				var val = String(btn.getAttribute('data-bundle-cat') || 'all').toLowerCase();
+				var active = (val===current);
+				btn.setAttribute('aria-pressed', String(!!active));
+				if(active){
+					activeBtn = btn;
+					btn.classList.add('bg-papsi-green','border-papsi-green','text-white');
+					btn.classList.remove('bg-white','border-gray-200','text-gray-700','hover:bg-gray-50');
+				} else {
+					btn.classList.remove('bg-papsi-green','border-papsi-green','text-white');
+					btn.classList.add('bg-white','border-gray-200','text-gray-700','hover:bg-gray-50');
+				}
+			}
+			if(activeBtn){ try{ activeBtn.scrollIntoView({ inline:'nearest', block:'nearest', behavior:'smooth' }); }catch(e){} }
+		}
+
+		function rebuildBundleCategoryBar(){
+			var bar = document.getElementById('bundleCategoryBar');
+			var categoryFilter = document.getElementById('categoryFilter');
+			if(!bar || !categoryFilter) return;
+			var html = ''+
+				'<button type="button" data-bundle-cat="all" aria-pressed="false" class="bundle-cat-btn shrink-0 snap-start whitespace-nowrap inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full border text-xs sm:text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-white border-gray-200 text-gray-700 hover:bg-gray-50">All Category</button>';
+			for(var i=0;i<categoryFilter.options.length;i++){
+				var opt = categoryFilter.options[i];
+				var val = String(opt && opt.value ? opt.value : '');
+				if(!val || val==='all') continue;
+				html += '<button type="button" data-bundle-cat="'+escapeAttr(val)+'" aria-pressed="false" class="bundle-cat-btn shrink-0 snap-start whitespace-nowrap inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full border text-xs sm:text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-papsi-green/30 bg-white border-gray-200 text-gray-700 hover:bg-gray-50">'+escapeHtml(val)+'</button>';
+			}
+			bar.innerHTML = html;
+			applyBundleCategoryBarLayout();
+		}
+
+		function applyBundleCategoryBarLayout(){
+			var bar = document.getElementById('bundleCategoryBar');
+			if(!bar) return;
+			var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 0;
+			var mobile = w < 768;
+			if(mobile){
+				bar.style.display = 'flex';
+				bar.style.flexWrap = 'nowrap';
+				bar.style.overflowX = 'auto';
+				bar.style.scrollSnapType = 'x mandatory';
+			} else {
+				bar.style.display = 'flex';
+				bar.style.flexWrap = 'wrap';
+				bar.style.overflowX = 'visible';
+				bar.style.scrollSnapType = 'none';
+			}
+			var btns = bar.querySelectorAll('.bundle-cat-btn');
+			for(var i=0;i<btns.length;i++){
+				if(mobile){
+					btns[i].style.flex = '0 0 auto';
+					btns[i].style.whiteSpace = 'nowrap';
+					btns[i].style.scrollSnapAlign = 'start';
+				} else {
+					btns[i].style.flex = '';
+					btns[i].style.whiteSpace = '';
+					btns[i].style.scrollSnapAlign = '';
+				}
+			}
+		}
+
+		function initBundleCategoryButtons(){
+			var bar = document.getElementById('bundleCategoryBar');
+			if(!bar || bar.getAttribute('data-bound')==='1') return;
+			bar.setAttribute('data-bound','1');
+			applyBundleCategoryBarLayout();
+			bar.addEventListener('keydown', function(e){
+				if(!e) return;
+				var key = e.key || '';
+				if(key!=='ArrowLeft' && key!=='ArrowRight') return;
+				var btns = bar.querySelectorAll('[data-bundle-cat]');
+				if(!btns || !btns.length) return;
+				var idx = -1;
+				for(var bi=0; bi<btns.length; bi++){ if(btns[bi]===document.activeElement){ idx=bi; break; } }
+				if(idx===-1) return;
+				e.preventDefault();
+				var next = key==='ArrowRight' ? Math.min(btns.length-1, idx+1) : Math.max(0, idx-1);
+				try{ btns[next].focus(); }catch(err){}
+			});
+			bar.addEventListener('click', function(e){
+				var t = e && e.target ? e.target : null;
+				while(t && t!==bar && !(t.getAttribute && t.getAttribute('data-bundle-cat'))){ t = t.parentNode; }
+				if(!t || t===bar) return;
+				var selected = t.getAttribute('data-bundle-cat') || 'all';
+				var categoryFilter = document.getElementById('categoryFilter');
+				if(categoryFilter){
+					var exists = false;
+					for(var i=0;i<categoryFilter.options.length;i++){ if(categoryFilter.options[i].value===selected){ exists=true; break; } }
+					categoryFilter.value = exists ? selected : 'all';
+				}
+				updateBundleCategoryButtons((categoryFilter && categoryFilter.value) ? categoryFilter.value : selected);
+				filterCourses();
+			});
+			updateBundleCategoryButtons();
 		}
 
 		function filterCourses(){
@@ -653,6 +845,7 @@
 			var spVal = document.getElementById('speakerFilter').value;
 			var sortVal = document.getElementById('dateSort').value;
 			var yearFilter = window.trainingYearFilter || null;
+			try{ updateBundleCategoryButtons(catVal); }catch(e){}
 			filteredCourses = allCourses.filter(function(course){
 				var matchesSearch = !searchTerm || course.title.toLowerCase().indexOf(searchTerm)!==-1 || (course.instructor||'').toLowerCase().indexOf(searchTerm)!==-1 || (course.description||'').toLowerCase().indexOf(searchTerm)!==-1;
 				var matchesCategory = (catVal==='all') || course.category===catVal;
@@ -661,60 +854,79 @@
 				return matchesSearch && matchesCategory && matchesSpeaker && matchesYear;
 			});
 			filteredCourses.sort(function(a,b){ return (sortVal==='newest') ? (b.date - a.date) : (a.date - b.date); });
-			currentPage = 1; renderCourses(); updateCounters(); renderTrainingStats(); try{ renderTrainingFilterChips(); }catch(e){}
+			currentPage = 1; renderCourses(); updateCounters(); renderTrainingStats();
 		}
 
 		function renderCourses(){
 			var grid = document.getElementById('coursesGrid'); var pag = document.getElementById('coursesPagination');
-			if(filteredCourses.length===0){ grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No courses found.</div>'; if(pag) pag.innerHTML=''; return; }
+			if(filteredCourses.length===0){ grid.innerHTML = '<div class="w-full text-center py-12 text-gray-500">No courses found.</div>'; if(pag) pag.innerHTML=''; return; }
 			var total = filteredCourses.length; var totalPages = Math.ceil(total / coursesPerPage);
 			if(currentPage>totalPages) currentPage=totalPages; if(currentPage<1) currentPage=1;
 			var startIdx = (currentPage-1)*coursesPerPage; var endIdx=startIdx+coursesPerPage; var items = filteredCourses.slice(startIdx, endIdx);
 			var html = '';
 			for(var i=0;i<items.length;i++){
 				var course = items[i];
-				var discountVal=0, regVal=0, promoVal=0;
-				if(course.originalPrice && course.price){ regVal=parseFloat(String(course.originalPrice).replace(/[^0-9.]/g,'')); promoVal=parseFloat(String(course.price).replace(/[^0-9.]/g,'')); discountVal = (regVal||0) - (promoVal||0); }
 				var inCart = cartCourses.indexOf(course.id)!==-1;
+				var fees = parseCourseFees(course);
+				var hasDiscount = !!(course.originalPrice && course.price && fees.reg>fees.promo);
+				var regText = (fees.reg>0) ? formatMoney(fees.reg) : '—';
+				var promoText = (fees.promo>0) ? formatMoney(fees.promo) : '—';
+				var hoursText = course.hours ? (String(course.hours).trim() + ' hours') : '—';
+				var rowClass = 'group rounded-lg shadow-sm border p-4 transition-colors focus-within:ring-2 focus-within:ring-papsi-green/30 ' +
+					(inCart ? 'bg-green-50/40 border-green-200 ring-1 ring-papsi-green/10' : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200');
+				var registerBtnClass = inCart
+					? 'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border bg-green-50 border-green-200 text-papsi-green text-sm font-semibold'
+					: 'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md border bg-white border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50';
 				html += ''+
-				'<div class="bg-white rounded-lg shadow-sm overflow-hidden card-hover">'+
-					'<div class="relative bg-white overflow-hidden">'+
-						'<img src="'+escapeAttr(course.image)+'" alt="'+escapeAttr(course.title)+'" class="block w-full h-auto object-contain training-image" loading="lazy" decoding="async" onclick="openImageViewer(this.src, this.alt)" onerror="this.src=\'\'; this.alt=\'Image failed to load\'; this.style.display=\'none\';">'+
-						'<div class="absolute top-2 left-2"><span class="'+categoryBadgeClasses(course.category)+' px-2 py-1 rounded text-xs font-medium">'+escapeHtml(course.category || 'Other')+'</span></div>'+
-						'<div class="absolute top-2 right-2 flex space-x-1">'+
-							'<button onclick="showAbout(\''+course.id+'\')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all" aria-label="About">'+
-								'<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>'+
-							'</button>'+
-							'<button onclick="playAudio(\''+course.id+'\')" class="bg-papsi-green text-white rounded-full p-2 shadow-sm hover:bg-green-700 transition-all '+(!course.audio?'opacity-50 cursor-not-allowed':'')+'" '+(!course.audio?'disabled':'')+' aria-label="Audio Preview">'+
-								'<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>'+
-							'</button>'+
-						'</div>'+
-						'<div class="absolute left-2 right-2 bottom-2 bg-white rounded-md shadow px-3 py-2">'+
-							'<div class="text-papsi-dark font-semibold text-sm">'+escapeHtml(course.title)+'</div>'+
-							'<div class="text-gray-600 text-xs mt-0.5">'+escapeHtml(course.instructor||'')+'</div>'+
-						'</div>'+
-						'<div class="absolute bottom-2 right-2 flex items-center gap-2">'+
-							'<div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">'+
-								'<span class="text-papsi-gold font-semibold">'+escapeHtml(course.price||'')+'</span>'+
-								(course.originalPrice ? ('<span class="text-gray-400 line-through ml-1">'+escapeHtml(course.originalPrice)+'</span>') : '')+
-							'</div>'+
-							(discountVal>0 ? ('<div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">₱'+String(discountVal) +' OFF</div>') : '')+
-							'<div class="bg-white rounded px-2 py-1 shadow text-xs font-medium">'+escapeHtml(course.duration||'')+'</div>'+
+				'<div class="'+rowClass+' flex flex-col sm:flex-row sm:items-start gap-4">'+
+					'<div class="flex-shrink-0">'+
+						'<div class="w-16 h-16 rounded-lg bg-white border '+(inCart?'border-green-200':'border-gray-200')+' overflow-hidden relative flex items-center justify-center">'+
+							'<svg class="w-7 h-7 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a1 1 0 01.447.105l7 3.5A1 1 0 0118 6.5v7a1 1 0 01-.553.895l-7 3.5a1 1 0 01-.894 0l-7-3.5A1 1 0 012 13.5v-7a1 1 0 01.553-.895l7-3.5A1 1 0 0110 2zm0 2.118L4.236 7 10 9.882 15.764 7 10 4.118z"/></svg>'+
+							(course.image ? ('<img src="'+escapeAttr(course.image)+'" alt="'+escapeAttr(course.title)+'" class="absolute inset-0 w-full h-full object-contain training-image" loading="lazy" decoding="async" onclick="openImageViewer(this.src, this.alt)" onerror="this.style.display=\'none\';">') : '')+
 						'</div>'+
 					'</div>'+
-					'<div class="p-4">'+
+					'<div class="flex-1 min-w-0">'+
+						'<div class="flex items-start justify-between gap-3">'+
+							'<button type="button" class="min-w-0 flex-1 text-left text-papsi-dark font-semibold leading-snug hover:underline focus:outline-none focus:ring-2 focus:ring-papsi-green/40 rounded" onclick="showAbout(\''+course.id+'\')">'+escapeHtml(course.title)+'</button>'+
+							'<span class="'+categoryBadgeClasses(course.category)+' px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap">'+escapeHtml(course.category || 'Other')+'</span>'+
+						'</div>'+
+						'<div class="mt-2 flex items-center gap-2">'+
+							'<button type="button" onclick="showAbout(\''+course.id+'\')" class="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 text-gray-700 text-xs hover:bg-gray-50" aria-label="About">'+
+								'<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>'+
+								'<span>About</span>'+
+							'</button>'+
+							'<button type="button" onclick="playAudio(\''+course.id+'\')" class="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 text-gray-700 text-xs hover:bg-gray-50 '+(!course.audio?'opacity-50 cursor-not-allowed':'')+'" '+(!course.audio?'disabled':'')+' aria-label="Audio Preview">'+
+								'<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.797l-4.146-3.317a1 1 0 00-.632-.22H2a1 1 0 01-1-1V7.64a1 1 0 011-1h1.605a1 1 0 00.632-.22l4.146-3.317a1 1 0 011.617.797zM14.657 7.757a1 1 0 011.414 0A9.972 9.972 0 0118 12a9.972 9.972 0 01-1.929 4.243 1 1 0 11-1.414-1.414A7.971 7.971 0 0016 12c0-1.594-.463-3.078-1.343-4.243a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>'+
+								'<span>Audio</span>'+
+							'</button>'+
+						'</div>'+
+						'<div class="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3">'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">Speaker</div>'+
+								'<div class="mt-0.5 text-sm text-gray-800 font-medium truncate">'+(course.instructor ? escapeHtml(course.instructor) : '—')+'</div>'+
+							'</div>'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">Webinar fee</div>'+
+								'<div class="mt-0.5 text-sm tabular-nums whitespace-nowrap '+(hasDiscount ? 'text-red-600 line-through' : 'text-gray-800 font-medium')+'">'+regText+'</div>'+
+							'</div>'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">Discounted fee</div>'+
+								'<div class="mt-0.5 text-sm tabular-nums whitespace-nowrap '+(hasDiscount ? 'text-papsi-green font-semibold' : 'text-gray-800 font-medium')+'">'+promoText+'</div>'+
+							'</div>'+
+							'<div class="min-w-0">'+
+								'<div class="text-[10px] uppercase tracking-wide text-gray-500">No. of hours</div>'+
+								'<div class="mt-0.5 text-sm text-gray-800 font-medium whitespace-nowrap">'+escapeHtml(hoursText)+'</div>'+
+							'</div>'+
+						'</div>'+
+					'</div>'+
+					'<div class="flex-shrink-0 w-full sm:w-auto sm:pt-0.5">'+
 						(inCart ? (
-							'<div class="added-success-banner added-banner-animate w-full rounded-md bg-green-50 border border-green-200 p-3 flex flex-col gap-3" role="status" aria-live="polite">'+
-								'<div class="flex items-start gap-3">'+
-									'<div class="flex-shrink-0 w-8 h-8 rounded-full bg-papsi-green text-white flex items-center justify-center">'+
-										'<svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a1 1 0 00-1.414-1.414L9 10.414 7.557 8.97a1 1 0 10-1.414 1.415l2.121 2.12a1 1 0 001.414 0l4.179-4.314z" clip-rule="evenodd"/></svg>'+
-									'</div>'+
-									'<div class="flex-1"><p class="text-sm font-semibold text-papsi-green leading-snug">Added to cart</p><p class="text-xs text-green-700 mt-0.5">Proceed to checkout when you\'re ready.</p></div>'+
-								'</div>'+
-								'<div><button type="button" onclick="openCart(); event.stopPropagation();" class="w-full inline-flex items-center justify-center gap-2 bg-papsi-green hover:bg-green-700 text-white text-sm font-medium px-3 py-2 rounded-md shadow-sm transition"><span>View Cart</span></button></div>'+
+							'<div class="flex flex-col sm:items-end gap-2">'+
+								'<button type="button" onclick="removeFromCart(\''+course.id+'\');" class="'+registerBtnClass+'"><span>Added</span></button>'+
+								'<button type="button" onclick="openCart();" class="inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-papsi-green hover:bg-green-700 text-white text-xs font-medium">View Cart</button>'+
 							'</div>'
 						) : (
-							'<button class="w-full py-2 rounded bg-papsi-green hover:bg-green-700 text-white text-sm font-medium" onclick="addToCart(\''+course.id+'\'); event.stopPropagation();">Register Now</button>'
+							'<button class="'+registerBtnClass+'" onclick="addToCart(\''+course.id+'\');">Register</button>'
 						))+
 					'</div>'+
 				'</div>';
@@ -741,7 +953,7 @@
 			var parts = [ '<div class="text-center"><div class="text-2xl font-bold text-papsi-green">'+total+'</div><div class="text-sm text-gray-600">Total Courses</div></div>', '<div class="text-center"><div class="text-2xl font-bold text-papsi-dark">'+totalHours+'</div><div class="text-sm text-gray-600">Total Hours</div></div>', '<div class="col-span-full text-[11px] text-gray-600 mt-1">Click a category to filter courses.</div>' ];
 			var catKeys = Object.keys(categories).sort(); for(var k=0;k<catKeys.length;k++){ var cat=catKeys[k]; var pal = categoryStatsText(cat); var enc = encodeURIComponent(cat); parts.push('<button type="button" data-cat="'+enc+'" class="text-center group rounded p-2 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-papsi-green/40" title="Filter by '+escapeAttr(cat)+'"><div class="text-xl font-semibold '+pal+' group-hover:text-papsi-green">'+categories[cat]+'</div><div class="text-sm text-gray-600">'+escapeHtml(cat)+'</div></button>'); }
 			grid.innerHTML = parts.join('');
-			var btns = grid.querySelectorAll('[data-cat]'); for(var b=0;b<btns.length;b++){ btns[b].addEventListener('click', function(){ var raw=this.getAttribute('data-cat')||''; var val=decodeURIComponent(raw); var sel=document.getElementById('categoryFilter'); if(sel){ var opts=[]; for(var o=0;o<sel.options.length;o++){ opts.push(sel.options[o].value); } sel.value = (opts.indexOf(val)!==-1) ? val : 'all'; } filterCourses(); var gridEl = document.getElementById('coursesGrid'); try{ gridEl.scrollIntoView({behavior:'smooth', block:'start'});}catch(e){} }); }
+			var btns = grid.querySelectorAll('[data-cat]'); for(var b=0;b<btns.length;b++){ btns[b].addEventListener('click', function(){ var raw=this.getAttribute('data-cat')||''; var val=decodeURIComponent(raw); var sel=document.getElementById('categoryFilter'); if(sel){ var opts=[]; for(var o=0;o<sel.options.length;o++){ opts.push(sel.options[o].value); } sel.value = (opts.indexOf(val)!==-1) ? val : 'all'; try{ updateBundleCategoryButtons(sel.value); }catch(e){} } filterCourses(); var gridEl = document.getElementById('coursesGrid'); try{ gridEl.scrollIntoView({behavior:'smooth', block:'start'});}catch(e){} }); }
 
 			if(yearBars){ var yearCounts={}; for(var i2=0;i2<allCourses.length;i2++){ var cc=allCourses[i2]; if(cc.date instanceof Date && !isNaN(cc.date)){ var y=cc.date.getFullYear(); yearCounts[y]=(yearCounts[y]||0)+1; } } var years = Object.keys(yearCounts).map(function(y){return parseInt(y,10);}).sort(function(a,b){return a-b;}); if(!years.length){ yearBars.innerHTML=''; yearBars.classList.add('hidden'); } else { yearBars.classList.remove('hidden'); var maxVal=0; var gt=0; for(var ii=0;ii<years.length;ii++){ var y2=years[ii]; if(yearCounts[y2]>maxVal) maxVal=yearCounts[y2]; gt += yearCounts[y2]; } var sparkWidth=160, sparkHeight=38, cumulative=0; var pts=[]; for(var iii=0;iii<years.length;iii++){ var y3=years[iii]; cumulative += yearCounts[y3]; var x = (iii/((years.length-1)||1))*sparkWidth; var yPos = sparkHeight - (cumulative/gt)*sparkHeight; pts.push(x.toFixed(1)+','+yPos.toFixed(1)); }
 				var sparkline = '<div class="mt-4 mb-2"><div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-600">Cumulative Growth</span><span class="text-[10px] text-gray-500">'+gt+' total</span></div><svg viewBox="0 0 '+sparkWidth+' '+sparkHeight+'" class="w-full max-w-xs h-10 text-papsi-green/70"><polyline fill="none" stroke="currentColor" stroke-width="2" points="'+pts.join(' ')+'" stroke-linejoin="round" stroke-linecap="round" /></svg><div class="text-[11px] text-gray-600 mt-1">Click a year to filter courses.</div></div>';
@@ -759,11 +971,20 @@
 			if(category && category.value!=='all'){ items.push({key:'category', label:'Category: '+category.value}); }
 			if(speaker && speaker.value!=='all'){ items.push({key:'speaker', label:'Speaker: '+speaker.value}); }
 			if(year){ items.push({key:'year', label:'Year: '+year}); }
+			updateTrainingFiltersActiveCount(items.length);
 			if(!items.length){ chips.classList.add('hidden'); clearBtn.classList.add('hidden'); chips.innerHTML=''; return; }
 			chips.classList.remove('hidden'); clearBtn.classList.remove('hidden');
 			var inner=''; for(var i=0;i<items.length;i++){ var it=items[i]; inner += '<span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 text-papsi-green text-xs font-medium" data-key="'+it.key+'">'+escapeHtml(it.label)+'<button type="button" class="ml-1 text-papsi-green/80 hover:text-papsi-green" aria-label="Remove '+it.key+'" data-remove="'+it.key+'">×</button></span>'; }
 			chips.innerHTML = inner;
 			var rBtns = chips.querySelectorAll('[data-remove]'); for(var b=0;b<rBtns.length;b++){ rBtns[b].addEventListener('click', function(){ var key=this.getAttribute('data-remove'); if(key==='search'){ if(search){ search.value=''; var cs=document.getElementById('clearSearch'); if(cs) cs.classList.add('hidden'); } } if(key==='category'){ if(category){ category.value='all'; } } if(key==='speaker'){ if(speaker){ speaker.value='all'; } } if(key==='year'){ window.trainingYearFilter=null; } filterCourses(); }); }
+		}
+
+		function updateTrainingFiltersActiveCount(count){
+			var badge = document.getElementById('trainingFiltersActiveCount');
+			if(!badge) return;
+			var n = Number(count||0);
+			if(n>0){ badge.textContent = String(n); badge.classList.remove('hidden'); }
+			else { badge.textContent = '0'; badge.classList.add('hidden'); }
 		}
 
 		function clearSearch(){ var s=document.getElementById('searchInput'); if(s){ s.value=''; } var cs=document.getElementById('clearSearch'); if(cs){ cs.classList.add('hidden'); } filterCourses(); }
@@ -775,6 +996,8 @@
 				var cat=document.getElementById('categoryFilter'); if(cat){ cat.value='all'; }
 				var sp=document.getElementById('speakerFilter'); if(sp){ sp.value='all'; }
 				window.trainingYearFilter = null;
+				saveStatsVisible(false);
+				updateStatsToggleUI(false);
 				filterCourses();
 			}catch(e){}
 		}
@@ -868,55 +1091,174 @@
 			}
 		}
 
+		function sanitizeBasicText(val, maxLen){
+			var v = String(val||'').replace(/[\u0000-\u001F\u007F]/g,' ');
+			v = v.replace(/[<>]/g,'').replace(/\s+/g,' ').trim();
+			if(maxLen && v.length>maxLen){ v = v.slice(0, maxLen); }
+			return v;
+		}
+		function sanitizeEmailValue(val){ return sanitizeBasicText(val, 120).replace(/\s+/g,'').toLowerCase(); }
+		function sanitizeNameValue(val, maxLen){
+			var v = sanitizeBasicText(val, maxLen||60);
+			v = v.replace(/[^A-Za-z'\-\s]/g,'').replace(/\s+/g,' ').trim();
+			return v;
+		}
+		function sanitizeMiddleInitialValue(val){
+			var v = sanitizeBasicText(val, 3).replace(/[^A-Za-z]/g,'').toUpperCase();
+			if(v.length>1){ v = v.charAt(0); }
+			return v;
+		}
+		function sanitizeSuffixValue(val){ return sanitizeBasicText(val, 15).replace(/[^A-Za-z0-9\.\-\s]/g,''); }
+		function sanitizeMobileValue(val){ return String(val||'').replace(/[^0-9]/g,'').slice(0,15); }
+		function sanitizeMoneyValue(val){ var n = Number(val); if(!isFinite(n) || n < 0) return 0; return Math.round(n * 100) / 100; }
+		function pickEndpointMessage(text){
+			var raw = String(text||'').trim();
+			if(!raw) return '';
+			try{
+				var data = JSON.parse(raw);
+				if(data && typeof data==='object'){
+					return String(data.message || data.error || data.status || data.result || data.detail || raw).trim();
+				}
+			}catch(e){}
+			return raw;
+		}
+		function normalizeEndpointMessage(text, fallback){
+			var msg = sanitizeBasicText(pickEndpointMessage(text), 220);
+			if(!msg) return fallback || 'Something went wrong. Please try again.';
+			if(/failed to fetch|network|networkerror|connection|load failed/i.test(msg)) return 'Network issue. Please try again.';
+			if(/timeout|timed out|abort/i.test(msg)) return 'Request timed out. Please try again.';
+			if(/401|403|unauthorized|forbidden/i.test(msg)) return 'Access denied. Please contact support.';
+			if(/404|not found/i.test(msg)) return 'Service is currently unavailable. Please try again later.';
+			if(/500|502|503|504|server error/i.test(msg)) return 'Server error. Please try again shortly.';
+			return msg;
+		}
+		function buildLockedRegistrationPayload(input){
+			var src = input || {};
+			var trainingjson = [];
+			if(Array.isArray(src.trainingjson)){
+				trainingjson = src.trainingjson.map(function(item){
+					return { title: sanitizeBasicText((item && item.title) || '', 180) };
+				}).filter(function(item){ return !!item.title; });
+			}
+			return {
+				timestamp: sanitizeBasicText(src.timestamp, 48),
+				email: sanitizeEmailValue(src.email),
+				id: '',
+				title: sanitizeBasicText(src.title, 40),
+				firstname: sanitizeNameValue(src.firstname, 60).toUpperCase(),
+				middleinitial: sanitizeMiddleInitialValue(src.middleinitial),
+				lastname: sanitizeNameValue(src.lastname, 60).toUpperCase(),
+				suffix: sanitizeSuffixValue(src.suffix),
+				fullname: sanitizeBasicText(src.fullname, 140),
+				nametext: sanitizeBasicText(src.nametext, 140).replace(/[^A-Za-z0-9]/g,''),
+				mobile: sanitizeMobileValue(src.mobile),
+				specialization: sanitizeBasicText(src.specialization, 80),
+				school: sanitizeBasicText(src.school, 120),
+				type: (src.type==='Private' || src.type==='Public') ? src.type : '',
+				address: sanitizeBasicText(src.address, 200),
+				subtotal: sanitizeMoneyValue(src.subtotal),
+				discount: sanitizeMoneyValue(src.discount),
+				vouchercode: sanitizeBasicText(src.vouchercode || 'none', 40),
+				voucherdiscount: sanitizeMoneyValue(src.voucherdiscount),
+				total: sanitizeMoneyValue(src.total),
+				trainingtext: sanitizeBasicText(src.trainingtext, 2000),
+				trainingjson: trainingjson
+			};
+		}
+		function sanitizeCheckoutFields(){
+			function setVal(id, value){ var el=document.getElementById(id); if(el){ el.value=value; } return value; }
+			var email = setVal('checkoutEmail', sanitizeEmailValue((document.getElementById('checkoutEmail')||{}).value));
+			var firstname = setVal('checkoutFirstname', sanitizeNameValue((document.getElementById('checkoutFirstname')||{}).value, 60));
+			var middleinitial = setVal('checkoutMiddleinitial', sanitizeMiddleInitialValue((document.getElementById('checkoutMiddleinitial')||{}).value));
+			var lastname = setVal('checkoutLastname', sanitizeNameValue((document.getElementById('checkoutLastname')||{}).value, 60));
+			var suffix = setVal('checkoutSuffix', sanitizeSuffixValue((document.getElementById('checkoutSuffix')||{}).value));
+			var mobile = setVal('checkoutMobile', sanitizeMobileValue((document.getElementById('checkoutMobile')||{}).value));
+			var school = setVal('checkoutSchool', sanitizeBasicText((document.getElementById('checkoutSchool')||{}).value, 120));
+			var address = setVal('checkoutAddress', sanitizeBasicText((document.getElementById('checkoutAddress')||{}).value, 200));
+			var titleOther = setVal('checkoutTitleOther', sanitizeBasicText((document.getElementById('checkoutTitleOther')||{}).value, 40));
+			var specOther = setVal('checkoutSpecializationOther', sanitizeBasicText((document.getElementById('checkoutSpecializationOther')||{}).value, 80));
+
+			var titleSel = document.getElementById('checkoutTitleSelect');
+			var specSel = document.getElementById('checkoutSpecializationSelect');
+			var typeSel = document.getElementById('checkoutType');
+			var titleSelVal = String((titleSel&&titleSel.value)||'').trim();
+			var specSelVal = String((specSel&&specSel.value)||'').trim();
+			var typeVal = String((typeSel&&typeSel.value)||'').trim();
+			var title = /other/i.test(titleSelVal) ? titleOther : titleSelVal;
+			var specialization = /other/i.test(specSelVal) ? specOther : specSelVal;
+
+			return {
+				email: email,
+				titleSelect: titleSelVal,
+				title: title,
+				firstname: firstname,
+				middleinitial: middleinitial,
+				lastname: lastname,
+				suffix: suffix,
+				mobile: mobile,
+				specializationSelect: specSelVal,
+				specialization: specialization,
+				school: school,
+				type: typeVal,
+				address: address
+			};
+		}
+
 		// --- Required fields validation (Middle Initial and Suffix are optional) ---
 		function markFieldError(el){ try{ if(!el) return; el.classList.add('ring-2','ring-red-500'); el.setAttribute('aria-invalid','true'); }catch(e){} }
 		function clearFieldError(el){ try{ if(!el) return; el.classList.remove('ring-2','ring-red-500'); el.removeAttribute('aria-invalid'); }catch(e){} }
 		function focusAndToast(el, msg){ try{ if(el){ el.focus({preventScroll:false}); el.scrollIntoView({behavior:'smooth', block:'center'}); } }catch(e){} showToast(msg,'error',5000); }
 		function validateCheckoutRequireds(){
+			var fields = sanitizeCheckoutFields();
+			var namePattern = /^[A-Za-z][A-Za-z'\-\s]{0,59}$/;
 			// Email
 			var emailEl = document.getElementById('checkoutEmail');
-			var emailVal = String((emailEl&&emailEl.value)||'').trim();
+			var emailVal = fields.email;
 			if(!isValidEmail(emailVal)){
 				updateEmailFieldState();
+				markFieldError(emailEl);
 				focusAndToast(emailEl,'Please enter a valid email (e.g., name@example.com).');
 				return false;
 			}
 			// Title (select or Other input)
 			var titleSel = document.getElementById('checkoutTitleSelect');
 			var titleOther = document.getElementById('checkoutTitleOther');
-			var titleVal = String((titleSel&&titleSel.value)||'').trim();
+			var titleVal = fields.titleSelect;
 			if(!titleVal){ markFieldError(titleSel); focusAndToast(titleSel,'Please select your title.'); return false; }
 			if(/other/i.test(titleVal)){
-				var tOtherVal = String((titleOther&&titleOther.value)||'').trim();
-				if(!tOtherVal){ markFieldError(titleOther); focusAndToast(titleOther,'Please type your title.'); return false; }
+				var tOtherVal = fields.title;
+				if(!tOtherVal || tOtherVal.length<2){ markFieldError(titleOther); focusAndToast(titleOther,'Please type a valid title (at least 2 characters).'); return false; }
 			}
 			// First Name
 			var fnEl = document.getElementById('checkoutFirstname');
-			if(!String((fnEl&&fnEl.value)||'').trim()){ markFieldError(fnEl); focusAndToast(fnEl,'Please enter your first name.'); return false; }
+			if(!fields.firstname){ markFieldError(fnEl); focusAndToast(fnEl,'Please enter your first name.'); return false; }
+			if(!namePattern.test(fields.firstname)){ markFieldError(fnEl); focusAndToast(fnEl,'First name contains invalid characters.'); return false; }
 			// Last Name
 			var lnEl = document.getElementById('checkoutLastname');
-			if(!String((lnEl&&lnEl.value)||'').trim()){ markFieldError(lnEl); focusAndToast(lnEl,'Please enter your last name.'); return false; }
+			if(!fields.lastname){ markFieldError(lnEl); focusAndToast(lnEl,'Please enter your last name.'); return false; }
+			if(!namePattern.test(fields.lastname)){ markFieldError(lnEl); focusAndToast(lnEl,'Last name contains invalid characters.'); return false; }
 			// Mobile
 			var mobEl = document.getElementById('checkoutMobile');
-			if(!String((mobEl&&mobEl.value)||'').trim()){ markFieldError(mobEl); focusAndToast(mobEl,'Please enter your mobile number.'); return false; }
+			if(!fields.mobile){ markFieldError(mobEl); focusAndToast(mobEl,'Please enter your mobile number.'); return false; }
+			if(!/^\d{10,15}$/.test(fields.mobile)){ markFieldError(mobEl); focusAndToast(mobEl,'Please enter a valid mobile number (10 to 15 digits).'); return false; }
 			// Specialization (select or Other)
 			var specSel = document.getElementById('checkoutSpecializationSelect');
 			var specOther = document.getElementById('checkoutSpecializationOther');
-			var specVal = String((specSel&&specSel.value)||'').trim();
+			var specVal = fields.specializationSelect;
 			if(!specVal){ markFieldError(specSel); focusAndToast(specSel,'Please select your specialization.'); return false; }
 			if(/other/i.test(specVal)){
-				var sOtherVal = String((specOther&&specOther.value)||'').trim();
-				if(!sOtherVal){ markFieldError(specOther); focusAndToast(specOther,'Please type your specialization.'); return false; }
+				var sOtherVal = fields.specialization;
+				if(!sOtherVal || sOtherVal.length<2){ markFieldError(specOther); focusAndToast(specOther,'Please type a valid specialization (at least 2 characters).'); return false; }
 			}
 			// School
 			var schEl = document.getElementById('checkoutSchool');
-			if(!String((schEl&&schEl.value)||'').trim()){ markFieldError(schEl); focusAndToast(schEl,'Please enter your school name.'); return false; }
+			if(!fields.school || fields.school.length<2){ markFieldError(schEl); focusAndToast(schEl,'Please enter your school name (at least 2 characters).'); return false; }
 			// Type (Private/Public)
 			var typeEl = document.getElementById('checkoutType');
-			if(!String((typeEl&&typeEl.value)||'').trim()){ markFieldError(typeEl); focusAndToast(typeEl,'Please select your school type.'); return false; }
+			if(!fields.type || (fields.type!=='Private' && fields.type!=='Public')){ markFieldError(typeEl); focusAndToast(typeEl,'Please select a valid school type.'); return false; }
 			// Address
 			var addrEl = document.getElementById('checkoutAddress');
-			if(!String((addrEl&&addrEl.value)||'').trim()){ markFieldError(addrEl); focusAndToast(addrEl,'Please enter your school address.'); return false; }
+			if(!fields.address || fields.address.length<5){ markFieldError(addrEl); focusAndToast(addrEl,'Please enter your school address (at least 5 characters).'); return false; }
 			return true;
 		}
 
@@ -926,25 +1268,18 @@
 				if(!Array.isArray(cartCourses) || cartCourses.length===0){ showToast('Your cart is empty.','info',3000); return; }
 				// Validation is performed before opening confirmation; proceed directly
 				// Read details from Checkout Details modal
-				var email = String((document.getElementById('checkoutEmail')||{}).value||'').trim();
-				var titleSel = document.getElementById('checkoutTitleSelect');
-				var titleOther = document.getElementById('checkoutTitleOther');
-				var title = '';
-				if(titleSel){ title = String(titleSel.value||'').trim(); }
-				if(/other/i.test(title) && titleOther){ title = String(titleOther.value||'').trim(); }
-				var firstname = String((document.getElementById('checkoutFirstname')||{}).value||'').trim();
-				var middleinitial = String((document.getElementById('checkoutMiddleinitial')||{}).value||'').trim();
-				var lastname = String((document.getElementById('checkoutLastname')||{}).value||'').trim();
-				var suffix = String((document.getElementById('checkoutSuffix')||{}).value||'').trim();
-				var mobileRaw = String((document.getElementById('checkoutMobile')||{}).value||'').trim();
-				var specSel = document.getElementById('checkoutSpecializationSelect');
-				var specOther = document.getElementById('checkoutSpecializationOther');
-				var specialization = '';
-				if(specSel){ specialization = String(specSel.value||'').trim(); }
-				if(/other/i.test(specialization) && specOther){ specialization = String(specOther.value||'').trim(); }
-				var school = String((document.getElementById('checkoutSchool')||{}).value||'').trim();
-				var type = String((document.getElementById('checkoutType')||{}).value||'').trim();
-				var address = String((document.getElementById('checkoutAddress')||{}).value||'').trim();
+				var fields = sanitizeCheckoutFields();
+				var email = fields.email;
+				var title = fields.title;
+				var firstname = fields.firstname;
+				var middleinitial = fields.middleinitial;
+				var lastname = fields.lastname;
+				var suffix = fields.suffix;
+				var mobileRaw = fields.mobile;
+				var specialization = fields.specialization;
+				var school = fields.school;
+				var type = fields.type;
+				var address = fields.address;
 				// Normalize name parts to UPPERCASE before submission
 				firstname = firstname.toUpperCase();
 				middleinitial = middleinitial.toUpperCase();
@@ -963,7 +1298,7 @@
 				var trainingjson = selected.map(function(c){ return { title: c.title }; });
 				var totals = computeCartTotals();
 				var nametext = String(fullname||'').replace(/[\.\s]/g,'').toUpperCase();
-				var payload = {
+				var payload = buildLockedRegistrationPayload({
 					timestamp: formatTimestampUS(new Date()),
 					email: email,
 					id: '',
@@ -974,7 +1309,7 @@
 					suffix: suffix,
 					fullname: fullname,
 					nametext: nametext,
-					mobile: mobileRaw.replace(/[^0-9]/g,'') || '',
+					mobile: mobileRaw || '',
 					specialization: specialization,
 					school: school,
 					type: type,
@@ -986,20 +1321,20 @@
 					total: totals.total,
 					trainingtext: trainingtext,
 					trainingjson: trainingjson
-				};
+				});
 				var btn = document.getElementById('submitCheckoutBtn'); var prevText = btn ? btn.textContent : '';
 				setPending(btn, true, 'Submitting…');
 				var url = AUTH_BASE + '?SH=Sheet1&func=cart';
 				var res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'text/plain; charset=UTF-8' }, body: JSON.stringify(payload) });
 				var text = await res.text();
-				if(!res.ok){ showToast(text || 'Registration failed.','error',6000); setPending(btn,false, prevText||'Confirm Registration'); return; }
+				if(!res.ok){ showToast(normalizeEndpointMessage(text, 'Registration failed.'),'error',6000); setPending(btn,false, prevText||'Confirm Registration'); return; }
 				var message = '';
 				try{ var data=JSON.parse(text); if(data && (data.message||data.status||data.result)) message = data.message||data.status||data.result; else message=text; } catch(e){ message=text; }
-				showToast((message||'Registration submitted.').trim(), 'success', 6000);
+				showToast(normalizeEndpointMessage(message, 'Registration submitted.'), 'success', 6000);
 				try{ if(typeof message==='string' && /Recorded and email dispatched\./i.test(String(message).trim())){ openRegistrationSuccessModal(email); } }catch(e){}
 				cartCourses = []; persistCart(); renderCourses(); updateCartCount(); appliedVoucher=null; closeCheckoutModal(); closeCart(); updateCartBar();
 				setPending(btn,false, prevText||'Confirm Registration');
-			} catch(err){ console.error('confirmRegistration error', err); showToast((err && err.message) || 'Network error. Please try again.','error',6000); var btn2=document.getElementById('submitCheckoutBtn'); setPending(btn2,false,'Submit'); }
+			} catch(err){ console.error('confirmRegistration error', err); showToast(normalizeEndpointMessage((err && err.message) || '', 'Network error. Please try again.'),'error',6000); var btn2=document.getElementById('submitCheckoutBtn'); setPending(btn2,false,'Submit'); }
 		}
 
 		function setPending(btn, pending, text){ if(!btn) return; if(pending){ btn.disabled=true; btn.textContent = text||'Working…'; btn.classList.add('opacity-70','cursor-not-allowed'); } else { btn.disabled=false; btn.textContent = text||btn.textContent; btn.classList.remove('opacity-70','cursor-not-allowed'); } }
@@ -1293,9 +1628,30 @@
 		// Simple escape/attr helpers
 		function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 		function escapeAttr(str){ return escapeHtml(str); }
+		function debounce(fn, waitMs){
+			var t = null;
+			return function(){
+				var args = arguments;
+				if(t){ clearTimeout(t); }
+				t = setTimeout(function(){ fn.apply(null, args); }, waitMs||150);
+			};
+		}
+		function throttleRaf(fn){
+			var queued = false;
+			return function(){
+				if(queued) return;
+				queued = true;
+				requestAnimationFrame(function(){ queued = false; fn(); });
+			};
+		}
 
 		// Init
 		document.addEventListener('DOMContentLoaded', function(){
+			var debouncedFilterCourses = debounce(function(){ filterCourses(); }, 180);
+			var onResizeStable = throttleRaf(function(){
+				try{ applyBundleCategoryBarLayout(); }catch(e){}
+				try{ updateCartBar(); }catch(e){}
+			});
 			// Promo banner logic
 			(function(){
 				var BANNER_KEY = 'PAPSI_PROMO_DISMISSED_UNTIL';
@@ -1345,12 +1701,14 @@
 			updateStatsToggleUI(getSavedStatsVisible());
 			document.getElementById('clearSearch').addEventListener('click', clearSearch);
 			var clearAllBtn = document.getElementById('trainingClearFilters'); if(clearAllBtn){ clearAllBtn.addEventListener('click', clearAllTrainingFilters); }
-			document.getElementById('searchInput').addEventListener('input', function(e){ var btn=document.getElementById('clearSearch'); if(e && e.target && e.target.value){ btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); } filterCourses(); });
+			document.getElementById('searchInput').addEventListener('input', function(e){ var btn=document.getElementById('clearSearch'); if(e && e.target && e.target.value){ btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); } debouncedFilterCourses(); });
 			document.getElementById('categoryFilter').addEventListener('change', filterCourses);
 			document.getElementById('speakerFilter').addEventListener('change', filterCourses);
 			document.getElementById('dateSort').addEventListener('change', filterCourses);
+			initBundleCategoryButtons();
 			// Email guidance on input
 			try{ var em=document.getElementById('checkoutEmail'); if(em){ em.addEventListener('input', function(){ updateEmailFieldState(); clearFieldError(em); }); } }catch(e){}
+			try{ var mob=document.getElementById('checkoutMobile'); if(mob){ mob.addEventListener('input', function(){ var v=sanitizeMobileValue(mob.value); if(mob.value!==v){ mob.value=v; } clearFieldError(mob); }); } }catch(e){}
 			// Clear error mark on required fields as user edits
 			['checkoutFirstname','checkoutLastname','checkoutMobile','checkoutSchool','checkoutType','checkoutAddress','checkoutTitleOther','checkoutSpecializationOther'].forEach(function(id){
 				var el=document.getElementById(id);
@@ -1361,10 +1719,7 @@
 
 			loadCart();
 			loadTrainingCourses();
-			// Keep the reserved bottom space accurate on viewport changes
-			window.addEventListener('resize', function(){
-				try{ updateCartBar(); } catch(e){}
-			});
+			window.addEventListener('resize', onResizeStable);
 		});
 	</script>
 </body>

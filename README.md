@@ -2,6 +2,27 @@
 
 This repository contains the static website for PAPSI, including a standalone Training Center at `center.html`.
 
+## Stakeholder Changelog (Phase 6 Closeout)
+
+Date: 2026-05-19
+Scope: Training Center experience and stability hardening in `center.html`.
+
+Delivered:
+- Migrated course presentation to a bundle-style row/list layout while preserving existing filter, cart, and checkout logic.
+- Added synchronized category filtering across top pills, dropdown, stats category click, chips, and clear-all actions.
+- Improved filter UX with active-filter count badge and clearer reset behavior.
+- Improved mobile category navigation with scan-friendly category pills.
+- Hardened voucher validation flow (request timeout handling and button state restore).
+- Added course-load resilience with cached-data fallback for transient network/source issues.
+- Improved checkout validation feedback for required fields.
+
+QA outcome:
+- All critical functional flows passed: filtering, chips, stats/year filters, cart open, voucher feedback, checkout open, and empty-submit validation.
+- Pagination logic is verified functional; occasional click-path flakiness was observed only in hidden embedded browser automation.
+
+Release recommendation:
+- Ready to release with one final visible-tab manual smoke check for pagination button clicks.
+
 ## Training Center (center.html)
 
 Key features:

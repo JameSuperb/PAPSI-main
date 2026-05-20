@@ -80,6 +80,17 @@
      make sure Bootstrap's navbar collapse stays visible when toggled. */
   .navbar .collapse { visibility: visible !important; }
   .collapse:not(.show) { display: none; }
+
+  /* Keep featured resources present but less visually dominant */
+  .featured-resources-grid { gap: 1rem; }
+  .resource-card {
+    padding: 0.85rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  .resource-card .resource-thumb { max-height: 190px; }
+  .resource-card h4 { font-size: 1rem; margin-bottom: 0.25rem; }
+  .resource-card p { font-size: 0.92rem; margin-bottom: 0.6rem; }
+  .resource-card .resource-btn { padding: 0.35rem 0.75rem; font-size: 0.9rem; }
 </style>
 
 <script>
@@ -344,16 +355,16 @@
 </section>
 
 <!-- Featured Resources -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8 featured-resources">
   <div class="bg-white rounded-lg shadow-sm p-6">
     <h3 class="text-xl font-bold text-papsi-dark mb-4">Featured Resources</h3>
 
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 featured-resources-grid">
       <!-- Resource card (duplicate this block to add more resources) -->
-      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch">
+      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch resource-card">
         <a href="https://sciencestar.ph/" target="_blank" rel="noopener" class="w-full mb-4 block" aria-label="Open ScienceStar Corporation (opens in a new tab)">
           <img src="images/sciencestarlogo.png" alt="ScienceStar Corporation"
-               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200"
+               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200 resource-thumb"
                loading="lazy" onerror="this.style.display='none'">
         </a>
 
@@ -361,15 +372,15 @@
         <p class="text-gray-700 mb-3">Official website.</p>
 
         <a href="https://sciencestar.ph/" target="_blank" rel="noopener"
-           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto">
+           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto resource-btn">
           Open resource
         </a>
       </div>
 
-      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch">
+      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch resource-card">
         <a href="https://www.alvtechnologies.com.ph/" target="_blank" rel="noopener" class="w-full mb-4 block" aria-label="Open ALVTechnologies (opens in a new tab)">
           <img src="images/alvtech.png" alt="ALVTechnologies"
-               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200"
+               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200 resource-thumb"
                loading="lazy" onerror="this.style.display='none'">
         </a>
 
@@ -377,15 +388,15 @@
         <p class="text-gray-700 mb-3">Official website.</p>
 
         <a href="https://www.alvtechnologies.com.ph/" target="_blank" rel="noopener"
-           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto">
+           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto resource-btn">
           Open resource
         </a>
       </div>
 
-      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch">
+      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch resource-card">
         <a href="https://www.new3jcn.com/simulation.html" target="_blank" rel="noopener" class="w-full mb-4 block" aria-label="Open 3JCN Simulation (opens in a new tab)">
           <img src="images/3jcn.png" alt="3JCN Simulation"
-               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200"
+               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200 resource-thumb"
                loading="lazy" onerror="this.style.display='none'">
         </a>
 
@@ -393,15 +404,15 @@
         <p class="text-gray-700 mb-3">Interactive simulation resource.</p>
 
         <a href="https://www.new3jcn.com/simulation.html" target="_blank" rel="noopener"
-           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto">
+           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto resource-btn">
           Open resource
         </a>
       </div>
 
-      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch">
+      <div class="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-stretch resource-card">
         <a href="https://www.suratosapparatusmanufacturing.com/" target="_blank" rel="noopener" class="w-full mb-4 block" aria-label="Open Suratos Manufacturing (opens in a new tab)">
           <img src="images/samlogo.png" alt="Suratos Manufacturing"
-               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200"
+               class="w-full h-auto max-h-[240px] object-contain rounded-md border border-gray-200 resource-thumb"
                loading="lazy" onerror="this.style.display='none'">
         </a>
 
@@ -409,7 +420,7 @@
         <p class="text-gray-700 mb-3">Official website.</p>
 
         <a href="https://www.suratosapparatusmanufacturing.com/" target="_blank" rel="noopener"
-           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto">
+           class="inline-block bg-papsi-green text-white px-4 py-2 rounded hover:bg-green-700 transition-colors self-start mt-auto resource-btn">
           Open resource
         </a>
       </div>

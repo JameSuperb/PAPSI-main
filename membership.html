@@ -54,6 +54,83 @@
     /* Edge/IE fallbacks */
     #memberInfoModal #mi_suffix:-ms-input-placeholder { color: #adb5bd; }
     #memberInfoModal #mi_suffix::-ms-input-placeholder { color: #adb5bd; }
+
+    /* Make the membership benefits section clearly distinct from the process card */
+    .papsi-perks-card {
+      background: linear-gradient(135deg, #f0fff4 0%, #ecfeff 45%, #fff7ed 100%);
+      border: 1px solid #b7f0d0;
+      border-left: 5px solid #22a06b;
+    }
+    .papsi-perks-subtitle { color: #3b5b5b; }
+    .perk-item {
+      background: #ffffff;
+      border: 1px solid #e7ecef;
+      border-radius: 10px;
+      margin-bottom: 0.65rem;
+      overflow: hidden;
+    }
+    .perk-toggle {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      padding: 0.75rem 0.9rem;
+      font-weight: 600;
+      color: #1f3f33;
+      cursor: pointer;
+    }
+    .perk-toggle:hover { background: #f7fffb; }
+    .perk-toggle:focus { outline: 2px solid #7fd9ad; outline-offset: -2px; }
+    .perk-note {
+      padding: 0 0.9rem 0.85rem 0.9rem;
+      color: #4b5563;
+      font-size: 0.96rem;
+    }
+    .perk-title {
+      padding: 0.75rem 0.9rem 0.4rem 0.9rem;
+      font-weight: 600;
+      color: #1f3f33;
+    }
+    /* 2-column perk grid */
+    .perk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 600px) { .perk-grid { grid-template-columns: 1fr; } }
+    /* Per-perk accent colors */
+    .perk-item[data-color='green']  { border-left: 4px solid #22a06b; }
+    .perk-item[data-color='blue']   { border-left: 4px solid #3b82f6; }
+    .perk-item[data-color='amber']  { border-left: 4px solid #f59e0b; }
+    .perk-item[data-color='teal']   { border-left: 4px solid #14b8a6; }
+    .perk-item[data-color='violet'] { border-left: 4px solid #8b5cf6; }
+    .perk-item[data-color='rose']   { border-left: 4px solid #f43f5e; }
+    /* 2-column perk grid */
+    .perk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 600px) { .perk-grid { grid-template-columns: 1fr; } }
+    /* Per-perk accent colors via left border */
+    .perk-item[data-color='green']  { border-left: 4px solid #22a06b; }
+    .perk-item[data-color='blue']   { border-left: 4px solid #3b82f6; }
+    .perk-item[data-color='amber']  { border-left: 4px solid #f59e0b; }
+    .perk-item[data-color='teal']   { border-left: 4px solid #14b8a6; }
+    .perk-item[data-color='violet'] { border-left: 4px solid #8b5cf6; }
+    .perk-item[data-color='rose']   { border-left: 4px solid #f43f5e; }
+    .membership-content {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .membership-check-card {
+      width: 100%;
+      max-width: 640px;
+    }
+    .papsi-perks-wide {
+      width: 100%;
+      max-width: none;
+    }
   </style>
 
 </head>
@@ -224,12 +301,12 @@
             </div>
           </div>
           <!-- notice content -->
-          <div>
+          <div class="membership-content">
             <h3 class="mb-4">Membership</h3>
             <p>The annual membership fee is Php 500.00. You will receive the payment procedures on your email after accomplishing the form.</p>
-            
+
             <!-- NEW: Membership Check -->
-            <div class="card border-0 shadow-sm mt-4">
+            <div class="card border-0 shadow-sm mt-3 mb-4 membership-check-card">
               <div class="card-body">
                 <h5 class="card-title mb-3">Start the membership process</h5>
                 <div class="form-row align-items-end">
@@ -248,6 +325,54 @@
             <!-- /Membership Check -->
 
             <p> </p>
+          </div>
+        </div>
+
+        <!-- NEW: Membership perks and benefits summary -->
+        <div class="card border-0 shadow-sm mt-3 mb-4 papsi-perks-card papsi-perks-wide">
+          <div class="card-body">
+            <h5 class="card-title mb-2">✨ Why become a PAPSI member?</h5>
+            <p class="mb-3 papsi-perks-subtitle">For just <strong>Php 500/year</strong>, you unlock access to a growing community of science educators and benefits that support your career. See what's in it for you:</p>
+
+            <div class="perk-grid">
+              <div class="perk-item" data-color="green">
+                <div class="perk-title">📚 Professional Development</div>
+                <div class="perk-note">Get priority access to PAPSI webinars, seminars, and upskilling sessions — a great way to keep your teaching fresh, practical, and future-ready.</div>
+              </div>
+
+              <div class="perk-item" data-color="blue">
+                <div class="perk-title">🧪 Resource Access</div>
+                <div class="perk-note">Unlock curated science teaching materials you can use directly in class. Less time searching, more time actually teaching with confidence.</div>
+              </div>
+
+              <div class="perk-item" data-color="amber">
+                <div class="perk-title">🏅 Certification Pathway</div>
+                <div class="perk-note">Earn certificates through PAPSI activities and trainings. Every certificate you collect strengthens your portfolio and opens more career doors.</div>
+              </div>
+
+              <div class="perk-item" data-color="teal">
+                <div class="perk-title">🤝 Academic Network</div>
+                <div class="perk-note">Connect with physics and science educators nationwide. Share insights, collaborate on ideas, and grow alongside people who truly understand what you do.</div>
+              </div>
+
+              <div class="perk-item" data-color="violet">
+                <div class="perk-title">🌟 Career Visibility</div>
+                <div class="perk-note">Being a PAPSI member signals professionalism. It tells your school and peers you're committed to excellence in science education.</div>
+              </div>
+
+              <div class="perk-item" data-color="rose">
+                <div class="perk-title">🌏 Community Impact</div>
+                <div class="perk-note">Your membership contributes to advancing quality science education in the Philippines. Together, PAPSI members help shape the future of science teaching.</div>
+              </div>
+            </div>
+
+            <div class="text-center mt-4">
+              <a href="#membershipCheckEmail" onclick="document.getElementById('membershipCheckEmail').focus();return false;"
+                 class="btn btn-success btn-lg px-5 py-2" style="font-weight:700;letter-spacing:0.02em;">
+                🎓 Join Now — Only Php 500/year
+              </a>
+              <p class="mt-2 mb-0" style="font-size:0.88rem;color:#5a7a6a;">Already applied? Check your status above.</p>
+            </div>
           </div>
         </div>
         

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PAPSI Partner Schools Program</title>
+<link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" href="plugins/themify-icons/themify-icons.css">
+<link href="css/style.css" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f2; color: #1a1a1a; padding-top: 115px; }
+
+  .header { z-index: 1030; }
+  .papsi-navbar { background-color: #166938; }
+  .papsi-navbar .nav-link { color: #ffffff !important; }
+  .papsi-navbar .nav-link:hover { color: #f59e0b !important; }
+  .navbar-brand img { height: 48px; }
+  .navigation { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+
+  .doc-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .btn-download {
+    background: white;
+    color: #0a9142;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+  }
+  .btn-download:hover { background: #e6f5ec; }
+  .btn-download:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  #status { font-size: 0.8rem; color: #d4edda; margin-right: 10px; }
+
+  .partner-wrap { max-width: 860px; margin: 36px auto; padding: 0 20px 60px; }
+
+  .cover {
+    background: linear-gradient(135deg, #0a9142 0%, #076e31 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 48px 44px;
+    margin-bottom: 28px;
+    box-shadow: 0 6px 24px rgba(10,145,66,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.07); }
+  .cover::after  { content:''; position:absolute; bottom:-60px; left:-30px; width:250px; height:250px; border-radius:50%; background:rgba(255,255,255,0.05); }
+  .cover .org { font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; opacity:0.85; margin-bottom:10px; }
+  .cover h1 { font-size:1.9rem; font-weight:800; line-height:1.2; margin-bottom:12px; color:#ffffff; }
+  .cover .subtitle { font-size:0.95rem; opacity:0.9; font-style:italic; margin-bottom:18px; line-height:1.5; }
+  .cover .meta { font-size:0.78rem; opacity:0.75; background:rgba(255,255,255,0.12); display:inline-block; padding:5px 14px; border-radius:20px; }
+
+  .card { background:white; border-radius:10px; padding:28px 32px; margin-bottom:18px; box-shadow:0 2px 10px rgba(0,0,0,0.06); border-left:5px solid #0a9142; }
+  .card h2 { font-size:0.95rem; font-weight:700; color:#0a9142; text-transform:uppercase; letter-spacing:1px; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  .card h2 .num { background:#0a9142; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0; }
+  .card p { font-size:0.93rem; line-height:1.75; color:#333; margin-bottom:10px; }
+  .card ul { padding-left:20px; }
+  .card ul li { font-size:0.93rem; line-height:1.75; color:#333; margin-bottom:4px; }
+  .card ol { padding-left:22px; list-style:decimal; }
+  .card ol li { font-size:0.93rem; line-height:1.75; color:#333; margin-bottom:6px; display:list-item; }
+
+  table { width:100%; border-collapse:collapse; margin-top:10px; font-size:0.88rem; }
+  th { background:#0a9142; color:white; padding:10px 12px; text-align:left; }
+  td { padding:9px 12px; border-bottom:1px solid #e5e5e5; color:#333; }
+  tr:nth-child(even) td { background:#f6fdf9; }
+
+  .p-title { font-weight:700; color:#0a9142; font-size:0.93rem; margin:14px 0 4px; }
+  .note { background:#f0fdf4; border:1px solid #a7f3c3; border-radius:6px; padding:11px 15px; font-size:0.86rem; color:#166534; margin-top:14px; line-height:1.6; }
+  .faq-q { font-weight:700; color:#0a9142; margin:14px 0 4px; font-size:0.91rem; }
+  .faq-a { font-size:0.91rem; color:#444; line-height:1.7; }
+
+  .footer { text-align:center; margin-top:36px; font-size:0.78rem; color:#888; }
+  .footer a { color:#0a9142; text-decoration:none; font-weight:600; }
+</style>
+</head>
+<body>
+
+<header class="fixed-top header">
+  <div class="top-header py-2 bg-white">
+    <div class="container">
+      <div class="row no-gutters align-items-center">
+        <div class="col-lg-7 text-center text-lg-left">
+          <strong>PHILIPPINE ASSOCIATION OF PHYSICS AND SCIENCE INSTRUCTORS</strong>
+        </div>
+        <div class="col-lg-5 text-center text-lg-right">
+          <ul class="list-inline"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="navigation w-100">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg navbar-dark p-0 papsi-navbar">
+        <a class="navbar-brand" href="index.html"><img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/papsilogo_1.png" alt="PAPSI Logo"></a>
+        <button class="navbar-toggler rounded-0" type="button" data-toggle="collapse" data-target="#navigation"
+          aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navigation">
+          <ul class="navbar-nav ml-auto text-center">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="center.html">Training Center</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="portal.html">Member Portal</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="membership.html">Membership</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="about.html">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="certificate.html">Certificate</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="verification.html">Verification</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="partner.html">Partner</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="contact.html">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<div class="partner-wrap">
+  <div class="cover">
+    <div class="org">Philippine Association of Physics and Science Instructors</div>
+    <h1>PAPSI Partner Schools Program</h1>
+    <div class="subtitle">Strengthening Science Education Through Institutional Collaboration<br>and Teacher Professional Development</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">1</span> Introduction / Background</h2>
+    <p>The Philippine Association of Physics and Science Instructors (PAPSI) is a professional organization dedicated to advancing the quality of physics and science education in the Philippines. Since its establishment, PAPSI has been committed to the continuous professional growth of science educators through seminars, webinars, workshops, conferences, and collaborative educational initiatives.</p>
+    <p>The PAPSI Partner Schools Program is established to build stronger institutional partnerships with schools that actively support the professional growth of science educators through PAPSI membership and participation. By formalizing these partnerships, PAPSI aims to create a more connected, supported, and empowered science education community across the country.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span> Objectives of the Program</h2>
+    <ul>
+      <li>Strengthen collaboration between PAPSI and educational institutions.</li>
+      <li>Support continuous professional development for science teachers.</li>
+      <li>Encourage active participation in PAPSI programs and activities.</li>
+      <li>Recognize schools that actively support science teacher development.</li>
+      <li>Build a stronger science education community through institutional partnerships.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">3</span> Scope of the Partnership</h2>
+    <p>The program is open to public and private schools, colleges, universities, international schools, homeschool organizations, learning centers, and other educational institutions in the Philippines with active science educators who participate in PAPSI activities and maintain active PAPSI membership. PAPSI reserves the right to review and approve partnership applications to ensure alignment with the organization's mission and professional standards.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">4</span> Partnership Categories</h2>
+    <table>
+      <thead><tr><th>Active PAPSI Members</th><th>Partnership Category</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>5–9 Members</td><td>Associate Partner School</td><td>Entry-level institutional partnership</td></tr>
+        <tr><td>10–14 Members</td><td>Institutional Partner School</td><td>Established institutional partnership</td></tr>
+        <tr><td>15–19 Members</td><td>Distinguished Partner School</td><td>Advanced institutional partnership</td></tr>
+        <tr><td>20 or More Members</td><td>Premier Partner School</td><td>Highest level of institutional partnership</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">5</span> Definitions</h2>
+    <table>
+      <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Active PAPSI Membership</strong></td><td>A paid and current PAPSI membership for the applicable calendar or academic year.</td></tr>
+        <tr><td><strong>Partner School Coordinator</strong></td><td>A designated contact person within the partner school responsible for PAPSI-related communications and coordination.</td></tr>
+        <tr><td><strong>Group Registration</strong></td><td>A collective registration of two or more active PAPSI-member teachers from the same institution for a single PAPSI event or program.</td></tr>
+        <tr><td><strong>Partnership Category</strong></td><td>The tier of institutional partnership determined by the number of active PAPSI members in the school.</td></tr>
+        <tr><td><strong>Annual Review</strong></td><td>The yearly evaluation of a partner school's active membership count and participation conducted every January.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">6</span> Requirements for Partnership</h2>
+    <ol>
+      <li>Schools and educational institutions applying for partnership with PAPSI must accomplish the official PAPSI Partner Schools Application Form and undergo evaluation and approval by PAPSI.</li>
+      <li>Partner schools must maintain the required number of active PAPSI members corresponding to their designated partnership category.</li>
+      <li>Teachers included in the partnership membership count must possess active and fully paid PAPSI membership for the current membership year.</li>
+      <li>Partner schools are required to designate a Partner School Coordinator who will serve as the official representative for PAPSI-related communications, announcements, and coordination.</li>
+      <li>Partner schools are encouraged to actively participate in PAPSI seminars, webinars, workshops, conferences, and other educational initiatives throughout the partnership period.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">7</span> Privileges of PAPSI Partner Schools</h2>
+    <div class="p-title">1. Priority Training Announcements</div>
+    <p>Partner schools will receive priority messages and early announcements regarding upcoming PAPSI seminars, webinars, workshops, conferences, and training programs.</p>
+    <div class="p-title">2. School Recognition on the PAPSI Website</div>
+    <p>The school name and partnership category will be officially listed on the PAPSI website as a recognized PAPSI Partner School within 30 days of approved partnership.</p>
+    <div class="p-title">3. Priority Access to Limited-Slot Trainings</div>
+    <p>Partner schools may receive priority consideration for trainings, workshops, or special events with limited participant slots.</p>
+    <div class="p-title">4. Eligibility for Exclusive Partner-School Activities</div>
+    <p>Partner schools may be invited to selected exclusive activities, pilot programs, consultations, or collaborative educational initiatives organized by PAPSI.</p>
+    <div class="p-title">5. Digital Recognition Certificate</div>
+    <p>Partner schools shall receive a digital certificate or recognition badge acknowledging their active partnership and support for science teacher professional development, issued within 30 days of approved partnership.</p>
+    <div class="p-title">6. Feature Opportunities</div>
+    <p>Selected partner schools shall be featured on PAPSI social media pages or the PAPSI website for their active participation in science education initiatives and teacher development programs.</p>
+    <div class="p-title">7. Streamlined School-Based Coordination</div>
+    <p>Partner schools may coordinate institutional or group participation more efficiently through designated communication channels and consolidated registration processes.</p>
+    <div class="p-title">8. Access to Future Collaborative Programs</div>
+    <p>Partner schools may be considered for future collaborative projects, teacher development initiatives, research activities, or educational partnerships organized by PAPSI.</p>
+    <div class="note"><strong>Note:</strong> Specific privileges may vary by partnership category. Higher-tier partner schools (Distinguished and Premier) may be given additional priority consideration for exclusive activities, feature opportunities, and future collaborative programs.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">8</span> Responsibilities of Partner Schools</h2>
+    <ol>
+      <li>
+        <strong>Promote Professional Development Participation</strong><br>
+        Encourage science educators within the institution to participate in PAPSI professional development programs and educational initiatives.
+      </li>
+      <li>
+        <strong>Support Ethical and Professional Conduct</strong><br>
+        Uphold professionalism and ethical conduct in all PAPSI-related activities and engagements.
+      </li>
+      <li>
+        <strong>Participate in Partnership Renewal Review</strong><br>
+        Cooperate with PAPSI during annual partnership evaluation and renewal processes.
+      </li>
+      <li>
+        <strong>Share Relevant PAPSI Opportunities</strong><br>
+        Assist in disseminating relevant PAPSI opportunities, announcements, and activities to science educators within the institution.
+      </li>
+      <li>
+        <strong>Strengthen Institutional Collaboration</strong><br>
+        Foster a collaborative relationship with PAPSI in support of science education, teacher development, and academic engagement.
+      </li>
+    </ol>
+    <div class="note"><strong>Note:</strong> Partnership categories are reviewed annually based on active membership and institutional participation in PAPSI programs and activities. Schools that no longer meet the requirements may be subject to partnership category reassessment or partnership status review.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">9</span> Responsibilities of PAPSI</h2>
+    <ul>
+      <li>Provide timely updates and announcements regarding PAPSI activities and programs.</li>
+      <li>Organize relevant and high-quality professional development programs for science educators.</li>
+      <li>Recognize and acknowledge partner schools appropriately through official channels.</li>
+      <li>Maintain open communication and coordination with partner institutions.</li>
+      <li>Publish an annual program summary or report of PAPSI activities and partnerships to promote transparency and accountability.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">10</span> Application and Renewal Process</h2>
+    <p>Schools may apply for partnership through the official PAPSI application process by submitting the required information regarding active PAPSI members within the institution. The application form is available on the PAPSI website at <strong>papsicenter.com</strong>.</p>
+    <p>Partnership status is reviewed and renewed annually every <strong>January</strong>. Schools must reconfirm their active membership count to maintain or upgrade their partnership category. Schools that fall below the minimum membership threshold during the year will be notified and given an opportunity to meet the requirement before the annual review. Failure to meet the requirement at the time of renewal will result in a downgrade to the appropriate category or removal from the program.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">11</span> Recognition and Public Listing</h2>
+    <p>Partner schools will be recognized through the following channels within 30 days of approved partnership or renewal:</p>
+    <ul>
+      <li>Official listing on the PAPSI website (papsicenter.com)</li>
+      <li>Digital recognition certificate or partner-school badge</li>
+      <li>Social media acknowledgments on official PAPSI pages</li>
+      <li>Inclusion in official PAPSI announcements and communications</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">12</span> Future Opportunities</h2>
+    <p>PAPSI is committed to expanding the Partner Schools Program to provide greater value to institutional partners. Future directions under active consideration include:</p>
+    <ul>
+      <li><strong>School-Based Training Programs</strong> — Bringing PAPSI-organized trainings and workshops directly to partner school campuses.</li>
+      <li><strong>Curriculum Consultation Services</strong> — Offering guidance and resources to support science curriculum planning and development.</li>
+      <li><strong>Collaborative Research Initiatives</strong> — Engaging partner schools in joint research activities, publications, and educational studies.</li>
+    </ul>
+    <p style="margin-top:10px;">Additional opportunities and benefits may be introduced as the program grows and evolves.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">13</span> Contact Information</h2>
+    <p><strong>Philippine Association of Physics and Science Instructors (PAPSI)</strong></p>
+    <ul>
+      <li>Website: papsicenter.com</li>
+      <li>Facebook Page: PAPSI Training Center</li>
+    </ul>
+    <p style="margin-top:10px;">For partnership inquiries, please visit the PAPSI website or send a message through the official PAPSI Facebook Page.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">14</span> Glossary</h2>
+    <table>
+      <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+      <tbody>
+        <tr><td>Active PAPSI Membership</td><td>A paid and current PAPSI membership for the applicable calendar or academic year.</td></tr>
+        <tr><td>Partner School Coordinator</td><td>A designated contact person within the partner school responsible for PAPSI-related communications and coordination.</td></tr>
+        <tr><td>Group Registration</td><td>A collective registration of two or more active PAPSI-member teachers from the same institution for a single PAPSI event or program.</td></tr>
+        <tr><td>Partnership Category</td><td>The tier of institutional partnership (Associate, Institutional, Distinguished, or Premier) determined by the number of active PAPSI members in the school.</td></tr>
+        <tr><td>Annual Review</td><td>The yearly evaluation of a partner school's active membership count and participation conducted every January.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">15</span> Effectivity and Approvals</h2>
+    <p style="margin-bottom:14px;">This document is hereby adopted and approved for implementation effective <strong>June 2025</strong>.</p>
+    <table>
+      <thead><tr><th>Role</th><th>Name</th><th>Signature</th><th>Date</th></tr></thead>
+      <tbody>
+        <tr><td>PAPSI President</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>
+        <tr><td>Program Coordinator</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><td>Secretary</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">A</span> Annex A: Frequently Asked Questions</h2>
+    <div class="faq-q">Q1: Who can apply for the PAPSI Partner Schools Program?</div>
+    <div class="faq-a">Any public or private school, college, university, or educational institution in the Philippines with at least five (5) active PAPSI-member science educators may apply.</div>
+    <div class="faq-q">Q2: How do we apply?</div>
+    <div class="faq-a">Visit the PAPSI website at papsicenter.com and complete the official partner school application form. Provide the names and membership details of active PAPSI members within your institution.</div>
+    <div class="faq-q">Q3: What counts as active PAPSI membership?</div>
+    <div class="faq-a">A teacher is considered an active member if they have a paid and current PAPSI membership for the applicable year.</div>
+    <div class="faq-q">Q4: Can our school be upgraded to a higher partnership category?</div>
+    <div class="faq-a">Yes. Schools that increase their number of active PAPSI members to meet the threshold of a higher category may apply for an upgrade during the annual review period every January.</div>
+    <div class="faq-q">Q5: What happens if our school falls below the required number of members?</div>
+    <div class="faq-a">PAPSI will notify the school and provide an opportunity to meet the requirement. If the school is unable to meet the threshold by the annual review, the partnership category will be adjusted accordingly or the partnership may be placed on hold.</div>
+    <div class="faq-q">Q6: Are the privileges the same for all partnership categories?</div>
+    <div class="faq-a">Core privileges apply to all partner schools. However, higher-tier partners (Distinguished and Premier) may receive additional priority consideration for exclusive activities, feature opportunities, and collaborative programs.</div>
+    <div class="faq-q">Q7: How will we receive our digital recognition certificate?</div>
+    <div class="faq-a">The digital certificate will be sent to the designated Partner School Coordinator via official PAPSI communication channels within 30 days of approved partnership.</div>
+    <div class="faq-q">Q8: Is there a fee to join the PAPSI Partner Schools Program?</div>
+    <div class="faq-a">There is no separate fee for the partnership program itself. However, individual teacher members must maintain active and paid PAPSI membership to be counted toward the school's partnership category.</div>
+  </div>
+
+  <div class="footer">
+    <p>Philippine Association of Physics and Science Instructors (PAPSI) &nbsp;|&nbsp; <a href="https://papsicenter.com" target="_blank">papsicenter.com</a> &nbsp;|&nbsp; Facebook: PAPSI Training Center</p>
+  </div>
+</div><!-- /.partner-wrap -->
+
+<script>
+async function downloadDocx() {
+  const btn = document.getElementById('dlBtn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  status.textContent = 'Building document...';
+
+  try {
+    // Dynamically load docx library
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js');
+
+    const {
+      Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+      WidthType, BorderStyle, AlignmentType, ShadingType,
+      Header, Footer, HeadingLevel, UnderlineType
+    } = window.docx;
+
+    const GREEN = "0a9142";
+    const DARK_GREEN = "076e31";
+    const WHITE = "FFFFFF";
+    const DARK = "1a1a1a";
+    const NOTE_BG = "f0fdf4";
+    const ROW_ALT = "f6fdf9";
+
+    const sp = (before=0, after=120) => ({ spacing: { before, after } });
+
+    // Helper: section heading paragraph
+    const sHead = (label, text) => new Paragraph({
+      children: [
+        new TextRun({ text: `  ${label}   ${text.toUpperCase()}  `, bold: true, color: WHITE, size: 24, font: "Calibri" })
+      ],
+      shading: { type: ShadingType.SOLID, color: GREEN },
+      ...sp(320, 180),
+    });
+
+    // Helper: body paragraph
+    const body = (text, opts={}) => new Paragraph({
+      children: [new TextRun({ text, size: 22, color: DARK, font: "Calibri", ...opts })],
+      ...sp(0, 120),
+    });
+
+    // Helper: bullet
+    const bullet = (text, bold_prefix="") => new Paragraph({
+      children: [
+        ...(bold_prefix ? [new TextRun({ text: bold_prefix, bold: true, size: 22, color: DARK, font: "Calibri" })] : []),
+        new TextRun({ text, size: 22, color: DARK, font: "Calibri" })
+      ],
+      bullet: { level: 0 },
+      ...sp(0, 80),
+    });
+
+    // Helper: privilege block
+    const privilege = (num, title, desc) => [
+      new Paragraph({
+        children: [new TextRun({ text: `${num}. ${title}`, bold: true, color: GREEN, size: 22, font: "Calibri" })],
+        ...sp(140, 60),
+      }),
+      body(desc),
+    ];
+
+    // Helper: note paragraph
+    const note = (text) => new Paragraph({
+      children: [
+        new TextRun({ text: "Note: ", bold: true, color: GREEN, size: 20, font: "Calibri" }),
+        new TextRun({ text, size: 20, color: "166534", font: "Calibri" }),
+      ],
+      shading: { type: ShadingType.SOLID, color: NOTE_BG },
+      indent: { left: 180 },
+      border: { left: { style: BorderStyle.SINGLE, size: 8, color: GREEN } },
+      ...sp(120, 160),
+    });
+
+    // Helper: table
+    const makeTable = (headers, rows) => new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({
+          tableHeader: true,
+          children: headers.map(h => new TableCell({
+            children: [new Paragraph({
+              children: [new TextRun({ text: h, bold: true, color: WHITE, size: 20, font: "Calibri" })],
+              ...sp(60, 60),
+            })],
+            shading: { type: ShadingType.SOLID, color: GREEN },
+          }))
+        }),
+        ...rows.map((row, i) => new TableRow({
+          children: row.map(cell => new TableCell({
+            children: [new Paragraph({
+              children: [new TextRun({ text: cell, size: 20, font: "Calibri", color: DARK })],
+              ...sp(60, 60),
+            })],
+            shading: { type: ShadingType.SOLID, color: i % 2 === 1 ? ROW_ALT : WHITE },
+          }))
+        }))
+      ]
+    });
+
+    // Helper: FAQ item
+    const faq = (q, a) => [
+      new Paragraph({
+        children: [new TextRun({ text: q, bold: true, color: GREEN, size: 22, font: "Calibri" })],
+        ...sp(140, 60),
+      }),
+      body(a),
+    ];
+
+    const space = (n=200) => new Paragraph({ children: [new TextRun("")], spacing: { after: n } });
+
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: { margin: { top: 1000, bottom: 1000, left: 1080, right: 1080 } }
+        },
+        headers: {
+          default: new Header({
+            children: [new Paragraph({
+              children: [
+                new TextRun({ text: "PAPSI Partner Schools Program", bold: true, color: GREEN, size: 18, font: "Calibri" }),
+                new TextRun({ text: "   |   Version 1.0   |   Effective: June 2025", color: "888888", size: 16, font: "Calibri" }),
+              ],
+              border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: GREEN } },
+              spacing: { after: 120 },
+            })]
+          })
+        },
+        footers: {
+          default: new Footer({
+            children: [new Paragraph({
+              children: [new TextRun({ text: "papsicenter.com   |   PAPSI Training Center (Facebook)", size: 16, color: "888888", font: "Calibri" })],
+              alignment: AlignmentType.CENTER,
+              border: { top: { style: BorderStyle.SINGLE, size: 6, color: GREEN } },
+              spacing: { before: 120 },
+            })]
+          })
+        },
+        children: [
+          // ── COVER ──
+          new Paragraph({
+            children: [new TextRun({ text: "PHILIPPINE ASSOCIATION OF PHYSICS AND SCIENCE INSTRUCTORS", size: 20, color: WHITE, bold: true, font: "Calibri" })],
+            shading: { type: ShadingType.SOLID, color: GREEN },
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 200, after: 80 },
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: "PAPSI Partner Schools Program", bold: true, size: 52, color: WHITE, font: "Calibri" })],
+            shading: { type: ShadingType.SOLID, color: GREEN },
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 80 },
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: "Strengthening Science Education Through Institutional Collaboration and Teacher Professional Development", italics: true, size: 24, color: "e6f5ec", font: "Calibri" })],
+            shading: { type: ShadingType.SOLID, color: GREEN },
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 80 },
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: "Version 1.0   |   Effective: June 2025", size: 20, color: WHITE, font: "Calibri" })],
+            shading: { type: ShadingType.SOLID, color: DARK_GREEN },
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 },
+          }),
+
+          // ── SECTION 1 ──
+          sHead("1", "Introduction / Background"),
+          body("The Philippine Association of Physics and Science Instructors (PAPSI) is a professional organization dedicated to advancing the quality of physics and science education in the Philippines. Since its establishment, PAPSI has been committed to the continuous professional growth of science educators through seminars, webinars, workshops, conferences, and collaborative educational initiatives."),
+          body("The PAPSI Partner Schools Program is established to build stronger institutional partnerships with schools that actively support the professional growth of science educators through PAPSI membership and participation. By formalizing these partnerships, PAPSI aims to create a more connected, supported, and empowered science education community across the country."),
+
+          // ── SECTION 2 ──
+          sHead("2", "Objectives of the Program"),
+          bullet("Strengthen collaboration between PAPSI and educational institutions."),
+          bullet("Support continuous professional development for science teachers."),
+          bullet("Encourage active participation in PAPSI programs and activities."),
+          bullet("Recognize schools that actively support science teacher development."),
+          bullet("Build a stronger science education community through institutional partnerships."),
+
+          // ── SECTION 3 ──
+          sHead("3", "Scope of the Partnership"),
+          body("The program is open to public and private schools, colleges, universities, and educational institutions in the Philippines with active science educators who participate in PAPSI activities and maintain active PAPSI membership. Institutions operating under special or alternative education frameworks (e.g., international schools, homeschool organizations) may be considered on a case-by-case basis upon application."),
+
+          // ── SECTION 4 ──
+          sHead("4", "Partnership Categories"),
+          makeTable(
+            ["Active PAPSI Members", "Partnership Category", "Description"],
+            [
+              ["5–9 Members", "Associate Partner School", "Entry-level institutional partnership"],
+              ["10–14 Members", "Institutional Partner School", "Established institutional partnership"],
+              ["15–19 Members", "Distinguished Partner School", "Advanced institutional partnership"],
+              ["20 or More Members", "Premier Partner School", "Highest level of institutional partnership"],
+            ]
+          ),
+
+          // ── SECTION 5 ──
+          sHead("5", "Definitions"),
+          makeTable(
+            ["Term", "Definition"],
+            [
+              ["Active PAPSI Membership", "A paid and current PAPSI membership for the applicable calendar or academic year."],
+              ["Partner School Coordinator", "A designated contact person within the partner school responsible for PAPSI-related communications and coordination."],
+              ["Group Registration", "A collective registration of two or more active PAPSI-member teachers from the same institution for a single PAPSI event or program."],
+              ["Partnership Category", "The tier of institutional partnership determined by the number of active PAPSI members in the school."],
+              ["Annual Review", "The yearly evaluation of a partner school's active membership count and participation conducted every January."],
+            ]
+          ),
+
+          // ── SECTION 6 ──
+          sHead("6", "Requirements for Partnership"),
+          bullet("Schools must maintain the required number of active PAPSI members corresponding to their partnership category."),
+          bullet("Teachers included in the partnership membership count must have active and paid PAPSI membership for the current year."),
+          bullet("Schools are required to designate a Partner School Coordinator for PAPSI-related communications and coordination."),
+          bullet("Partner schools are encouraged to actively participate in PAPSI activities and programs throughout the partnership period."),
+
+          // ── SECTION 7 ──
+          sHead("7", "Privileges of PAPSI Partner Schools"),
+          ...privilege("1", "Priority Training Announcements", "Partner schools will receive priority messages and early announcements regarding upcoming PAPSI seminars, webinars, workshops, conferences, and training programs."),
+          ...privilege("2", "School Recognition on the PAPSI Website", "The school name and partnership category will be officially listed on the PAPSI website as a recognized PAPSI Partner School within 30 days of approved partnership."),
+          ...privilege("3", "Priority Access to Limited-Slot Trainings", "Partner schools may receive priority consideration for trainings, workshops, or special events with limited participant slots."),
+          ...privilege("4", "Eligibility for Exclusive Partner-School Activities", "Partner schools may be invited to selected exclusive activities, pilot programs, consultations, or collaborative educational initiatives organized by PAPSI."),
+          ...privilege("5", "Digital Recognition Certificate", "Partner schools shall receive a digital certificate or recognition badge acknowledging their active partnership and support for science teacher professional development, issued within 30 days of approved partnership."),
+          ...privilege("6", "Feature Opportunities", "Selected partner schools shall be featured on PAPSI social media pages or the PAPSI website for their active participation in science education initiatives and teacher development programs."),
+          ...privilege("7", "Streamlined School-Based Coordination", "Partner schools may coordinate institutional or group participation more efficiently through designated communication channels and consolidated registration processes."),
+          ...privilege("8", "Access to Future Collaborative Programs", "Partner schools may be considered for future collaborative projects, teacher development initiatives, research activities, or educational partnerships organized by PAPSI."),
+          note("Specific privileges may vary by partnership category. Higher-tier partner schools (Distinguished and Premier) may be given additional priority consideration for exclusive activities, feature opportunities, and future collaborative programs."),
+
+          // ── SECTION 8 ──
+          sHead("8", "Responsibilities of Partner Schools"),
+          bullet("Encourage teachers to maintain active PAPSI membership throughout the partnership period."),
+          bullet("Disseminate PAPSI announcements and opportunities within the school community."),
+          bullet("Support and facilitate teacher participation in PAPSI activities and programs."),
+          bullet("Maintain professional collaboration and open communication with PAPSI."),
+          bullet("Ensure that the designated Partner School Coordinator remains accessible and responsive to PAPSI communications."),
+          note("Schools that fail to maintain the minimum membership requirement or do not fulfill their responsibilities may be subject to downgrading of partnership category or removal from the program upon annual review."),
+
+          // ── SECTION 9 ──
+          sHead("9", "Responsibilities of PAPSI"),
+          bullet("Provide timely updates and announcements regarding PAPSI activities and programs."),
+          bullet("Organize relevant and high-quality professional development programs for science educators."),
+          bullet("Recognize and acknowledge partner schools appropriately through official channels."),
+          bullet("Maintain open communication and coordination with partner institutions."),
+          bullet("Publish an annual program summary or report of PAPSI activities and partnerships to promote transparency and accountability."),
+
+          // ── SECTION 10 ──
+          sHead("10", "Application and Renewal Process"),
+          body("Schools may apply for partnership through the official PAPSI application process by submitting the required information regarding active PAPSI members within the institution. The application form is available on the PAPSI website at papsicenter.com."),
+          body("Partnership status is reviewed and renewed annually every January. Schools must reconfirm their active membership count to maintain or upgrade their partnership category. Schools that fall below the minimum membership threshold during the year will be notified and given an opportunity to meet the requirement before the annual review. Failure to meet the requirement at the time of renewal will result in a downgrade to the appropriate category or removal from the program."),
+
+          // ── SECTION 11 ──
+          sHead("11", "Recognition and Public Listing"),
+          body("Partner schools will be recognized through the following channels within 30 days of approved partnership or renewal:"),
+          bullet("Official listing on the PAPSI website (papsicenter.com)"),
+          bullet("Digital recognition certificate or partner-school badge"),
+          bullet("Social media acknowledgments on official PAPSI pages"),
+          bullet("Inclusion in official PAPSI announcements and communications"),
+
+          // ── SECTION 12 ──
+          sHead("12", "Future Opportunities"),
+          body("PAPSI is committed to expanding the Partner Schools Program to provide greater value to institutional partners. Future directions under active consideration include:"),
+          bullet("School-Based Training Programs — Bringing PAPSI-organized trainings and workshops directly to partner school campuses."),
+          bullet("Curriculum Consultation Services — Offering guidance and resources to support science curriculum planning and development."),
+          bullet("Collaborative Research Initiatives — Engaging partner schools in joint research activities, publications, and educational studies."),
+          body("Additional opportunities and benefits may be introduced as the program grows and evolves."),
+
+          // ── SECTION 13 ──
+          sHead("13", "Contact Information"),
+          body("Philippine Association of Physics and Science Instructors (PAPSI)", { bold: true }),
+          bullet("Website: papsicenter.com"),
+          bullet("Facebook Page: PAPSI Training Center"),
+          body("For partnership inquiries, please visit the PAPSI website or send a message through the official PAPSI Facebook Page."),
+
+          // ── SECTION 14 ──
+          sHead("14", "Glossary"),
+          makeTable(
+            ["Term", "Definition"],
+            [
+              ["Active PAPSI Membership", "A paid and current PAPSI membership for the applicable calendar or academic year."],
+              ["Partner School Coordinator", "A designated contact person within the partner school responsible for PAPSI-related communications and coordination."],
+              ["Group Registration", "A collective registration of two or more active PAPSI-member teachers from the same institution for a single PAPSI event or program."],
+              ["Partnership Category", "The tier of institutional partnership (Associate, Institutional, Distinguished, or Premier) determined by the number of active PAPSI members in the school."],
+              ["Annual Review", "The yearly evaluation of a partner school's active membership count and participation conducted every January."],
+            ]
+          ),
+
+          // ── SECTION 15 ──
+          sHead("15", "Effectivity and Approvals"),
+          body("This document is hereby adopted and approved for implementation effective June 2025."),
+          space(140),
+          makeTable(
+            ["Role", "Name", "Signature", "Date"],
+            [
+              ["PAPSI President", "                              ", "                              ", "                    "],
+              ["Program Coordinator", "                              ", "                              ", "                    "],
+              ["Secretary", "                              ", "                              ", "                    "],
+            ]
+          ),
+
+          // ── ANNEX A ──
+          sHead("Annex A", "Frequently Asked Questions (FAQ)"),
+          ...faq("Q1: Who can apply for the PAPSI Partner Schools Program?", "Any public or private school, college, university, or educational institution in the Philippines with at least five (5) active PAPSI-member science educators may apply."),
+          ...faq("Q2: How do we apply?", "Visit the PAPSI website at papsicenter.com and complete the official partner school application form. Provide the names and membership details of active PAPSI members within your institution."),
+          ...faq("Q3: What counts as active PAPSI membership?", "A teacher is considered an active member if they have a paid and current PAPSI membership for the applicable year."),
+          ...faq("Q4: Can our school be upgraded to a higher partnership category?", "Yes. Schools that increase their number of active PAPSI members to meet the threshold of a higher category may apply for an upgrade during the annual review period every January."),
+          ...faq("Q5: What happens if our school falls below the required number of members?", "PAPSI will notify the school and provide an opportunity to meet the requirement. If the school is unable to meet the threshold by the annual review, the partnership category will be adjusted accordingly or the partnership may be placed on hold."),
+          ...faq("Q6: Are the privileges the same for all partnership categories?", "Core privileges apply to all partner schools. However, higher-tier partners (Distinguished and Premier) may receive additional priority consideration for exclusive activities, feature opportunities, and collaborative programs."),
+          ...faq("Q7: How will we receive our digital recognition certificate?", "The digital certificate will be sent to the designated Partner School Coordinator via official PAPSI communication channels within 30 days of approved partnership."),
+          ...faq("Q8: Is there a fee to join the PAPSI Partner Schools Program?", "There is no separate fee for the partnership program itself. However, individual teacher members must maintain active and paid PAPSI membership to be counted toward the school's partnership category."),
+        ]
+      }]
+    });
+
+    status.textContent = 'Packing file...';
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'PAPSI_Partner_Schools_Program.docx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    status.textContent = '✓ Downloaded successfully!';
+    setTimeout(() => { status.textContent = ''; }, 4000);
+  } catch (err) {
+    console.error(err);
+    status.textContent = '✗ Error: ' + err.message;
+  }
+  btn.disabled = false;
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Failed to load: ' + src));
+    document.head.appendChild(s);
+  });
+}
+</script>
+<script src="plugins/jQuery/jquery.min.js"></script>
+<script src="plugins/bootstrap/bootstrap.min.js"></script>
+<script>
+  $(window).scroll(function () {
+    var height = $('.top-header').innerHeight();
+    if ($('header').offset().top > 10) {
+      $('.top-header').addClass('hide');
+      $('.navigation').addClass('nav-bg');
+      $('.navigation').css('margin-top', '-' + height + 'px');
+    } else {
+      $('.top-header').removeClass('hide');
+      $('.navigation').removeClass('nav-bg');
+      $('.navigation').css('margin-top', '0');
+    }
+  });
+</script>
+</body>
+</html>

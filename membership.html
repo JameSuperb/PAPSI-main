@@ -86,18 +86,32 @@
       color: #4b5563;
       font-size: 0.96rem;
     }
+    .perk-media {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-bottom: 1px solid #e7ecef;
+    }
+    @media (min-width: 992px) {
+      .perk-media {
+        height: 160px;
+        object-fit: contain;
+        background: #ffffff;
+      }
+    }
     .perk-title {
       padding: 0.75rem 0.9rem 0.4rem 0.9rem;
       font-weight: 600;
+      font-size: 1.12rem;
+      line-height: 1.35;
       color: #1f3f33;
     }
-    /* 2-column perk grid */
+    /* Single-column perk grid */
     .perk-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 0.75rem;
     }
-    @media (max-width: 600px) { .perk-grid { grid-template-columns: 1fr; } }
     /* Per-perk accent colors */
     .perk-item[data-color='green']  { border-left: 4px solid #22a06b; }
     .perk-item[data-color='blue']   { border-left: 4px solid #3b82f6; }
@@ -105,13 +119,12 @@
     .perk-item[data-color='teal']   { border-left: 4px solid #14b8a6; }
     .perk-item[data-color='violet'] { border-left: 4px solid #8b5cf6; }
     .perk-item[data-color='rose']   { border-left: 4px solid #f43f5e; }
-    /* 2-column perk grid */
+    /* Single-column perk grid */
     .perk-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 0.75rem;
     }
-    @media (max-width: 600px) { .perk-grid { grid-template-columns: 1fr; } }
     /* Per-perk accent colors via left border */
     .perk-item[data-color='green']  { border-left: 4px solid #22a06b; }
     .perk-item[data-color='blue']   { border-left: 4px solid #3b82f6; }
@@ -336,32 +349,38 @@
 
             <div class="perk-grid">
               <div class="perk-item" data-color="green">
-                <div class="perk-title">📚 Professional Development</div>
+                <img src="images/Membership/professionaldevelopment.jpg" alt="Professional Development" class="perk-media">
+                <div class="perk-title">1. 📚 Professional Development</div>
                 <div class="perk-note">Get priority access to PAPSI webinars, seminars, and upskilling sessions — a great way to keep your teaching fresh, practical, and future-ready.</div>
               </div>
 
               <div class="perk-item" data-color="blue">
-                <div class="perk-title">🧪 Resource Access</div>
+                <img src="images/Membership/resourceaccess.jpg" alt="Resource Access" class="perk-media">
+                <div class="perk-title">2. 🧪 Resource Access</div>
                 <div class="perk-note">Unlock curated science teaching materials you can use directly in class. Less time searching, more time actually teaching with confidence.</div>
               </div>
 
               <div class="perk-item" data-color="amber">
-                <div class="perk-title">🏅 Certification Pathway</div>
+                <img src="images/Membership/certificationpathway.jpg" alt="Certification Pathway" class="perk-media">
+                <div class="perk-title">3. 🏅 Certification Pathway</div>
                 <div class="perk-note">Earn certificates through PAPSI activities and trainings. Every certificate you collect strengthens your portfolio and opens more career doors.</div>
               </div>
 
               <div class="perk-item" data-color="teal">
-                <div class="perk-title">🤝 Academic Network</div>
+                <img src="images/Membership/academicnetwork.jpg" alt="Academic Network" class="perk-media">
+                <div class="perk-title">4. 🤝 Academic Network</div>
                 <div class="perk-note">Connect with physics and science educators nationwide. Share insights, collaborate on ideas, and grow alongside people who truly understand what you do.</div>
               </div>
 
               <div class="perk-item" data-color="violet">
-                <div class="perk-title">🌟 Career Visibility</div>
+                <img src="images/Membership/careervisibility.jpg" alt="Career Visibility" class="perk-media">
+                <div class="perk-title">5. 🌟 Career Visibility</div>
                 <div class="perk-note">Being a PAPSI member signals professionalism. It tells your school and peers you're committed to excellence in science education.</div>
               </div>
 
               <div class="perk-item" data-color="rose">
-                <div class="perk-title">🌏 Community Impact</div>
+                <img src="images/Membership/communityimpact.jpg" alt="Community Impact" class="perk-media">
+                <div class="perk-title">6. 🌏 Community Impact</div>
                 <div class="perk-note">Your membership contributes to advancing quality science education in the Philippines. Together, PAPSI members help shape the future of science teaching.</div>
               </div>
             </div>
@@ -371,7 +390,6 @@
                  class="btn btn-success btn-lg px-5 py-2" style="font-weight:700;letter-spacing:0.02em;">
                 🎓 Join Now — Only Php 500/year
               </a>
-              <p class="mt-2 mb-0" style="font-size:0.88rem;color:#5a7a6a;">Already applied? Check your status above.</p>
             </div>
           </div>
         </div>

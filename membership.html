@@ -1154,6 +1154,11 @@
     }
     if (_checking) return;
     setPending(true);
+    if (OUT) {
+      OUT.className = 'alert alert-secondary';
+      OUT.innerHTML = '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>'
+                    + 'Please wait while we check your email in the PAPSI database\u2026';
+    }
     try{
       // Web POST to membershipcheck with email in query string
       var url = BASE + '?SH=Sheet1&func=membershipcheck&email=' + encodeURIComponent(email);

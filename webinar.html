@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <!--
  // WEBSITE: https://themefisher.com
@@ -13,7 +13,7 @@
   <!-- Basic Page Needs
 	================================================== -->
   <meta charset="utf-8">
-  <title>PAPSI (Promo)</title>
+  <title>PAPSI</title>
 
   <!-- Mobile Specific Metas
 	================================================== -->
@@ -46,6 +46,485 @@
   <link rel="apple-touch-icon" sizes="180x180" href="images/favicon.png">
   <link rel="shortcut icon" href="images/favicon.png">
   <meta name="theme-color" content="#166938">
+
+  <style>
+    /* ── Webinar Picker ── */
+    .webinar-picker-header h4 { color: #166938; letter-spacing: -0.3px; }
+
+    .webinar-card {
+      position: relative;
+      margin-bottom: 14px;
+    }
+    .webinar-card-label {
+      display: block;
+      cursor: pointer;
+      margin: 0;
+    }
+    .webinar-card-inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: 2px solid #e4e4e4;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    .webinar-card-inner:hover {
+      border-color: #4caf50;
+      box-shadow: 0 6px 20px rgba(22,105,56,0.12);
+      transform: translateY(-2px);
+    }
+    .webinar-card.selected .webinar-card-inner {
+      border-color: #166938;
+      background: #f0faf3;
+      box-shadow: 0 6px 24px rgba(22,105,56,0.18);
+    }
+
+    /* Thumbnail */
+    .webinar-img-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 100px;
+    }
+    .webinar-thumb {
+      width: 100px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+    .webinar-card-inner:hover .webinar-thumb { transform: scale(1.04); }
+    .zoom-hint {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 5px;
+      border-radius: 5px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .webinar-img-wrap:hover .zoom-hint { opacity: 1; }
+
+    /* Info */
+    .webinar-info { flex: 1; }
+    .webinar-title {
+      font-weight: 700;
+      font-size: 0.97rem;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .webinar-meta span {
+      display: block;
+      font-size: 0.87rem;
+      color: #555;
+      margin-bottom: 3px;
+    }
+
+    /* Check circle */
+    .check-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: transparent;
+      transition: border-color 0.25s, background 0.25s, color 0.25s;
+      flex-shrink: 0;
+    }
+    .webinar-card.selected .check-circle {
+      border-color: #166938;
+      background: #166938;
+      color: #fff;
+    }
+
+    /* Fee badge */
+    .webinar-fee {
+      display: inline-block;
+      margin-top: 6px;
+      background: #166938;
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    @media (max-width: 576px) {
+      .webinar-card-inner { flex-wrap: wrap; gap: 12px; }
+      .webinar-img-wrap, .webinar-thumb { width: 80px; height: 64px; }
+      .check-circle { width: 26px; height: 26px; font-size: 13px; }
+    }
+
+    /* ── Registration Process ── */
+    #webinarRegSection {
+      display: none;
+      margin-top: 24px;
+      border-radius: 16px;
+      border: 1.5px solid #d1e8db;
+      background: linear-gradient(135deg, #f0faf4 0%, #f8fdfa 100%);
+      overflow: hidden;
+    }
+    #webinarRegSection .reg-header {
+      padding: 16px 22px 0;
+    }
+    #webinarRegSection .reg-header h5 {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #166938;
+      margin-bottom: 4px;
+    }
+    #webinarRegSection .reg-header p {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 0;
+    }
+    #webinarRegSection .reg-body {
+      padding: 18px 22px 22px;
+    }
+    #webinarRegSection .reg-divider {
+      border: none;
+      border-top: 1px solid #d1e8db;
+      margin: 14px 0;
+    }
+    /* Google Sign-In centering */
+    #webinarGoogleSignIn { display: flex; justify-content: center; }
+    /* Signed-in state pill */
+    #webinarGoogleSignedIn {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1.5px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(22,105,56,0.07);
+    }
+    #webinarGoogleAvatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #bbf7d0;
+      flex-shrink: 0;
+    }
+    #webinarGoogleNameText { font-weight: 700; font-size: 0.93rem; color: #1f3f33; }
+    #webinarGoogleEmailText { font-size: 0.82rem; color: #4b5563; }
+    #webinarGoogleSwitchBtn {
+      background: none;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      color: #495057;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-left: auto;
+      transition: background 0.15s;
+    }
+    #webinarGoogleSwitchBtn:hover { background: #f0f0f0; }
+    #webinarRegHint {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: 6px;
+    }
+    #webinarCheckResult {
+      font-size: 0.88rem;
+      margin-top: 10px;
+    }
+
+    /* ── Fee Summary ── */
+    #feeSummaryBox {
+      display: none;
+      margin-top: 20px;
+      border-radius: 14px;
+      border: 1.5px solid #dde3ea;
+      background: #f8f9fc;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    #feeSummaryBox .fee-header {
+      background: #166938;
+      color: #fff;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+    }
+    #feeSummaryBox .fee-body {
+      padding: 16px 20px;
+    }
+    .fee-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      padding: 5px 0;
+      color: #444;
+      border-bottom: 1px solid #edf0f4;
+    }
+    .fee-row:last-child { border-bottom: none; }
+    .fee-row .fee-label { flex: 1; }
+    .fee-row .fee-amount { font-weight: 600; white-space: nowrap; }
+    .fee-discount-row .fee-label { color: #166938; }
+    .fee-discount-row .fee-amount { color: #166938; }
+    .fee-total-row {
+      margin-top: 6px;
+      padding-top: 10px !important;
+      border-top: 2px solid #c8d6e0 !important;
+      font-size: 1rem !important;
+    }
+    .fee-total-row .fee-label { font-weight: 700; color: #1a1a2e; }
+    .fee-total-row .fee-amount { font-weight: 800; color: #166938; font-size: 1.1rem; }
+    .fee-discount-badge {
+      display: inline-block;
+      margin-left: 8px;
+      background: #e6f4ec;
+      color: #166938;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      vertical-align: middle;
+    }
+
+    /* ── VenoBox overrides for webinar images ── */
+    /* Constrain image so it always fits the viewport */
+    .vbox-container img.figlio {
+      max-height: 72vh !important;
+      width: auto !important;
+      max-width: 88vw !important;
+      border-radius: 8px;
+    }
+    /* Vertically center content and leave room for close button */
+    .vbox-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .vbox-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 10px 0 !important;
+    }
+    /* Custom close button */
+    .vbox-custom-close {
+      display: block;
+      margin: 18px auto 24px;
+      padding: 10px 36px;
+      background: #fff;
+      color: #222;
+      border: none;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+      transition: background 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .vbox-custom-close:hover {
+      background: #f0f0f0;
+      transform: scale(1.03);
+    }
+
+    /* ── Membership Status Overlay ── */
+    #wrfStatusBackdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 1080;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #wrfStatusCard {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.32);
+      animation: wrfFadeIn .22s ease;
+    }
+    @keyframes wrfFadeIn {
+      from { opacity:0; transform:translateY(-18px) scale(.97); }
+      to   { opacity:1; transform:none; }
+    }
+    #wrfStatusCard .wrf-status-header {
+      background: linear-gradient(135deg, #0f5132 0%, #166938 55%, #1a7c42 100%);
+      padding: 1rem 1.1rem 1rem 1.25rem;
+      display: flex; align-items: center; gap: .65rem;
+      position: relative;
+    }
+    #wrfStatusCard .wrf-status-header::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg,#22c55e,#86efac,#22c55e);
+    }
+    #wrfStatusCard .wrf-status-header .wrf-hicon {
+      font-size: 1.25rem;
+      background: rgba(255,255,255,.18);
+      border-radius: 50%; width:38px; height:38px;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    #wrfStatusCard .wrf-status-header .wrf-htxt { flex:1; min-width:0; }
+    #wrfStatusCard .wrf-status-header h6 { margin:0; font-weight:700; font-size:1rem; color:#fff; }
+    #wrfStatusCard .wrf-status-header small { color:rgba(255,255,255,.82); font-size:.8rem; }
+    #wrfStatusCard .wrf-status-header .wrf-close-btn {
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      width: 30px; height: 30px; border-radius: 50%;
+      font-size: 1.1rem; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s; flex-shrink: 0;
+    }
+    #wrfStatusCard .wrf-status-header .wrf-close-btn:hover { background: rgba(255,255,255,.3); }
+    #wrfStatusCard .wrf-status-body { background:#fff; padding:1.25rem 1.3rem; }
+    #wrfStatusCard .wrf-mrm-card {
+      background:#f8faf9; border:1px solid #e2ede7; border-radius:10px; padding:1rem 1.1rem;
+    }
+    #wrfStatusCard .wrf-mrm-table { width:100%; font-size:.9rem; border-collapse:collapse; }
+    #wrfStatusCard .wrf-mrm-table td { padding:.3rem 0; vertical-align:top; }
+    #wrfStatusCard .wrf-mrm-label { color:#6b7280; width:55%; font-size:.87rem; }
+    #wrfStatusCard .wrf-mrm-value { font-weight:700; color:#166938; }
+    #wrfStatusCard .wrf-status-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 14px; border-radius:20px; font-size:.84rem; font-weight:700; margin-top:8px; }
+    #wrfStatusCard .wrf-status-badge.active { background:#dcfce7; color:#166938; border:1.5px solid #86efac; }
+    #wrfStatusCard .wrf-status-badge.expired { background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; }
+    #wrfStatusCard .wrf-status-footer {
+      background:#f0f7f3; border-top:1px solid #d1fae5;
+      padding:.85rem 1.3rem; display:flex; gap:.6rem; justify-content:flex-end;
+    }
+    #wrfStatusCard .btn-wrf-no {
+      border:1.5px solid #ced4da; color:#495057; background:#fff;
+      border-radius:8px; font-weight:600; padding:.48rem 1.2rem; cursor:pointer;
+      transition:background .15s; font-size:.9rem;
+    }
+    #wrfStatusCard .btn-wrf-no:hover { background:#f0f0f0; }
+    #wrfStatusCard .btn-wrf-yes {
+      background:linear-gradient(135deg,#166938,#22a06b); color:#fff; border:none;
+      border-radius:8px; font-weight:700; padding:.48rem 1.8rem; cursor:pointer;
+      box-shadow:0 3px 10px rgba(22,105,56,.28); transition:filter .15s; font-size:.95rem;
+    }
+    #wrfStatusCard .btn-wrf-yes:hover { filter:brightness(1.08); }
+
+    /* ── Registration Form Section (inline, not modal) ── */
+    #wrfFormSection {
+      display: none;
+      margin-top: 24px;
+    }
+    #wrfFormSection .wrf-form-header {
+      background: linear-gradient(135deg, #0f5132 0%, #166938 55%, #1a7c42 100%);
+      border-radius: 14px 14px 0 0;
+      padding: 1.1rem 1.4rem;
+      display: flex; align-items: center; gap: .65rem;
+      position: relative;
+    }
+    #wrfFormSection .wrf-form-header::after {
+      content:''; position:absolute; bottom:-1px; left:0; right:0; height:3px;
+      background: linear-gradient(90deg,#22c55e,#86efac,#22c55e);
+    }
+    #wrfFormSection .wrf-form-header .wrf-hicon {
+      font-size:1.3rem; background:rgba(255,255,255,.15); border-radius:50%;
+      width:40px; height:40px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    #wrfFormSection .wrf-form-header h6 { margin:0; font-weight:700; font-size:1rem; color:#fff; }
+    #wrfFormSection .wrf-form-header small { color:rgba(255,255,255,.82); font-size:.8rem; }
+    #wrfFormSection .wrf-form-body {
+      background:#f8faf9; border:1.5px solid #d1e8db; border-top:none;
+      border-radius:0 0 14px 14px; padding:0 1.2rem 1.4rem;
+    }
+    /* Sections */
+    #wrfFormSection .wrf-section {
+      background:#fff; border:1px solid #e2ede7; border-radius:10px;
+      padding:1rem 1.1rem .25rem 1.1rem; margin-top:1.1rem;
+    }
+    #wrfFormSection .wrf-section-title {
+      font-size:.73rem; font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:#166938;
+      border-bottom:2px solid #d1fae5; padding-bottom:.4rem; margin-bottom:.9rem;
+      display:flex; align-items:center; gap:.4rem;
+    }
+    #wrfFormSection .wrf-section-title .wrf-sec-icon {
+      background:#d1fae5; border-radius:6px; padding:2px 6px; font-size:.95rem;
+    }
+    #wrfFormSection label { font-weight:600; font-size:.84rem; color:#1f3f33; margin-bottom:.28rem; display:block; }
+    #wrfFormSection .form-control {
+      border:1.5px solid #c8d8ce; border-radius:7px; font-size:.92rem;
+      transition:border-color .18s,box-shadow .18s; background:#fcfffe;
+    }
+    #wrfFormSection .form-control:focus {
+      border-color:#22a06b; box-shadow:0 0 0 3px rgba(34,160,107,.15); background:#fff;
+    }
+    #wrfFormSection .form-control[readonly] { background:#f0f9f4 !important; cursor:default; }
+    #wrfFormSection textarea.form-control { resize:vertical; }
+    /* Payment Summary */
+    #wrfPaySummary {
+      margin-top: 1.4rem;
+      border: 1.5px solid #d1e8db;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f0f9f4;
+    }
+    #wrfPaySummary .wrf-pay-title {
+      background: linear-gradient(135deg,#0f5132,#166938);
+      color: #fff; font-weight: 700; font-size: .9rem;
+      padding: .65rem 1.1rem; letter-spacing: .03em;
+    }
+    #wrfPaySummary .wrf-pay-body { padding: .85rem 1.1rem .6rem; }
+    #wrfPaySummary .wrf-pay-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-size: .9rem; color: #374151; padding: .22rem 0;
+    }
+    #wrfPaySummary .wrf-pay-row span:last-child { font-weight: 600; white-space: nowrap; }
+    #wrfPaySummary .wrf-pay-discount { color: #16a34a; font-size: .86rem; }
+    #wrfPaySummary .wrf-pay-discount span:last-child { color: #16a34a; }
+    #wrfPaySummary .wrf-pay-divider { border-color: #d1e8db; margin: .5rem 0; }
+    #wrfPaySummary .wrf-pay-member { color: #374151; }
+    #wrfPaySummary .wrf-pay-member-badge {
+      display: inline-block; font-size: .75rem; font-weight: 700;
+      border-radius: 20px; padding: 2px 9px; margin-left: 5px; vertical-align: middle;
+    }
+    #wrfPaySummary .wrf-pay-member-badge.active   { background:#dcfce7; color:#166938; border:1px solid #86efac; }
+    #wrfPaySummary .wrf-pay-member-badge.new      { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+    #wrfPaySummary .wrf-pay-member-badge.renewal  { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+    #wrfPaySummary .wrf-pay-total {
+      font-size: 1rem; font-weight: 800; color: #0f5132;
+      border-top: 2px solid #166938; margin-top: .35rem; padding-top: .45rem;
+    }
+    #wrfPaySummary .wrf-pay-total span:last-child { font-size: 1.1rem; color: #166938; }
+    /* Submit area */
+    #wrfFormSection .wrf-form-footer {
+      margin-top:1.25rem; padding-top:1rem; border-top:1px solid #d1fae5;
+      display:flex; gap:.6rem; justify-content:flex-end;
+    }
+    #wrfFormSection .btn-wrf-submit {
+      background:linear-gradient(135deg,#166938,#22a06b); color:#fff; border:none;
+      border-radius:8px; font-weight:700; padding:.5rem 2rem; cursor:pointer;
+      box-shadow:0 3px 10px rgba(22,105,56,.28); transition:filter .15s; font-size:.95rem;
+      letter-spacing:.02em;
+    }
+    #wrfFormSection .btn-wrf-submit:hover { filter:brightness(1.08); }
+    #wrfFormSection .btn-wrf-submit:disabled { opacity:.6; cursor:not-allowed; filter:none; }
+    #wrf_error { font-size:.87rem; }
+  </style>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 </head>
 
@@ -117,418 +596,384 @@
       <div class="container">
         <div class="row">
           <div class="col-12">
-            <img src="images/headerxmas2025promo.png" class="img-fluid w-100" alt="PAPSI 2025 Christmas Promo Header">
+            <img src="images/Header PAPSI webinar.png" class="img-fluid w-100" alt="PAPSI Webinar Header">
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Promo Overview -->
-    <section class="pt-3 pb-4" aria-labelledby="promo-overview">
+    <!-- Registration Form Intro -->
+    <section class="py-4">
       <div class="container">
         <div class="row">
           <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-overview" class="h4">2025 Christmas Sale: Webinar-On-Demand Special Offer</h2>
-            <p>
-              Celebrate the season of learning with PAPSI’s 2025 Christmas Sale! This special Webinar-on-Demand bundle features a curated collection of past PAPSI webinars, giving you access to high-quality trainings in Physics, Biology, Chemistry, science experiments, research writing, and systematic reviews at 50% OFF. Since these are recorded sessions, all trainings are fully self-paced and can be accessed anytime. Participants will enjoy seamless learning through the PAPSI Member Portal, a dedicated web app where video recordings and modules are centrally organized for easy viewing, downloading, and review. This limited-time Christmas offer lets you learn at your own pace—anytime, anywhere.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
+            <h2 class="text-center mb-3">Registration Form</h2>
+            <p>Use this form to register for the upcoming PAPSI webinars. Please complete the required information accurately to ensure proper processing of your registration, payment verification, certificates, and event updates. Once submitted, you will receive a confirmation email containing payment instructions and important event details.</p>
 
-    <!-- Registration Form -->
-    <section class="py-4 section-sep" aria-labelledby="promo-registration" style="background-color:#fffffb;">
-      <div class="container">
-        <div class="row">
-          <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-registration" class="h4">Registration Form</h2>
-            <form aria-label="Promo registration form" novalidate>
-              <!-- Honeypot: hidden field to trap bots -->
-              <input type="text" name="hp" autocomplete="off" tabindex="-1" aria-hidden="true" hidden>
+            <h5 class="font-weight-bold mt-4">What You Will Receive</h5>
+            <ul class="list-unstyled">
+              <li>&#128279; Zoom Meeting Link</li>
+              <li>&#128220; Official Acknowledgement Receipt</li>
+              <li>&#127891; Certificate of Participation</li>
+              <li>&#128187; Copy of the Webinar Module/Materials</li>
+              <li>&#127909; Access to the Webinar Recording</li>
+            </ul>
 
-              <div class="form-row">
-                <div class="form-group col-12">
-                  <label for="regEmail">Email Address*</label>
-                  <input type="email" class="form-control" id="regEmail" name="email" placeholder="name@example.com" required>
+            <h5 class="font-weight-bold mt-4">Exclusive for New and Renewing PAPSI Members</h5>
+            <ul class="list-unstyled">
+              <li>&#129352; Certificate of Membership</li>
+              <li>&#128284; Official PAPSI Member ID</li>
+            </ul>
+
+            <!-- Webinar Selection -->
+            <div class="mt-5" id="webinarSelection">
+              <div class="webinar-picker-header mb-3">
+                <h4 class="mb-0">&#128205; Choose the Webinar to Attend</h4>
+                <p class="text-muted mt-1 mb-0" style="font-size:0.9rem;">&#9989; You can pick multiple webinars</p>
+              </div>
+
+              <!-- Webinar 1 -->
+              <div class="webinar-card" id="card-webinar1">
+                <input type="checkbox" id="webinar1" name="webinars[]" value="webinar1" class="webinar-checkbox" hidden>
+                <label class="webinar-card-label" for="webinar1">
+                  <div class="webinar-card-inner">
+                    <div class="webinar-img-wrap">
+                      <a href="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-2_orig.png" class="webinar-vbox" data-gall="webinars" title="Scatter Plots and Correlation" onclick="event.stopPropagation();">
+                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-2_orig.png" alt="Webinar 1" class="webinar-thumb">
+                      </a>
+                      <span class="zoom-hint">&#128269; Zoom</span>
+                    </div>
+                    <div class="webinar-info">
+                      <div class="webinar-title">Scatter Plots and Correlation: Understanding Relationships Between Variables</div>
+                      <div class="webinar-meta">
+                        <span>&#128197; May 30, 2026</span>
+                        <span>&#9200; 10:00 AM &ndash; 12:00 PM</span>
+                        <span>&#127891; Dr. Russel Soltura</span>
+                      </div>
+                      <span class="webinar-fee">PHP 300</span>
+                    </div>
+                    <div class="check-circle">&#10003;</div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Webinar 2 -->
+              <div class="webinar-card" id="card-webinar2">
+                <input type="checkbox" id="webinar2" name="webinars[]" value="webinar2" class="webinar-checkbox" hidden>
+                <label class="webinar-card-label" for="webinar2">
+                  <div class="webinar-card-inner">
+                    <div class="webinar-img-wrap">
+                      <a href="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-3_orig.png" class="webinar-vbox" data-gall="webinars" title="Physics Through Correlation" onclick="event.stopPropagation();">
+                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-3_orig.png" alt="Webinar 2" class="webinar-thumb">
+                      </a>
+                      <span class="zoom-hint">&#128269; Zoom</span>
+                    </div>
+                    <div class="webinar-info">
+                      <div class="webinar-title">Physics Through Correlation: Using Experimental Data to Discover Physical Relationships</div>
+                      <div class="webinar-meta">
+                        <span>&#128197; May 30, 2026</span>
+                        <span>&#9200; 1:00 PM &ndash; 3:00 PM</span>
+                        <span>&#127891; Dr. James Salveo Olarve</span>
+                      </div>
+                      <span class="webinar-fee">PHP 300</span>
+                    </div>
+                    <div class="check-circle">&#10003;</div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Webinar 3 -->
+              <div class="webinar-card" id="card-webinar3">
+                <input type="checkbox" id="webinar3" name="webinars[]" value="webinar3" class="webinar-checkbox" hidden>
+                <label class="webinar-card-label" for="webinar3">
+                  <div class="webinar-card-inner">
+                    <div class="webinar-img-wrap">
+                      <a href="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-4_orig.png" class="webinar-vbox" data-gall="webinars" title="Chemistry Through Correlation" onclick="event.stopPropagation();">
+                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-4_orig.png" alt="Webinar 3" class="webinar-thumb">
+                      </a>
+                      <span class="zoom-hint">&#128269; Zoom</span>
+                    </div>
+                    <div class="webinar-info">
+                      <div class="webinar-title">Chemistry Through Correlation: Using Experimental Data to Discover Chemical Relationships</div>
+                      <div class="webinar-meta">
+                        <span>&#128197; June 6, 2026</span>
+                        <span>&#9200; 1:00 PM &ndash; 3:00 PM</span>
+                        <span>&#127891; Dr. David Penaloza Jr.</span>
+                      </div>
+                      <span class="webinar-fee">PHP 300</span>
+                    </div>
+                    <div class="check-circle">&#10003;</div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Fee Summary -->
+              <div id="feeSummaryBox" role="region" aria-live="polite" aria-label="Training Fee Summary">
+                <div class="fee-header">&#128179; Training Fee Summary</div>
+                <div class="fee-body">
+                  <div id="feeLineItems"></div>
+                  <div class="fee-row fee-discount-row" id="feeDiscountRow" style="display:none;">
+                    <span class="fee-label">&#127381; Bundle Discount <span class="fee-discount-badge">3 webinars</span></span>
+                    <span class="fee-amount" id="feeDiscountAmt">&minus; PHP 100</span>
+                  </div>
+                  <div class="fee-row fee-total-row">
+                    <span class="fee-label">Total</span>
+                    <span class="fee-amount" id="feeTotalAmt">PHP 0</span>
+                  </div>
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group col-12">
-                  <label for="regTitle">Title*</label>
-                  <input type="text" class="form-control" id="regTitle" name="title" list="titleOptions" placeholder="Mr., Ms., Mrs., Dr., Engr., or type...">
-                  <datalist id="titleOptions">
-                    <option value="Mr."></option>
-                    <option value="Ms."></option>
-                    <option value="Mrs."></option>
-                    <option value="Dr."></option>
-                    <option value="Engr."></option>
-                  </datalist>
-                  <small class="form-text text-muted">–You may type or choose</small>
+              <!-- Registration Process -->
+              <div id="webinarRegSection">
+                <div class="reg-header">
+                  <h5>&#9997;&#65039; Start the Registration Process</h5>
+                  <p>Sign in with the Google account you used for PAPSI registration or trainings.</p>
+                </div>
+                <hr class="reg-divider mx-3">
+                <div class="reg-body">
+
+                  <!-- Google Sign-In widget (shown before sign-in) -->
+                  <div id="webinarGoogleSignIn" class="mb-1">
+                    <div id="webinarGSignInBtn"></div>
+                  </div>
+
+                  <!-- Signed-in state (shown after sign-in) -->
+                  <div id="webinarGoogleSignedIn">
+                    <img id="webinarGoogleAvatar" src="" alt="Profile photo">
+                    <div style="flex:1;min-width:0;">
+                      <div id="webinarGoogleNameText"></div>
+                      <div id="webinarGoogleEmailText"></div>
+                    </div>
+                    <button type="button" id="webinarGoogleSwitchBtn">Switch Account</button>
+                  </div>
+
+                  <!-- Result / status area -->
+                  <div id="webinarCheckResult" aria-live="polite"></div>
+
+                  <p id="webinarRegHint">&#128274; Your information is only used to pre-fill your registration details.</p>
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group col-12">
-                  <label for="regFirstName">First Name*</label>
-                  <input type="text" class="form-control" id="regFirstName" name="firstName" required>
-                </div>
-                <div class="form-group col-12">
-                  <label for="regMI">Middle Initial</label>
-                  <input type="text" class="form-control" id="regMI" name="middleInitial" maxlength="3">
-                  <small class="form-text text-muted">– Leave blank if not applicable</small>
-                </div>
-                <div class="form-group col-12">
-                  <label for="regLastName">Last Name*</label>
-                  <input type="text" class="form-control" id="regLastName" name="lastName" required>
+              <!-- Membership Status Overlay (fixed backdrop + centered card) -->
+              <div id="wrfStatusBackdrop">
+                <div id="wrfStatusCard">
+                  <div class="wrf-status-header">
+                    <div class="wrf-hicon">&#127991;&#65039;</div>
+                    <div class="wrf-htxt">
+                      <h6>Membership Status</h6>
+                      <small>Your PAPSI membership record was found.</small>
+                    </div>
+                    <button type="button" class="wrf-close-btn" id="wrfStatusCloseBtn" aria-label="Close">&times;</button>
+                  </div>
+                  <div class="wrf-status-body">
+                    <div class="wrf-mrm-card">
+                      <p style="font-size:.93rem;color:#1f3f33;margin-bottom:.75rem;">We found an existing membership record linked to your email address.</p>
+                      <table class="wrf-mrm-table">
+                        <tr>
+                          <td class="wrf-mrm-label">&#128197; Membership Expiration Date:</td>
+                          <td class="wrf-mrm-value" id="wrf_expiryDate">&mdash;</td>
+                        </tr>
+                      </table>
+                      <div id="wrf_statusBadge" class="mt-2"></div>
+                      <hr style="border-color:#e2ede7;margin:.75rem 0;">
+                      <p style="font-size:.88rem;color:#4b5563;margin-bottom:0;">Would you like to proceed with the registration for the training?</p>
+                    </div>
+                  </div>
+                  <div class="wrf-status-footer">
+                    <button type="button" class="btn-wrf-no" id="wrfStatusNoBtn">&#10005; No, Thanks</button>
+                    <button type="button" class="btn-wrf-yes" id="wrfStatusYesBtn">&#128260; Yes</button>
+                  </div>
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group col-12">
-                  <label for="regSuffix">Suffix (e.g. Jr., Sr.)</label>
-                  <input type="text" class="form-control" id="regSuffix" name="suffix" placeholder="Jr., Sr., II, III">
-                  <small class="form-text text-muted">– Leave blank if not applicable</small>
-                  <small class="form-text text-muted">Note: Do not enter LPT, PhD, EdD, and the likes</small>
-                </div>
-              </div>
-
-              <button type="button" id="promoEnterBtn" class="btn btn-primary">Enter</button>
-              
-              <!-- Expanded Registration Details (shown after successful response) -->
-              <div id="promoExpanded" class="hidden mt-4" aria-live="polite">
-                <h3 class="h5">Additional Details</h3>
-
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <label for="regSpecialization">Specialization</label>
-                    <select class="form-control" id="regSpecialization" name="specialization">
-                      <option value="" selected>Select specialization</option>
-                      <option value="Physics">Physics</option>
-                      <option value="Biology">Biology</option>
-                      <option value="Chemistry">Chemistry</option>
-                      <option value="Earth Science">Earth Science</option>
-                      <option value="General Science">General Science</option>
-                      <option value="Research">Research</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    <input type="text" class="form-control mt-2 d-none" id="regSpecializationOther" name="specializationOther" placeholder="Please specify your specialization">
+              <!-- Registration Form (inline, shown after status check) -->
+              <div id="wrfFormSection">
+                <div class="wrf-form-header">
+                  <div class="wrf-hicon">&#128203;</div>
+                  <div>
+                    <h6>Registration Form</h6>
+                    <small>Please review and complete all required fields.</small>
                   </div>
                 </div>
+                <div class="wrf-form-body">
+                  <form id="wrfForm" novalidate autocomplete="off">
 
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <label for="regSchoolName">Name of School</label>
-                    <input type="text" class="form-control" id="regSchoolName" name="schoolName" placeholder="e.g., Sample National High School">
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <label for="regSchoolType">Type</label>
-                    <select class="form-control" id="regSchoolType" name="schoolType">
-                      <option value="" selected>Select type</option>
-                      <option value="Private">Private</option>
-                      <option value="Public">Public</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <label for="regSchoolAddress">Address of School</label>
-                    <input type="text" class="form-control" id="regSchoolAddress" name="schoolAddress" placeholder="Street, Barangay, City/Province">
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <label class="d-block">Choose Training Bundles (multiple selection allowed)</label>
-                    <div class="card border-0 shadow-sm mb-3 promo-bundles-card">
-                      <div class="card-body p-2">
-                        <div id="bundleGroup" class="list-group list-group-flush">
-                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundlePhysics">
-                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundlePhysics" name="bundleIds[]" value="physics">
-                            <span>Physics: Vectors, Motion, & Collision</span>
-                          </label>
-                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleBiology">
-                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleBiology" name="bundleIds[]" value="biology">
-                            <span>Biology: From Cells to Genetics</span>
-                          </label>
-                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleChemistry">
-                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleChemistry" name="bundleIds[]" value="chemistry">
-                            <span>Chemistry: From Electrons to Reactions</span>
-                          </label>
-                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleExperiment">
-                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleExperiment" name="bundleIds[]" value="experiment">
-                            <span>Guide to Science Experiment</span>
-                          </label>
-                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleResearch">
-                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleResearch" name="bundleIds[]" value="research">
-                            <span>Research Writing and Presentation</span>
-                          </label>
-                          <label class="list-group-item d-flex align-items-center bundle-item" for="bundleSystematic">
-                            <input class="form-check-input mr-2 bundle-check" type="checkbox" id="bundleSystematic" name="bundleIds[]" value="systematic">
-                            <span>Conducting Systematic Reviews</span>
-                          </label>
+                    <!-- Section 1: Personal Information -->
+                    <div class="wrf-section">
+                      <div class="wrf-section-title">
+                        <span class="wrf-sec-icon">&#128100;</span> Personal Information
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-2">
+                          <label for="wrf_title">&#127891; Title</label>
+                          <select class="form-control" id="wrf_title" name="title" required>
+                            <option value="">Select&hellip;</option>
+                            <option>Dr.</option><option>Ms.</option><option>Mr.</option>
+                            <option>Mrs.</option><option>Engr.</option>
+                            <option value="__other">Other&hellip;</option>
+                          </select>
+                          <input type="text" class="form-control mt-2 d-none" id="wrf_title_other" placeholder="Please specify">
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="wrf_firstname">&#9999;&#65039; First Name</label>
+                          <input type="text" class="form-control" id="wrf_firstname" name="firstname" required>
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label for="wrf_middleinitial">&#9999;&#65039; Middle Initial</label>
+                          <input type="text" class="form-control" id="wrf_middleinitial" name="middleinitial" maxlength="3">
+                          <small class="form-text text-muted">Leave blank if not applicable.</small>
+                        </div>
+                        <div class="form-group col-md-3">
+                          <label for="wrf_lastname">&#9999;&#65039; Last Name</label>
+                          <input type="text" class="form-control" id="wrf_lastname" name="lastname" required>
+                        </div>
+                        <div class="form-group col-md-2">
+                          <label for="wrf_suffix">&#128278; Suffix</label>
+                          <input type="text" class="form-control" id="wrf_suffix" name="suffix" placeholder="Jr., III">
+                          <small class="form-text text-muted">Leave blank if not applicable.</small>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <label>Webinars Included (You may choose your preferred certificate date)</label>
-                    <div id="webinarItems" class="mt-2"></div>
-                  </div>
-                </div>
-
-                <!-- Fees Summary (auto-computed) -->
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <div id="feesSummary" class="card border-0 shadow-sm d-none">
-                      <div class="card-body p-3">
-                        <h4 class="h6 mb-3">Fees Summary</h4>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                          <span class="text-muted">Membership Fee</span>
-                          <strong id="feeMembership">PHP 0</strong>
+                    <!-- Section 2: Contact Details -->
+                    <div class="wrf-section">
+                      <div class="wrf-section-title">
+                        <span class="wrf-sec-icon">&#128236;</span> Contact Details
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-6">
+                          <label for="wrf_email">&#128231; Email Address</label>
+                          <input type="email" class="form-control" id="wrf_email" name="email" readonly>
+                          <small class="form-text text-muted">Verified via Google Sign-In.</small>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                          <span class="text-muted">Training Fee</span>
-                          <strong id="feeTraining">PHP 0</strong>
-                        </div>
-                        <hr class="my-2"/>
-                        <div class="d-flex justify-content-between align-items-center">
-                          <span class="text-muted">Total</span>
-                          <strong id="feeTotal">PHP 0</strong>
+                        <div class="form-group col-md-6">
+                          <label for="wrf_mobile">&#128241; Mobile Number</label>
+                          <input type="tel" class="form-control" id="wrf_mobile" name="mobilenumber" placeholder="e.g. 09171234567" required>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <!-- Submit Registration (shown when any bundle is selected) -->
-                <div class="form-row">
-                  <div class="form-group col-12">
-                    <button type="button" id="submitRegBtn" class="btn btn-success d-none">Submit Registration</button>
-                  </div>
+                    <!-- Section 3: School & Professional Info -->
+                    <div class="wrf-section">
+                      <div class="wrf-section-title">
+                        <span class="wrf-sec-icon">&#127979;</span> School &amp; Professional Info
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-6">
+                          <label for="wrf_specialization">&#128300; Specialization</label>
+                          <select class="form-control" id="wrf_specialization" name="specialization" required>
+                            <option value="">Select specialization&hellip;</option>
+                            <option>Physics</option><option>Biology</option><option>Chemistry</option>
+                            <option>Natural Science</option><option>Physical Science</option>
+                            <option>General Science</option><option>Earth Science</option>
+                            <option>Mathematics</option><option value="__other">Other&hellip;</option>
+                          </select>
+                          <input type="text" class="form-control mt-2 d-none" id="wrf_specialization_other" placeholder="Please specify">
+                        </div>
+                        <div class="form-group col-md-6">
+                          <label for="wrf_school">&#127963;&#65039; Name of School</label>
+                          <input type="text" class="form-control" id="wrf_school" name="school"
+                            list="wrf_school_list" autocomplete="off" placeholder="Type to search&hellip;" required>
+                          <datalist id="wrf_school_list"></datalist>
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-4">
+                          <label for="wrf_schooltype">&#127970; School Type</label>
+                          <select class="form-control" id="wrf_schooltype" name="type" required>
+                            <option value="">Select type&hellip;</option>
+                            <option>Private</option><option>Public</option>
+                          </select>
+                        </div>
+                        <div class="form-group col-md-8">
+                          <label for="wrf_position">&#128188; Position</label>
+                          <select class="form-control" id="wrf_position" name="position" required>
+                            <option value="">Select position&hellip;</option>
+                            <option>Student</option><option>Teacher</option>
+                            <option>Subject Teacher</option><option>Master Teacher</option>
+                            <option>Head Teacher</option><option>Principal</option>
+                            <option>Instructor</option><option>Lecturer</option>
+                            <option>Assistant Professor</option><option>Associate Professor</option>
+                            <option>Professor</option><option>Trainer</option>
+                            <option value="__other">Other&hellip;</option>
+                          </select>
+                          <input type="text" class="form-control mt-2 d-none" id="wrf_position_other" placeholder="Please specify">
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="wrf_address">&#128205; Address of School</label>
+                        <textarea class="form-control" id="wrf_address" name="address" rows="2"
+                          placeholder="Street, Barangay, City/Municipality, Province" required></textarea>
+                      </div>
+                    </div>
+
+                    <!-- Section 4: Additional Information -->
+                    <div class="wrf-section">
+                      <div class="wrf-section-title">
+                        <span class="wrf-sec-icon">&#128172;</span> Additional Information
+                      </div>
+                      <div class="form-group">
+                        <label for="wrf_source">&#128226; How did you hear about the PAPSI webinar?</label>
+                        <select class="form-control" id="wrf_source" name="source" required>
+                          <option value="">Select one&hellip;</option>
+                          <option>From a colleague</option><option>School</option>
+                          <option>Facebook Page</option><option>Email</option>
+                          <option>Website</option><option>Text / SMS</option>
+                          <option>Advertisement</option><option value="__other">Other&hellip;</option>
+                        </select>
+                        <input type="text" class="form-control mt-2 d-none" id="wrf_source_other" placeholder="Please specify">
+                      </div>
+                      <div class="form-group mb-2">
+                        <label for="wrf_topics">&#127775; What area(s)/topic(s) would you like the speaker to highlight or add? <span class="text-muted font-weight-normal">(optional)</span></label>
+                        <textarea class="form-control" id="wrf_topics" name="topics" rows="3"
+                          placeholder="Share any specific topics or questions you would like the webinar to address&hellip;"></textarea>
+                      </div>
+                    </div>
+
+                    <div id="wrf_error" class="alert alert-danger d-none mt-3"></div>
+
+                    <!-- Payment Summary -->
+                    <div id="wrfPaySummary">
+                      <div class="wrf-pay-title">&#128179; Payment Summary</div>
+                      <div class="wrf-pay-body">
+                        <div id="wrfPayTrainingRows"></div>
+                        <div class="wrf-pay-row wrf-pay-discount d-none" id="wrfPayDiscountRow">
+                          <span>Bundle Discount (all 3 webinars)</span>
+                          <span>&minus; PHP 100</span>
+                        </div>
+                        <div class="wrf-pay-row" id="wrfPayTrainingTotalRow">
+                          <span>Training Fee Subtotal</span>
+                          <span id="wrfPayTrainingAmt">PHP 0</span>
+                        </div>
+                        <hr class="wrf-pay-divider">
+                        <div class="wrf-pay-row wrf-pay-member" id="wrfPayMemberRow">
+                          <span>
+                            PAPSI Membership
+                            <span class="wrf-pay-member-badge new" id="wrfPayMemberBadge">New</span>
+                          </span>
+                          <span id="wrfPayMemberAmt">PHP 500</span>
+                        </div>
+                        <div class="wrf-pay-row wrf-pay-total">
+                          <span>Total Amount Due</span>
+                          <span id="wrfPayGrandTotal">PHP 500</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="wrf-form-footer">
+                      <button type="button" class="btn-wrf-submit" id="wrfSubmitBtn">&#128640; Submit Registration</button>
+                    </div>
+
+                  </form>
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Webinar Bundles -->
-    <section class="py-4" aria-labelledby="promo-bundles">
-      <div class="container">
-        <div class="row">
-          <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-bundles" class="h4">Webinar Bundles</h2>
-              <div class="row">
-                <div class="col-12 col-md-4 mb-3">
-                  <figure class="m-0 bundle-figure">
-                    <a href="images/xmaspromo2025_%20(1).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 1 image">
-                      <img src="images/xmaspromo2025_%20(1).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 1">
-                    </a>
-                    <figcaption class="small text-muted mt-2">Bundle 1</figcaption>
-                  </figure>
-                </div>
-                <div class="col-12 col-md-4 mb-3">
-                  <figure class="m-0 bundle-figure">
-                    <a href="images/xmaspromo2025_%20(2).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 2 image">
-                      <img src="images/xmaspromo2025_%20(2).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 2">
-                    </a>
-                    <figcaption class="small text-muted mt-2">Bundle 2</figcaption>
-                  </figure>
-                </div>
-                <div class="col-12 col-md-4 mb-3">
-                  <figure class="m-0 bundle-figure">
-                    <a href="images/xmaspromo2025_%20(3).png" class="bundle-link vbox" data-gall="bundles" aria-label="Open bundle 3 image">
-                      <img src="images/xmaspromo2025_%20(3).png" class="img-fluid bundle-tilt bundle-img" alt="Webinar bundle 3">
-                    </a>
-                    <figcaption class="small text-muted mt-2">Bundle 3</figcaption>
-                  </figure>
-                </div>
-              </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Promo Details Table -->
-    <section class="py-4 bg-light" aria-labelledby="promo-table">
-      <div class="container">
-        <div class="row">
-          <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-table" class="h4">Promo Details</h2>
-            <div class="table-responsive">
-              <table class="table table-bordered">
-                <thead class="thead-light">
-                  <tr>
-                    <th scope="col">Bundle Title</th>
-                    <th scope="col" style="width:55%;">Webinars Included</th>
-                    <th scope="col" class="text-right">Training Hours</th>
-                    <th scope="col" class="text-right">Original Price</th>
-                    <th scope="col" class="text-right">Promo Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>⚙️ Physics: Vectors, Motion, &amp; Collision</strong></td>
-                    <td>
-                      1. <em>Impact in Motion: Understanding Momentum and Collisions through Real-World Examples</em><br>
-                      2. <em>Gamified Motion: Graphical and Computational Analysis of Kinematics &amp; Projectile</em><br>
-                      3. <em>Twist and Turn: Exploring the Laws Behind Rotational Systems</em><br>
-                      4. <em>Vector Essentials: Building a Strong Foundation in Physics</em>
-                    </td>
-                    <td class="text-right">8 hrs</td>
-                    <td class="text-right">PHP 1,200</td>
-                    <td class="text-right"><strong>PHP 600</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>🧬 Biology: From Cells to Genetics</strong></td>
-                    <td>
-                      1. <em>Metabolic Mystery: Teaching Cell Metabolism with Clarity and Context</em><br>
-                      2. <em>Molecules of Life: Mastering Carbs, Proteins, Lipids, Nucleic Acids, and Enzymes</em><br>
-                      3. <em>Mendelian and Non-Mendelian Genetics and Inheritance</em><br>
-                      4. <em>Cell Essentials: Theory, Structure, and Function</em>
-                    </td>
-                    <td class="text-right">8 hrs</td>
-                    <td class="text-right">PHP 1,200</td>
-                    <td class="text-right"><strong>PHP 600</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>🧪 Chemistry: From Electrons to Reactions</strong></td>
-                    <td>
-                      1. <em>React Right: Understanding and Classifying Chemical Reactions with Confidence</em><br>
-                      2. <em>Quantum Clarity: Mastering Orbital Diagrams and the Rules that Govern Them</em><br>
-                      3. <em>Molecular Geometry: Predicting the 3D Shapes of Molecules</em><br>
-                      4. <em>Stoichiometry Essentials: From Moles to Chemical Equations</em>
-                    </td>
-                    <td class="text-right">8 hrs</td>
-                    <td class="text-right">PHP 1,200</td>
-                    <td class="text-right"><strong>PHP 600</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>⚡ Guide to Science Experiment</strong></td>
-                    <td>
-                      1. <em>Science Experiment: Understanding Types, Variables, and Methodology</em><br>
-                      2. <em>Making Data Meaningful: Using the Right Statistical Tools</em><br>
-                      3. <em>Polishing and Publishing: Formatting, Style, &amp; References using Microsoft Word and Mendeley</em>
-                    </td>
-                    <td class="text-right">6 hrs</td>
-                    <td class="text-right">PHP 900</td>
-                    <td class="text-right"><strong>PHP 450</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>🎤 Research Writing and Presentation</strong></td>
-                    <td>
-                      1. <em>The Research Writer’s Workshop: Manuscript Essentials for Success</em><br>
-                      2. <em>The Research Presenter’s Workshop: A Guide to Oral Presentations</em><br>
-                      3. <em>Practical Strategies &amp; Tools for Effective Thesis Writing</em>
-                    </td>
-                    <td class="text-right">8 hrs</td>
-                    <td class="text-right">PHP 1,200</td>
-                    <td class="text-right"><strong>PHP 600</strong></td>
-                  </tr>
-                  <tr>
-                    <td><strong>📘 Conducting Systematic Reviews</strong></td>
-                    <td>
-                      1. <em>Building One’s Knowledge Base Through Systematic Review</em><br>
-                      2. <em>Systematic Review Writeshop: Focus on Developing the SR Protocol</em><br>
-                      3. <em>Presentation and Critiquing of Systematic Review Proposal</em>
-                    </td>
-                    <td class="text-right">6 hrs</td>
-                    <td class="text-right">PHP 900</td>
-                    <td class="text-right"><strong>PHP 450</strong></td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Who This Is For -->
-    <section class="py-4" aria-labelledby="promo-who">
-      <div class="container">
-        <div class="row">
-          <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-who" class="h4">Who This Is For</h2>
-            <p>
-              This Christmas Promo is ideal for science teachers, educators, researchers, and academic professionals who want flexible, high-quality training. It is especially suited for those seeking self-paced learning, practical teaching strategies, and research-focused skills they can apply anytime, anywhere.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- What You’ll Get -->
-    <section class="py-4 bg-light" aria-labelledby="promo-get">
-      <div class="container">
-        <div class="row">
-          <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-get" class="h4">What You’ll Get</h2>
-            <ul class="mb-0 pl-4" style="list-style: disc;">
-              <li>Zoom Recording</li>
-              <li>Certificates (participation and completion)</li>
-              <li>Training Modules</li>
-              <li>Access to PAPSI Member Portal</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQs -->
-    <section class="py-4" aria-labelledby="promo-faqs">
-      <div class="container">
-        <div class="row">
-          <div class="col-12 col-lg-10 mx-auto">
-            <h2 id="promo-faqs" class="h4">FAQs</h2>
-            <ol class="mb-0">
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">I am not yet a PAPSI member. Can I still avail of the promo?</p>
-                <p>Yes. Non-members may still avail of the promo by completing the registration form. The PAPSI membership fee will be included in the total computation, and your membership will be activated upon release of the training inclusions.</p>
-              </li>
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">When will the training be conducted?</p>
-                <p>All trainings included in this promo are past PAPSI webinars. Once you avail of the promo, you will receive on-demand access to the Zoom recordings and learning modules, which are conveniently accessible through the PAPSI Member Portal. This allows you to complete the trainings at your own pace.</p>
-              </li>
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">What date will appear on my certificate?</p>
-                <p>The certificate dates will start from your date of availment and will be assigned consecutively based on the number of training days included in the selected bundle.</p>
-              </li>
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">Can I choose the dates that will appear on my certificate?</p>
-                <p>Yes. Participants may request their preferred dates to appear on the certificate.</p>
-              </li>
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">Where and how can I pay?</p>
-                <p>Payment instructions will be sent after you complete the registration form. PAPSI accepts QR payments, online transfers, and manual deposits to our BPI bank account.</p>
-              </li>
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">Do these trainings include CPD units?</p>
-                <p>Please note that these trainings do not carry CPD units.</p>
-              </li>
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">What is the validity period of the PAPSI membership?</p>
-                <p>The PAPSI membership is valid for one (1) year from the date of activation.</p>
-              </li>
-              <li class="mb-3">
-                <p class="mb-1 font-weight-bold">Can I access the PAPSI Member Portal using a mobile phone?</p>
-                <p>Yes. The PAPSI Member Portal is a web-based application and can be accessed using a mobile phone, tablet, laptop, or desktop computer, provided you have an internet connection.</p>
-              </li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
 <!-- Footer -->
@@ -593,6 +1038,590 @@
 
 <!-- Main Script -->
 <script src="js/script.js"></script>
+
+<script>
+  // Webinar card toggle
+  var WEBINAR_FEE = 300;
+  var BUNDLE_DISCOUNT = 100;
+  var webinarNames = {
+    webinar1: 'Scatter Plots and Correlation: Understanding Relationships Between Variables',
+    webinar2: 'Physics Through Correlation: Using Experimental Data to Discover Physical Relationships',
+    webinar3: 'Chemistry Through Correlation: Using Experimental Data to Discover Chemical Relationships'
+  };
+
+  // Membership fee state (set when form is shown after DB check)
+  var _wrfMembershipFee   = 500;  // default: assume new user until DB check
+  var _wrfMembershipType  = 'new'; // 'new' | 'renewal' | 'active'
+
+  // Update the payment summary inside the registration form
+  function wrfUpdatePaymentSummary() {
+    var formSection = document.getElementById('wrfFormSection');
+    if (!formSection || formSection.style.display === 'none') return; // form not visible yet
+
+    var checked = [];
+    document.querySelectorAll('.webinar-checkbox:checked').forEach(function(cb) {
+      checked.push(cb.value);
+    });
+
+    var subtotal = checked.length * WEBINAR_FEE;
+    var discount = checked.length === 3 ? BUNDLE_DISCOUNT : 0;
+    var trainingTotal = subtotal - discount;
+    var grandTotal = trainingTotal + _wrfMembershipFee;
+
+    // Training rows
+    var trainingRowsEl = document.getElementById('wrfPayTrainingRows');
+    if (trainingRowsEl) {
+      trainingRowsEl.innerHTML = checked.map(function(id) {
+        return '<div class="wrf-pay-row"><span>' + webinarNames[id] + '</span><span>PHP ' + WEBINAR_FEE + '</span></div>';
+      }).join('');
+    }
+
+    // Discount row
+    var discountRow = document.getElementById('wrfPayDiscountRow');
+    if (discountRow) discountRow.classList.toggle('d-none', discount === 0);
+
+    // Training subtotal
+    var trainingAmtEl = document.getElementById('wrfPayTrainingAmt');
+    if (trainingAmtEl) trainingAmtEl.textContent = 'PHP ' + trainingTotal;
+
+    // Membership row
+    var memberAmtEl  = document.getElementById('wrfPayMemberAmt');
+    var memberBadge  = document.getElementById('wrfPayMemberBadge');
+    if (memberAmtEl) memberAmtEl.textContent = _wrfMembershipFee === 0 ? 'PHP 0 (included)' : 'PHP ' + _wrfMembershipFee;
+    if (memberBadge) {
+      memberBadge.className = 'wrf-pay-member-badge';
+      if (_wrfMembershipType === 'active') {
+        memberBadge.textContent = 'Active Member';
+        memberBadge.classList.add('active');
+      } else if (_wrfMembershipType === 'renewal') {
+        memberBadge.textContent = 'Renewal';
+        memberBadge.classList.add('renewal');
+      } else {
+        memberBadge.textContent = 'New';
+        memberBadge.classList.add('new');
+      }
+    }
+
+    // Grand total
+    var grandTotalEl = document.getElementById('wrfPayGrandTotal');
+    if (grandTotalEl) grandTotalEl.textContent = 'PHP ' + grandTotal;
+  }
+
+  function updateFees() {
+    var checked = [];
+    document.querySelectorAll('.webinar-checkbox:checked').forEach(function(cb) {
+      checked.push(cb.value);
+    });
+
+    var box = document.getElementById('feeSummaryBox');
+    var lineItems = document.getElementById('feeLineItems');
+    var discountRow = document.getElementById('feeDiscountRow');
+    var totalEl = document.getElementById('feeTotalAmt');
+
+    if (checked.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+
+    box.style.display = 'block';
+
+    // Build line items
+    lineItems.innerHTML = checked.map(function(id) {
+      return '<div class="fee-row"><span class="fee-label">' + webinarNames[id] + '</span><span class="fee-amount">PHP ' + WEBINAR_FEE + '</span></div>';
+    }).join('');
+
+    var subtotal = checked.length * WEBINAR_FEE;
+    var discount = checked.length === 3 ? BUNDLE_DISCOUNT : 0;
+    var total = subtotal - discount;
+
+    discountRow.style.display = discount > 0 ? 'flex' : 'none';
+    totalEl.textContent = 'PHP ' + total;
+
+    // Show registration section whenever at least one webinar is selected
+    var regSection = document.getElementById('webinarRegSection');
+    if (regSection) regSection.style.display = checked.length > 0 ? 'block' : 'none';
+
+    // Refresh payment summary if form is already visible
+    wrfUpdatePaymentSummary();
+  }
+
+  document.querySelectorAll('.webinar-checkbox').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      var card = document.getElementById('card-' + this.id);
+      if (card) card.classList.toggle('selected', this.checked);
+      updateFees();
+    });
+  });
+
+  // ── Google Sign-In for Webinar Registration ──
+  var _wEmail = null, _wName = null, _wPicture = null;
+
+  // Initialise GSI programmatically so it works even inside a hidden container
+  function initWebinarGSI() {
+    if (!window.google || !window.google.accounts) return;
+    google.accounts.id.initialize({
+      client_id: '813790804900-l1sg6e7v13mjb3nreahh8gseptp0qoae.apps.googleusercontent.com',
+      callback: handleWebinarGoogleSignIn,
+      auto_select: false
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('webinarGSignInBtn'),
+      { type: 'standard', size: 'large', theme: 'outline',
+        text: 'signin_with', shape: 'rectangular',
+        logo_alignment: 'left', width: 280 }
+    );
+  }
+
+  // Run after GSI script loads (it fires window.onload or a callback)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      // GSI may not be ready yet — poll briefly
+      var tries = 0;
+      var t = setInterval(function() {
+        if (window.google && window.google.accounts) { clearInterval(t); initWebinarGSI(); }
+        if (++tries > 30) clearInterval(t);
+      }, 200);
+    });
+  } else {
+    var tries = 0;
+    var t = setInterval(function() {
+      if (window.google && window.google.accounts) { clearInterval(t); initWebinarGSI(); }
+      if (++tries > 30) clearInterval(t);
+    }, 200);
+  }
+
+  var WRF_BASE = 'https://script.google.com/macros/s/AKfycbxpwr7Zk-zQg4FP35AIynHQRKHpoDbc_mKIG_AONHpv-De8_ynPcZeyneIv7LpCphNcLA/exec';
+
+  window.handleWebinarGoogleSignIn = function(response) {
+    try {
+      var b64 = response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      var payload = JSON.parse(decodeURIComponent(
+        atob(b64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join('')
+      ));
+      _wEmail   = payload.email   || null;
+      _wName    = payload.name    || null;
+      _wPicture = payload.picture || null;
+    } catch(e) {
+      document.getElementById('webinarCheckResult').innerHTML =
+        '<div class="alert alert-danger py-2 px-3 mb-0">Unable to read Google account info. Please try again.</div>';
+      return;
+    }
+
+    // Switch UI: hide button, show signed-in pill
+    var widget   = document.getElementById('webinarGoogleSignIn');
+    var signedIn = document.getElementById('webinarGoogleSignedIn');
+    if (widget)   widget.style.display   = 'none';
+    if (signedIn) signedIn.style.display = 'flex';
+    var nameEl   = document.getElementById('webinarGoogleNameText');
+    var emailEl  = document.getElementById('webinarGoogleEmailText');
+    var avatarEl = document.getElementById('webinarGoogleAvatar');
+    if (nameEl)   nameEl.textContent  = _wName  || '';
+    if (emailEl)  emailEl.textContent = _wEmail || '';
+    if (avatarEl && _wPicture) avatarEl.src = _wPicture;
+
+    // Pre-fill email in form
+    var wrfEmailEl = document.getElementById('wrf_email');
+    if (wrfEmailEl && _wEmail) wrfEmailEl.value = _wEmail;
+
+    // Hide any previous status overlay / form
+    document.getElementById('wrfStatusBackdrop').style.display = 'none';
+    document.getElementById('wrfFormSection').style.display = 'none';
+
+    // Show checking spinner
+    var result = document.getElementById('webinarCheckResult');
+    if (result) {
+      result.innerHTML =
+        '<div class="alert alert-info py-2 px-3 mb-0" style="font-size:.87rem;">' +
+        '&#128269; Checking your account&hellip; <span class="spinner-border spinner-border-sm ml-1" role="status"></span>' +
+        '</div>';
+    }
+
+    // Membership check call
+    var url = WRF_BASE + '?SH=Sheet1&func=membershipcheck&email=' + encodeURIComponent(_wEmail);
+    fetch(url, { method: 'POST' })
+      .then(function(r) { return r.text(); })
+      .then(function(text) {
+        if (result) result.innerHTML = '';
+        var trimmed = (text || '').trim();
+        if (trimmed === 'new' || trimmed === '') {
+          // New / unknown user — show form directly
+          wrfShowForm(null);
+        } else {
+          try {
+            var data = JSON.parse(trimmed);
+            wrfShowStatusCard(data);
+          } catch(pe) {
+            // Unparseable response — treat as new
+            wrfShowForm(null);
+          }
+        }
+      })
+      .catch(function() {
+        if (result) {
+          result.innerHTML =
+            '<div class="alert alert-warning py-2 px-3 mb-0" style="font-size:.87rem;">' +
+            '&#9888;&#65039; Could not connect to the server. Please check your connection and try again.' +
+            '</div>';
+        }
+      });
+  };
+
+  // Show membership status overlay
+  function wrfShowStatusCard(data) {
+    var backdrop = document.getElementById('wrfStatusBackdrop');
+    var expiryEl = document.getElementById('wrf_expiryDate');
+    var badgeEl  = document.getElementById('wrf_statusBadge');
+
+    // Get expiry date from response
+    var expiryRaw = data.date || data.Date || data.memberdate || data.MemberDate || '';
+    var expiryDate = expiryRaw ? new Date(expiryRaw) : null;
+    var isActive   = expiryDate && expiryDate >= new Date();
+
+    if (expiryEl) {
+      expiryEl.textContent = expiryDate ? expiryDate.toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'}) : 'N/A';
+    }
+    if (badgeEl) {
+      badgeEl.innerHTML = isActive
+        ? '<span class="wrf-status-badge active">&#9989; Membership Active</span>'
+        : '<span class="wrf-status-badge expired">&#9940; Membership Expired</span>';
+    }
+
+    // Store data on backdrop for retrieval by Yes button
+    backdrop._wrfData = data;
+
+    // Show overlay
+    backdrop.style.display = 'flex';
+  }
+
+  // Close the status overlay
+  function wrfCloseStatusOverlay() {
+    document.getElementById('wrfStatusBackdrop').style.display = 'none';
+  }
+
+  // Reset the form completely (clears all fields + hides any "Other" inputs)
+  function wrfResetForm() {
+    var form = document.getElementById('wrfForm');
+    if (form) form.reset();
+    // Hide and clear every "Other" free-text input
+    ['wrf_title_other','wrf_specialization_other','wrf_position_other','wrf_source_other'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.value = ''; el.classList.add('d-none'); el.required = false; }
+    });
+    // Clear error banner
+    var err = document.getElementById('wrf_error');
+    if (err) { err.textContent = ''; err.classList.add('d-none'); }
+    // Reset submit button label in case it was mid-submit
+    var btn = document.getElementById('wrfSubmitBtn');
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#128640; Submit Registration'; }
+  }
+
+  // Show inline registration form (always reset first, then optionally pre-fill from member data)
+  function wrfShowForm(data) {
+    // 1. Always wipe any previous values so a new user never sees another user's data
+    wrfResetForm();
+
+    // 2. Always inject the currently signed-in Google email (not from database)
+    var emailEl = document.getElementById('wrf_email');
+    if (emailEl && _wEmail) emailEl.value = _wEmail;
+
+    // 3. Pre-fill from member record only when data exists
+    if (data) {
+      var fields = {
+        wrf_title:         data.title         || data.Title         || '',
+        wrf_firstname:     data.firstname      || data.FirstName     || data.Firstname || '',
+        wrf_middleinitial: data.middleinitial  || data.MiddleInitial || '',
+        wrf_lastname:      data.lastname       || data.LastName      || data.Lastname  || '',
+        wrf_suffix:        data.suffix         || data.Suffix        || '',
+        wrf_mobile:        data.mobilenumber   || data.MobileNumber  || data.mobile    || '',
+        wrf_school:        data.school         || data.School        || '',
+        wrf_address:       data.address        || data.Address       || '',
+      };
+      Object.keys(fields).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && fields[id]) el.value = fields[id];
+      });
+      // Selects that may need the "Other" free-text fallback
+      function setSelectOrOther(selectId, otherId, value) {
+        if (!value) return;
+        var sel = document.getElementById(selectId);
+        if (!sel) return;
+        var opts = Array.from(sel.options).map(function(o) { return o.value; });
+        if (opts.indexOf(value) !== -1) {
+          sel.value = value;
+        } else {
+          sel.value = '__other';
+          var other = document.getElementById(otherId);
+          if (other) { other.value = value; other.classList.remove('d-none'); other.required = true; }
+        }
+      }
+      setSelectOrOther('wrf_specialization', 'wrf_specialization_other', data.specialization || data.Specialization || '');
+      setSelectOrOther('wrf_schooltype',     null,                        data.type           || data.Type           || '');
+      setSelectOrOther('wrf_position',       'wrf_position_other',        data.position       || data.Position       || '');
+    }
+
+    // 4. Reveal and scroll to the form
+    var formSection = document.getElementById('wrfFormSection');
+    formSection.style.display = 'block';
+
+    // 5. Determine membership fee from data
+    if (!data) {
+      _wrfMembershipFee  = 500;
+      _wrfMembershipType = 'new';
+    } else {
+      var expiryRaw2 = data.date || data.Date || data.memberdate || data.MemberDate || '';
+      var expiryDate2 = expiryRaw2 ? new Date(expiryRaw2) : null;
+      if (expiryDate2 && expiryDate2 >= new Date()) {
+        _wrfMembershipFee  = 0;
+        _wrfMembershipType = 'active';
+      } else {
+        _wrfMembershipFee  = 500;
+        _wrfMembershipType = 'renewal';
+      }
+    }
+
+    // 6. Render payment summary
+    wrfUpdatePaymentSummary();
+
+    formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Switch Account button
+  document.addEventListener('DOMContentLoaded', function() {
+    // Status overlay buttons
+    var _closeOverlay = function() { wrfCloseStatusOverlay(); };
+    document.getElementById('wrfStatusCloseBtn').addEventListener('click', _closeOverlay);
+    document.getElementById('wrfStatusNoBtn').addEventListener('click', _closeOverlay);
+    // Clicking the dark backdrop itself also closes
+    document.getElementById('wrfStatusBackdrop').addEventListener('click', function(e) {
+      if (e.target === this) wrfCloseStatusOverlay();
+    });
+    document.getElementById('wrfStatusYesBtn').addEventListener('click', function() {
+      var data = document.getElementById('wrfStatusBackdrop')._wrfData || null;
+      wrfCloseStatusOverlay();
+      wrfShowForm(data);
+    });
+
+    // "Other" field toggles for form selects
+    ['wrf_title', 'wrf_specialization', 'wrf_position', 'wrf_source'].forEach(function(selId) {
+      var sel = document.getElementById(selId);
+      if (!sel) return;
+      sel.addEventListener('change', function() {
+        var other = document.getElementById(selId + '_other');
+        if (other) {
+          if (sel.value === '__other') {
+            other.classList.remove('d-none');
+            other.required = true;
+          } else {
+            other.classList.add('d-none');
+            other.required = false;
+            other.value = '';
+          }
+        }
+      });
+    });
+
+    // Submit button
+    var submitBtn = document.getElementById('wrfSubmitBtn');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function() {
+        var form = document.getElementById('wrfForm');
+        var errorEl = document.getElementById('wrf_error');
+        errorEl.classList.add('d-none');
+
+        // Gather selected webinars
+        var selected = [];
+        document.querySelectorAll('.webinar-checkbox:checked').forEach(function(cb) {
+          selected.push(cb.value);
+        });
+        if (!selected.length) {
+          errorEl.textContent = 'Please select at least one webinar before submitting.';
+          errorEl.classList.remove('d-none');
+          return;
+        }
+
+        // Basic HTML5 validation
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        // Resolve "other" fields
+        function resolveField(selId, otherId) {
+          var sel = document.getElementById(selId);
+          if (!sel) return '';
+          if (sel.value === '__other') {
+            var other = document.getElementById(otherId);
+            return other ? other.value.trim() : '';
+          }
+          return sel.value;
+        }
+
+        // Compute fees for submission
+        var _subCount    = selected.length;
+        var _subSubtotal = _subCount * WEBINAR_FEE;
+        var _subDiscount = _subCount === 3 ? BUNDLE_DISCOUNT : 0;
+        var _subTraining = _subSubtotal - _subDiscount;
+        var _subMbrFee   = _wrfMembershipFee;
+        var _subTotal    = _subTraining + _subMbrFee;
+        var _subMbrStatus = _wrfMembershipType === 'active' ? 'Member' : 'Non-member';
+
+        var payload = {
+          func:             'webinarregistration',
+          email:            document.getElementById('wrf_email').value.trim(),
+          title:            resolveField('wrf_title', 'wrf_title_other'),
+          firstname:        document.getElementById('wrf_firstname').value.trim(),
+          middleinitial:    document.getElementById('wrf_middleinitial').value.trim(),
+          lastname:         document.getElementById('wrf_lastname').value.trim(),
+          suffix:           document.getElementById('wrf_suffix').value.trim(),
+          mobilenumber:     document.getElementById('wrf_mobile').value.trim(),
+          position:         resolveField('wrf_position', 'wrf_position_other'),
+          specialization:   resolveField('wrf_specialization', 'wrf_specialization_other'),
+          school:           document.getElementById('wrf_school').value.trim(),
+          schooltype:       document.getElementById('wrf_schooltype').value,
+          address:          document.getElementById('wrf_address').value.trim(),
+          source:           resolveField('wrf_source', 'wrf_source_other'),
+          highlight:        document.getElementById('wrf_topics').value.trim(),
+          webinar:          selected.map(function(id) { return webinarNames[id]; }).join(','),
+          trainingfee:      _subTraining,
+          statusmembership: _subMbrStatus,
+          membershipfee:    _subMbrFee,
+          totalfee:         _subTotal,
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting\u2026';
+
+        fetch(WRF_BASE, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: Object.keys(payload).map(function(k) {
+            return encodeURIComponent(k) + '=' + encodeURIComponent(payload[k]);
+          }).join('&')
+        })
+          .then(function(r) { return r.text(); })
+          .then(function(text) {
+            document.getElementById('wrfFormSection').style.display = 'none';
+            var result = document.getElementById('webinarCheckResult');
+            if (result) {
+              result.innerHTML =
+                '<div class="alert alert-success py-3 px-4 mt-3 mb-0" style="font-size:.93rem;">' +
+                '&#10003;&#65039; <strong>Registration submitted!</strong> Thank you for registering. ' +
+                'A confirmation will be sent to <strong>' + (payload.email || 'your email') + '</strong>.' +
+                '</div>';
+              result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          })
+          .catch(function() {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '\uD83D\uDE80 Submit Registration';
+            errorEl.textContent = 'Submission failed. Please check your connection and try again.';
+            errorEl.classList.remove('d-none');
+          });
+      });
+    }
+
+    var switchBtn = document.getElementById('webinarGoogleSwitchBtn');
+    if (switchBtn) {
+      switchBtn.addEventListener('click', function() {
+        _wEmail = null; _wName = null; _wPicture = null;
+        // Reset the form so the next user starts with a blank slate
+        wrfResetForm();
+        var widget   = document.getElementById('webinarGoogleSignIn');
+        var signedIn = document.getElementById('webinarGoogleSignedIn');
+        var result   = document.getElementById('webinarCheckResult');
+        if (widget)   widget.style.display   = '';
+        if (signedIn) signedIn.style.display = 'none';
+        if (result)   result.innerHTML = '';
+        document.getElementById('wrfStatusBackdrop').style.display = 'none';
+        document.getElementById('wrfFormSection').style.display    = 'none';
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          window.google.accounts.id.disableAutoSelect();
+        }
+      });
+    }
+  });
+  // Init VenoBox for webinar images
+  $(document).ready(function() {
+    var vb = $('.webinar-vbox').venobox({
+      overlayClose: true,
+      cb_post_open: function() {
+        // Inject a close button below the image if not already present
+        if (!$('.vbox-custom-close').length) {
+          $('<button class="vbox-custom-close" type="button">&#10005;&nbsp; Close Image</button>')
+            .appendTo('.vbox-content')
+            .on('click', function() {
+              vb.VBclose();
+            });
+        }
+      },
+      cb_post_close: function() {
+        $('.vbox-custom-close').remove();
+      }
+    });
+
+    // Also close on overlay background click (belt-and-suspenders)
+    $(document).on('click', '.vbox-overlay', function(e) {
+      if ($(e.target).is('.vbox-overlay') || $(e.target).is('.vbox-backdrop')) {
+        vb.VBclose();
+      }
+    });
+  });
+</script>
+
+<!-- Schools datalist loader for webinar registration form -->
+<script>
+(function(){
+  var dl = document.getElementById('wrf_school_list');
+  if (!dl) return;
+
+  // Minimal RFC-4180 CSV line parser (handles quoted fields with embedded commas)
+  function parseCSVLine(line) {
+    var result = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var c = line[i];
+      if (c === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (c === ',' && !inQ) {
+        result.push(cur); cur = '';
+      } else {
+        cur += c;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  fetch('schools.csv')
+    .then(function(r) { return r.text(); })
+    .then(function(csv) {
+      var lines = csv.split(/\r?\n/);
+      var seen = typeof Set === 'function' ? new Set() : {};
+      var useSet = typeof Set === 'function';
+      var frag = document.createDocumentFragment();
+      // Row 0 = region header row — skip; school names start at row 1
+      for (var i = 1; i < lines.length; i++) {
+        var cells = parseCSVLine(lines[i]);
+        for (var j = 0; j < cells.length; j++) {
+          var name = cells[j].trim();
+          if (!name) continue;
+          var already = useSet ? seen.has(name) : seen.hasOwnProperty(name);
+          if (!already) {
+            if (useSet) seen.add(name); else seen[name] = true;
+            var opt = document.createElement('option');
+            opt.value = name;
+            frag.appendChild(opt);
+          }
+        }
+      }
+      dl.appendChild(frag);
+    })
+    .catch(function() { /* silent fail — field still works as free-text */ });
+})();
+</script>
 
 </body>
 </html>

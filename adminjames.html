@@ -57,6 +57,16 @@
 		.action-title { font-weight:700; }
 		.action-sub { color:var(--muted); font-size:12px; }
 
+		/* Webinar Registration table */
+		.wreg-table-wrap { overflow-x:auto; border-radius:8px; border:1px solid var(--line); }
+		.wreg-table { border-collapse:collapse; width:100%; font-size:12.5px; }
+		.wreg-table th { background:var(--green); color:#fff; padding:8px 10px; text-align:left; white-space:nowrap; position:sticky; top:0; z-index:1; }
+		.wreg-table td { padding:7px 10px; border-bottom:1px solid var(--line); vertical-align:top; white-space:nowrap; }
+		.wreg-table tr:last-child td { border-bottom:none; }
+		.wreg-table tr:hover td { background:#f0fdf4; }
+		.wreg-table td.wrap-cell { white-space:normal; min-width:160px; max-width:260px; word-break:break-word; }
+		.wreg-count { font-size:12px; color:var(--muted); margin-top:6px; }
+
 		/* Modal */
 		.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50; }
 		.modal-backdrop.show { display:flex; }
@@ -170,6 +180,18 @@
 				<button id="rownumber-submit" class="btn" type="button">Submit</button>
 			</div>
 			<div id="rownumber-status" class="status" aria-live="polite"></div>
+		</div>
+
+		<!-- Webinar Registration card -->
+		<div class="card" id="webinarRegCard" style="margin-bottom:16px;">
+			<div class="title">Webinar Registration</div>
+			<div class="subtle" style="margin-top:2px;">Load registrations from Google Apps Script</div>
+			<div class="actions" style="margin-top:12px;">
+				<button id="webinarRegLoadBtn" class="btn" type="button">Load</button>
+			</div>
+			<div id="webinarRegStatus" class="status" aria-live="polite"></div>
+			<div id="webinarRegCount" class="wreg-count" style="display:none;"></div>
+			<div id="webinarRegTableWrap" class="wreg-table-wrap" style="margin-top:10px; display:none;"></div>
 		</div>
 		<!-- Members and Tools cards removed per request -->
 
@@ -296,6 +318,30 @@
 				<button id="trainingReqClearBtn" class="btn ghost" type="button" title="Clear selected fields">Clear</button>
 				<button id="trainingReqCancelBtn" class="btn secondary" type="button">Cancel</button>
 				<button id="trainingReqSubmitBtn" class="btn" type="button">Submit</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Payment Confirmation Modal -->
+	<div id="payConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="payConfirmTitle">
+		<div class="modal">
+			<div class="modal-head">
+				<div class="title" id="payConfirmTitle">Send Payment Confirmation</div>
+				<button type="button" class="close-x" id="payConfirmCloseBtn" aria-label="Close">&times;</button>
+			</div>
+			<div id="payConfirmInfo" style="margin-top:8px; font-size:13px; color:var(--muted);"></div>
+			<div class="row" style="margin-top:12px;">
+				<div class="field"><label for="pcMembershipFee">Membership Fee</label><input id="pcMembershipFee" type="number" step="1" min="0" placeholder="0" /></div>
+				<div class="field"><label for="pcTrainingFee">Training Fee</label><input id="pcTrainingFee" type="number" step="1" min="0" placeholder="0" /></div>
+			</div>
+			<div class="row" style="margin-top:10px;">
+				<div class="field"><label for="pcTotalFee">Total Fee</label><input id="pcTotalFee" type="number" step="1" min="0" placeholder="0" /></div>
+				<div class="field"><label for="pcDatePaid">Date Paid</label><input id="pcDatePaid" type="text" placeholder="MM/DD/YYYY" /></div>
+			</div>
+			<div id="payConfirmStatus" class="status" style="margin-top:6px;" aria-live="polite"></div>
+			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
+				<button id="payConfirmCancelBtn" class="btn secondary" type="button">Cancel</button>
+				<button id="payConfirmSubmitBtn" class="btn" type="button">Submit</button>
 			</div>
 		</div>
 	</div>
@@ -862,6 +908,165 @@
 		document.getElementById('rownumber-input')?.addEventListener('change', clampRowNumberInput);
 		document.getElementById('rownumber-input')?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); submitRowNumber(); } });
 		document.getElementById('rownumber-submit')?.addEventListener('click', submitRowNumber);
+
+		// Webinar Registration
+		const WEBINAR_REG_URL = 'https://script.google.com/macros/s/AKfycbxpwr7Zk-zQg4FP35AIynHQRKHpoDbc_mKIG_AONHpv-De8_ynPcZeyneIv7LpCphNcLA/exec?func=webinarregget';
+		const WEBINAR_REG_COLS = [
+			{ key:'Timestamp', label:'Timestamp' },
+			{ key:'Email Address', label:'Email' },
+			{ key:'Title', label:'Title' },
+			{ key:'First Name', label:'First Name' },
+			{ key:'Middle Initial (e.g. B. )', label:'M.I.' },
+			{ key:'Last Name', label:'Last Name' },
+			{ key:'Suffix (e.g. Jr.)', label:'Suffix' },
+			{ key:'Mobile Number', label:'Mobile' },
+			{ key:'Position', label:'Position' },
+			{ key:'Specialization', label:'Specialization' },
+			{ key:'Name of School/ University/ Company', label:'School/Company', wrap:true },
+			{ key:'Is that a Public or a Private School/ University/ Company?', label:'Public/Private' },
+			{ key:'Address of School/ University/ Company', label:'Address', wrap:true },
+			{ key:'How did you know about this PAPSI webinar?', label:'How Known' },
+			{ key:'What area(s)/topic(s) would you like the speaker to highlight or add on his webinar? (optional)', label:'Topics (optional)', wrap:true },
+			{ key:'Webinar', label:'Webinar', wrap:true },
+			{ key:'Training Fee', label:'Training Fee' },
+			{ key:'Status Membership', label:'Membership Status' },
+			{ key:'Membership Fee', label:'Membership Fee' },
+			{ key:'Total Fee', label:'Total Fee' },
+			{ key:'Date Paid', label:'Date Paid' }
+		];
+		let _webinarRegRows = [];
+		function renderWebinarRegTable(rows){
+			_webinarRegRows = rows || [];
+			const wrap = document.getElementById('webinarRegTableWrap');
+			const count = document.getElementById('webinarRegCount');
+			if (!_webinarRegRows.length){
+				wrap.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;">No records found.</p>';
+				wrap.style.display = 'block';
+				if (count){ count.textContent = ''; count.style.display = 'none'; }
+				return;
+			}
+			let html = '<table class="wreg-table"><thead><tr>';
+			html += '<th>#</th>';
+			WEBINAR_REG_COLS.forEach(c => { html += '<th>' + escHtml(c.label) + '</th>'; });
+			html += '</tr></thead><tbody>';
+			_webinarRegRows.forEach((row, i) => {
+				html += '<tr data-ridx="' + i + '" style="cursor:pointer;" title="Click to send payment confirmation"><td style="color:var(--muted);">' + (i + 1) + '</td>';
+				WEBINAR_REG_COLS.forEach(c => {
+					const val = row[c.key] !== undefined ? String(row[c.key]) : '';
+					html += c.wrap ? '<td class="wrap-cell">' : '<td>';
+					html += escHtml(val) + '</td>';
+				});
+				html += '</tr>';
+			});
+			html += '</tbody></table>';
+			wrap.innerHTML = html;
+			wrap.style.display = 'block';
+			if (count){ count.textContent = _webinarRegRows.length + ' record' + (_webinarRegRows.length !== 1 ? 's' : '') + ' loaded. Click a row to send payment confirmation.'; count.style.display = 'block'; }
+			// Row click handler
+			wrap.querySelectorAll('tr[data-ridx]').forEach(tr => {
+				tr.addEventListener('click', () => openPayConfirmModal(parseInt(tr.dataset.ridx, 10)));
+			});
+		}
+		function openPayConfirmModal(idx){
+			const row = _webinarRegRows[idx];
+			if (!row) return;
+			const modal = document.getElementById('payConfirmModal');
+			// Info line
+			const name = [row['Title'], row['First Name'], row['Middle Initial (e.g. B. )'], row['Last Name'], row['Suffix (e.g. Jr.)']].filter(Boolean).join(' ');
+			document.getElementById('payConfirmInfo').textContent = name + (row['Email Address'] ? ' — ' + row['Email Address'] : '') + (row['Webinar'] ? ' | ' + row['Webinar'] : '');
+			// Pre-fill fields from row data
+			document.getElementById('pcMembershipFee').value = row['Membership Fee'] || '';
+			document.getElementById('pcTrainingFee').value = row['Training Fee'] || '';
+			document.getElementById('pcTotalFee').value = row['Total Fee'] || '';
+			document.getElementById('pcDatePaid').value = row['Date Paid'] || fmtMDY(new Date(), true);
+			document.getElementById('payConfirmStatus').textContent = '';
+			document.getElementById('payConfirmStatus').className = 'status';
+			document.getElementById('payConfirmSubmitBtn').disabled = false;
+			document.getElementById('payConfirmSubmitBtn').textContent = 'Submit';
+			modal._rowData = row;
+			modal._rowNumber = idx + 2;
+			modal.classList.add('show');
+			function onKey(e){ if (e.key === 'Escape'){ e.preventDefault(); closePayConfirmModal(); } }
+			modal.addEventListener('keydown', onKey); modal._onKey = onKey;
+			setTimeout(() => document.getElementById('pcDatePaid').focus(), 0);
+		}
+		function closePayConfirmModal(){
+			const modal = document.getElementById('payConfirmModal');
+			if (!modal) return;
+			if (modal._onKey){ modal.removeEventListener('keydown', modal._onKey); modal._onKey = null; }
+			modal.classList.remove('show');
+		}
+		async function submitPayConfirm(){
+			const modal = document.getElementById('payConfirmModal');
+			const row = modal._rowData;
+			if (!row) return;
+			const submitBtn = document.getElementById('payConfirmSubmitBtn');
+			const status = document.getElementById('payConfirmStatus');
+			const payload = {
+				func: 'webinarregedit',
+				RowNumber: String(modal._rowNumber || ''),
+				Timestamp: row['Timestamp'] || '',
+				Email: row['Email Address'] || '',
+				MembershipFee: document.getElementById('pcMembershipFee').value.trim(),
+				TrainingFee: document.getElementById('pcTrainingFee').value.trim(),
+				TotalFee: document.getElementById('pcTotalFee').value.trim(),
+				DatePaid: document.getElementById('pcDatePaid').value.trim()
+			};
+			submitBtn.disabled = true; submitBtn.textContent = 'Submitting…';
+			status.textContent = ''; status.className = 'status';
+			try{
+				const base = 'https://script.google.com/macros/s/AKfycbxpwr7Zk-zQg4FP35AIynHQRKHpoDbc_mKIG_AONHpv-De8_ynPcZeyneIv7LpCphNcLA/exec';
+				const qs = '?func=' + encodeURIComponent(payload.func)
+					+ '&RowNumber=' + encodeURIComponent(payload.RowNumber)
+					+ '&Timestamp=' + encodeURIComponent(payload.Timestamp)
+					+ '&Email=' + encodeURIComponent(payload.Email)
+					+ '&MembershipFee=' + encodeURIComponent(payload.MembershipFee)
+					+ '&TrainingFee=' + encodeURIComponent(payload.TrainingFee)
+					+ '&TotalFee=' + encodeURIComponent(payload.TotalFee)
+					+ '&DatePaid=' + encodeURIComponent(payload.DatePaid);
+				const res = await fetch(base + qs, { method: 'POST' });
+				const text = (await res.text()).trim();
+				closePayConfirmModal();
+				showToast(text || 'Submitted', 'success', 3500, 'top-right');
+			} catch(e){
+				status.textContent = 'Error: ' + (e?.message || 'Submission failed');
+				status.className = 'status error';
+				submitBtn.disabled = false; submitBtn.textContent = 'Submit';
+			}
+		}
+		document.getElementById('payConfirmCloseBtn').addEventListener('click', closePayConfirmModal);
+		document.getElementById('payConfirmCancelBtn').addEventListener('click', closePayConfirmModal);
+		document.getElementById('payConfirmSubmitBtn').addEventListener('click', submitPayConfirm);
+		document.getElementById('payConfirmModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closePayConfirmModal(); });
+		function escHtml(str){
+			return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+		}
+		async function loadWebinarReg(){
+			const btn = document.getElementById('webinarRegLoadBtn');
+			const status = document.getElementById('webinarRegStatus');
+			const wrap = document.getElementById('webinarRegTableWrap');
+			const count = document.getElementById('webinarRegCount');
+			if (!btn) return;
+			setPending(btn, true, 'Loading…');
+			status.textContent = '';
+			status.className = 'status';
+			wrap.style.display = 'none';
+			if (count) count.style.display = 'none';
+			try{
+				const res = await fetch(WEBINAR_REG_URL);
+				if (!res.ok) throw new Error('HTTP ' + res.status);
+				const json = await res.json();
+				if (json.status !== 'success') throw new Error(json.message || 'Unexpected response');
+				renderWebinarRegTable(json.data || []);
+				status.textContent = '';
+			} catch(e){
+				status.textContent = 'Error: ' + (e?.message || 'Failed to load');
+				status.className = 'status error';
+			} finally {
+				setPending(btn, false);
+			}
+		}
+		document.getElementById('webinarRegLoadBtn')?.addEventListener('click', loadWebinarReg);
 
 		// Membership Request modal events
 		document.getElementById('memReqCloseBtn').addEventListener('click', closeMemReqModal);

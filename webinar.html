@@ -521,6 +521,38 @@
     #wrfFormSection .btn-wrf-submit:hover { filter:brightness(1.08); }
     #wrfFormSection .btn-wrf-submit:disabled { opacity:.6; cursor:not-allowed; filter:none; }
     #wrf_error { font-size:.87rem; }
+
+    /* ── Manual Registration button ── */
+    .btn-wrf-manual {
+      background: #fff;
+      color: #166938;
+      border: 1.5px solid #166938;
+      border-radius: 8px;
+      font-weight: 600;
+      padding: .42rem 1.4rem;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      letter-spacing: .01em;
+    }
+    .btn-wrf-manual:hover { background: #f0faf3; color: #0f5132; }
+    /* Check Membership button (inside input-group) */
+    #wrfCheckMembershipBtn {
+      background: #166938;
+      color: #fff;
+      border: 1.5px solid #166938;
+      font-size: .82rem;
+      white-space: nowrap;
+      padding: 0 .85rem;
+      border-radius: 0 7px 7px 0 !important;
+      cursor: pointer;
+      transition: filter .15s;
+      line-height: 1;
+    }
+    #wrfCheckMembershipBtn:hover { filter: brightness(1.1); }
+    #wrfCheckMembershipBtn:disabled { opacity: .65; cursor: not-allowed; filter: none; }
+    /* Membership check inline result */
+    #wrfMembershipCheckResult { font-size: .84rem; margin-top: .38rem; }
   </style>
 
   <!-- Google Identity Services -->
@@ -754,6 +786,16 @@
                   <div id="webinarCheckResult" aria-live="polite"></div>
 
                   <p id="webinarRegHint">&#128274; Your information is only used to pre-fill your registration details.</p>
+
+                  <!-- Manual Registration option -->
+                  <div id="webinarManualDivider" class="text-center my-2">
+                    <span style="color:#9ca3af;font-size:.82rem;">— or —</span>
+                  </div>
+                  <div id="webinarManualBtnWrap" class="text-center mb-3">
+                    <button type="button" id="wrfManualRegBtn" class="btn-wrf-manual">
+                      &#9998;&#65039; Manual Registration
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -846,8 +888,14 @@
                       <div class="form-row">
                         <div class="form-group col-md-6">
                           <label for="wrf_email">&#128231; Email Address</label>
-                          <input type="email" class="form-control" id="wrf_email" name="email" readonly>
-                          <small class="form-text text-muted">Verified via Google Sign-In.</small>
+                          <div class="input-group">
+                            <input type="email" class="form-control" id="wrf_email" name="email" readonly>
+                            <div class="input-group-append" id="wrfCheckMembershipBtnWrap" style="display:none;">
+                              <button type="button" id="wrfCheckMembershipBtn">&#128269; Check Membership</button>
+                            </div>
+                          </div>
+                          <small class="form-text text-muted" id="wrfEmailHint">Verified via Google Sign-In.</small>
+                          <div id="wrfMembershipCheckResult" aria-live="polite"></div>
                         </div>
                         <div class="form-group col-md-6">
                           <label for="wrf_mobile">&#128241; Mobile Number</label>
@@ -1055,6 +1103,7 @@
   // Membership fee state (set when form is shown after DB check)
   var _wrfMembershipFee   = 500;  // default: assume new user until DB check
   var _wrfMembershipType  = 'new'; // 'new' | 'renewal' | 'active'
+  var _wrfIsManual        = false; // true when user chose Manual Registration
 
   // Update the payment summary inside the registration form
   function wrfUpdatePaymentSummary() {
@@ -1326,8 +1375,18 @@
     // 1. Always wipe any previous values so a new user never sees another user's data
     wrfResetForm();
 
-    // 2. Always inject the currently signed-in Google email (not from database)
+    // 2. Google Sign-In mode — email is read-only, hide the manual membership check button
+    _wrfIsManual = false;
     var emailEl = document.getElementById('wrf_email');
+    if (emailEl) emailEl.setAttribute('readonly', '');
+    var chkBtnWrap = document.getElementById('wrfCheckMembershipBtnWrap');
+    if (chkBtnWrap) chkBtnWrap.style.display = 'none';
+    var emailHint = document.getElementById('wrfEmailHint');
+    if (emailHint) emailHint.textContent = 'Verified via Google Sign-In.';
+    var mbrCheckResult = document.getElementById('wrfMembershipCheckResult');
+    if (mbrCheckResult) mbrCheckResult.innerHTML = '';
+
+    // 3. Always inject the currently signed-in Google email (not from database)
     if (emailEl && _wEmail) emailEl.value = _wEmail;
 
     // 3. Pre-fill from member record only when data exists
@@ -1391,6 +1450,108 @@
     formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // Show the registration form in manual mode (no Google Sign-In, blank fields)
+  function wrfShowManualForm() {
+    _wrfIsManual = true;
+    wrfResetForm();
+
+    // Make email editable and reveal the Check Membership button
+    var emailEl = document.getElementById('wrf_email');
+    if (emailEl) emailEl.removeAttribute('readonly');
+    var chkBtnWrap = document.getElementById('wrfCheckMembershipBtnWrap');
+    if (chkBtnWrap) chkBtnWrap.style.display = '';
+    var emailHint = document.getElementById('wrfEmailHint');
+    if (emailHint) emailHint.textContent = 'Enter your email address, then click \u201cCheck Membership\u201d.';
+    var mbrCheckResult = document.getElementById('wrfMembershipCheckResult');
+    if (mbrCheckResult) mbrCheckResult.innerHTML = '';
+
+    // Default to new-member fee until Check Membership is run
+    _wrfMembershipFee  = 500;
+    _wrfMembershipType = 'new';
+
+    // Hide the manual button / divider so it cannot be clicked again
+    var manualDivider = document.getElementById('webinarManualDivider');
+    var manualBtnWrap = document.getElementById('webinarManualBtnWrap');
+    if (manualDivider) manualDivider.style.display = 'none';
+    if (manualBtnWrap) manualBtnWrap.style.display = 'none';
+
+    var formSection = document.getElementById('wrfFormSection');
+    formSection.style.display = 'block';
+    wrfUpdatePaymentSummary();
+    formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Perform membership check for manual registration.
+  // Only extracts the expiry date to compute the membership fee — does NOT pre-fill any form fields.
+  function wrfDoMembershipCheck() {
+    var emailEl  = document.getElementById('wrf_email');
+    var resultEl = document.getElementById('wrfMembershipCheckResult');
+    var btn      = document.getElementById('wrfCheckMembershipBtn');
+    if (!emailEl || !resultEl) return;
+
+    var email = emailEl.value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      resultEl.innerHTML = '<span class="text-danger">\u26a0\ufe0f Please enter a valid email address first.</span>';
+      return;
+    }
+
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Checking\u2026'; }
+    resultEl.innerHTML =
+      '<span class="text-muted"><span class="spinner-border spinner-border-sm mr-1" role="status"></span> Checking membership\u2026</span>';
+
+    var url = WRF_BASE + '?SH=Sheet1&func=membershipcheck&email=' + encodeURIComponent(email);
+    fetch(url, { method: 'POST' })
+      .then(function(r) { return r.text(); })
+      .then(function(text) {
+        if (btn) { btn.disabled = false; btn.innerHTML = '\uD83D\uDD0D Check Membership'; }
+        var trimmed = (text || '').trim();
+        if (trimmed === 'new' || trimmed === '') {
+          _wrfMembershipFee  = 500;
+          _wrfMembershipType = 'new';
+          resultEl.innerHTML =
+            '<span class="text-warning"><strong>\uD83D\uDC64 No membership record found.</strong>' +
+            ' New member fee of <strong>PHP 500</strong> will apply.</span>';
+        } else {
+          try {
+            var data = JSON.parse(trimmed);
+            // Extract date only — do NOT pre-fill any form fields
+            var expiryRaw = data.date || data.Date || data.memberdate || data.MemberDate || '';
+            var expiryDate = expiryRaw ? new Date(expiryRaw) : null;
+            var isActive   = expiryDate && expiryDate >= new Date();
+            if (isActive) {
+              _wrfMembershipFee  = 0;
+              _wrfMembershipType = 'active';
+              resultEl.innerHTML =
+                '<span class="text-success"><strong>\u2705 Active Member</strong> \u2014 valid until ' +
+                expiryDate.toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' }) +
+                '. Membership fee: <strong>PHP 0</strong>.</span>';
+            } else {
+              _wrfMembershipFee  = 500;
+              _wrfMembershipType = 'renewal';
+              var expTxt = expiryDate
+                ? 'Expired on ' + expiryDate.toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' }) + '.'
+                : 'Membership has expired.';
+              resultEl.innerHTML =
+                '<span class="text-danger"><strong>\u26d4 Membership Expired</strong> \u2014 ' + expTxt +
+                ' Renewal fee of <strong>PHP 500</strong> will apply.</span>';
+            }
+          } catch (pe) {
+            _wrfMembershipFee  = 500;
+            _wrfMembershipType = 'new';
+            resultEl.innerHTML =
+              '<span class="text-warning">\uD83D\uDC64 No membership record found.' +
+              ' New member fee of <strong>PHP 500</strong> will apply.</span>';
+          }
+        }
+        wrfUpdatePaymentSummary();
+      })
+      .catch(function() {
+        if (btn) { btn.disabled = false; btn.innerHTML = '\uD83D\uDD0D Check Membership'; }
+        resultEl.innerHTML =
+          '<span class="text-danger">\u26a0\ufe0f Could not connect. Please check your connection and try again.</span>';
+      });
+  }
+
   // Switch Account button
   document.addEventListener('DOMContentLoaded', function() {
     // Status overlay buttons
@@ -1406,6 +1567,22 @@
       wrfCloseStatusOverlay();
       wrfShowForm(data);
     });
+
+    // Manual Registration button
+    var manualRegBtn = document.getElementById('wrfManualRegBtn');
+    if (manualRegBtn) {
+      manualRegBtn.addEventListener('click', function() {
+        wrfShowManualForm();
+      });
+    }
+
+    // Check Membership button (manual mode only)
+    var checkMbrBtn = document.getElementById('wrfCheckMembershipBtn');
+    if (checkMbrBtn) {
+      checkMbrBtn.addEventListener('click', function() {
+        wrfDoMembershipCheck();
+      });
+    }
 
     // "Other" field toggles for form selects
     ['wrf_title', 'wrf_specialization', 'wrf_position', 'wrf_source'].forEach(function(selId) {
@@ -1443,6 +1620,17 @@
           errorEl.textContent = 'Please select at least one webinar before submitting.';
           errorEl.classList.remove('d-none');
           return;
+        }
+
+        // In manual mode, require a valid email
+        if (_wrfIsManual) {
+          var manualEmail = document.getElementById('wrf_email').value.trim();
+          if (!manualEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(manualEmail)) {
+            errorEl.textContent = 'Please enter a valid email address.';
+            errorEl.classList.remove('d-none');
+            document.getElementById('wrf_email').focus();
+            return;
+          }
         }
 
         // Basic HTML5 validation
@@ -1540,6 +1728,15 @@
         if (result)   result.innerHTML = '';
         document.getElementById('wrfStatusBackdrop').style.display = 'none';
         document.getElementById('wrfFormSection').style.display    = 'none';
+        // Restore manual registration option
+        var _manDiv = document.getElementById('webinarManualDivider');
+        var _manBtn = document.getElementById('webinarManualBtnWrap');
+        if (_manDiv) _manDiv.style.display = '';
+        if (_manBtn) _manBtn.style.display = '';
+        // Reset manual membership check result
+        var _mbrRes = document.getElementById('wrfMembershipCheckResult');
+        if (_mbrRes) _mbrRes.innerHTML = '';
+        _wrfIsManual = false;
         if (window.google && window.google.accounts && window.google.accounts.id) {
           window.google.accounts.id.disableAutoSelect();
         }

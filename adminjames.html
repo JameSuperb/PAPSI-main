@@ -336,7 +336,7 @@
 			</div>
 			<div class="row" style="margin-top:10px;">
 				<div class="field"><label for="pcTotalFee">Total Fee</label><input id="pcTotalFee" type="number" step="1" min="0" placeholder="0" /></div>
-				<div class="field"><label for="pcDatePaid">Date Paid</label><input id="pcDatePaid" type="text" placeholder="MM/DD/YYYY" /></div>
+				<div class="field"><label for="pcDatePaid">Date Paid</label><div style="display:flex;gap:4px;align-items:center;"><input id="pcDatePaid" type="text" placeholder="MM/DD/YYYY" style="flex:1;" /><button type="button" id="pcDatePaidBtn" class="btn secondary" style="padding:4px 8px;font-size:15px;line-height:1;" title="Pick date">&#128197;</button><input type="date" id="pcDatePaidPicker" style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;" tabindex="-1" /></div></div>
 			</div>
 			<div id="payConfirmStatus" class="status" style="margin-top:6px;" aria-live="polite"></div>
 			<div class="actions" style="margin-top:12px; justify-content:flex-end;">
@@ -978,7 +978,11 @@
 			document.getElementById('pcMembershipFee').value = row['Membership Fee'] || '';
 			document.getElementById('pcTrainingFee').value = row['Training Fee'] || '';
 			document.getElementById('pcTotalFee').value = row['Total Fee'] || '';
-			document.getElementById('pcDatePaid').value = row['Date Paid'] || fmtMDY(new Date(), true);
+			const _pcNow = new Date();
+			const _pcTodayStr = String(_pcNow.getMonth()+1).padStart(2,'0') + '/' + String(_pcNow.getDate()).padStart(2,'0') + '/' + _pcNow.getFullYear();
+			const _pcStored = (row['Date Paid'] || '').trim();
+			const _pcFormatted = _pcStored ? (fmtMDY(new Date(_pcStored), true) || _pcStored) : '';
+			document.getElementById('pcDatePaid').value = _pcFormatted || _pcTodayStr;
 			document.getElementById('payConfirmStatus').textContent = '';
 			document.getElementById('payConfirmStatus').className = 'status';
 			document.getElementById('payConfirmSubmitBtn').disabled = false;
@@ -1268,6 +1272,7 @@
 		// Mem dates: Start uses MM/DD/YYYY; End uses M/DD/YYYY
 		openDatePicker('trMemStartDateBtn','trMemStartDatePicker','trMemStartDate', (d)=> fmtMDY(d, true));
 		openDatePicker('trMemEndDateBtn','trMemEndDatePicker','trMemEndDate', (d)=> fmtMDY(d, false));
+		openDatePicker('pcDatePaidBtn','pcDatePaidPicker','pcDatePaid', (d)=> fmtMDY(d, true));
 
 		// Auto open app if session exists
 			(function init(){

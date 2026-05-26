@@ -269,9 +269,13 @@
 			<div class="subtle" style="margin-top:4px;">Filter members, copy emails, and mark who you’ve already invited (stored on this device).</div>
 
 			<div class="row" style="margin-top:12px;">
-				<div class="field">
+				<div class="field" style="flex:1; min-width:180px;">
 					<label for="inviteCampaign">Campaign</label>
-					<input id="inviteCampaign" type="text" placeholder="e.g., March 2026 Webinar" />
+					<div style="display:flex; gap:6px; align-items:center;">
+						<input id="inviteCampaign" type="text" placeholder="e.g., March 2026 Webinar" list="inviteCampaignList" autocomplete="off" style="flex:1;" />
+						<datalist id="inviteCampaignList"></datalist>
+						<button id="inviteDeleteCampaignBtn" class="btn secondary" type="button" title="Delete this campaign's marks">Delete Campaign</button>
+					</div>
 				</div>
 				<div class="field" style="min-width:180px;">
 					<label for="inviteMembership">Membership</label>
@@ -317,12 +321,13 @@
 				<button id="inviteSortBtn" class="btn ghost" type="button" style="margin-top:22px;">Sort Name Z→A</button>
 			</div>
 
-			<div class="actions" style="margin-top:12px; align-items:center;">
+			<div class="actions" style="margin-top:12px; align-items:center; flex-wrap:wrap; gap:6px;">
 				<button id="inviteCopyBtn" class="btn ghost" type="button">Copy Unmarked Emails</button>
+				<button id="inviteCopyMarkedBtn" class="btn ghost" type="button">Copy Marked Emails</button>
 				<button id="inviteCopyTsvBtn" class="btn ghost" type="button">Copy TSV</button>
 				<button id="inviteMarkUnmarkedBtn" class="btn" type="button">Mark Unmarked as Sent</button>
 				<button id="inviteClearMarksBtn" class="btn secondary" type="button">Clear Marks (Campaign)</button>
-				<div id="inviteStats" class="status info" style="margin-left:auto;"></div>
+				<div id="inviteStats" class="status info" style="margin-left:auto;" aria-live="polite" aria-atomic="true"></div>
 			</div>
 
 			<div style="margin-top:10px; overflow:auto; max-height:50vh; border:1px solid var(--line); border-radius:10px;">
@@ -335,13 +340,31 @@
 							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:110px;">Membership</th>
 							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:120px;">Region</th>
 							<th style="padding:8px 10px; border-bottom:1px solid var(--line);">School</th>
-							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:70px;">Sent</th>
+							<th style="padding:8px 10px; border-bottom:1px solid var(--line); width:70px;">
+						<label style="display:flex; align-items:center; gap:5px; cursor:pointer; font-weight:600;">
+							<input type="checkbox" id="inviteSelectAll" title="Select / deselect all visible" style="cursor:pointer;"> Sent
+						</label>
+					</th>
 						</tr>
 					</thead>
 					<tbody id="inviteTbody"></tbody>
 				</table>
 			</div>
 			<div id="inviteEmpty" class="subtle" style="margin-top:8px; display:none;">No members match the current filters.</div>
+			<!-- Pagination -->
+			<div id="invitePagination" style="margin-top:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+				<button id="invitePrevBtn" class="btn ghost" type="button" style="padding:4px 12px;">← Prev</button>
+				<span id="invitePageInfo" class="subtle" style="font-size:13px;"></span>
+				<button id="inviteNextBtn" class="btn ghost" type="button" style="padding:4px 12px;">Next →</button>
+			</div>
+			<div class="actions" style="margin-top:10px; align-items:center; flex-wrap:wrap; gap:6px;">
+				<button id="inviteExportBtn" class="btn ghost" type="button" title="Download all campaign marks as a JSON backup">Export Marks</button>
+				<label id="inviteImportLabel" class="btn ghost" style="cursor:pointer;" title="Restore marks from a previously exported JSON file">
+					Import Marks
+					<input id="inviteImportInput" type="file" accept=".json,application/json" style="display:none;" />
+				</label>
+				<button id="inviteDownloadTsvBtn" class="btn ghost" type="button" title="Download the current view as a TSV file">Download TSV</button>
+			</div>
 		</div>
 	</div>
 
@@ -537,6 +560,8 @@
 		let MEMBERS_RAW = [];
 		let MEMBERS_SORT_DIR = 'asc'; // 'asc' | 'desc' (default A→Z)
 		let INVITE_SORT_DIR = 'asc'; // 'asc' | 'desc'
+		let INVITE_PAGE = 0; // current page index (0-based)
+		const INVITE_PAGE_SIZE = 50;
 		let INVITE_MODAL_OPEN = false;
 		const INVITE_STATE_KEY = 'PAPSI_INVITE_STATE_V1';
 		const INVITE_CAMPAIGN_KEY = 'PAPSI_INVITE_CAMPAIGN_V1';
@@ -661,6 +686,7 @@
 		}
 		function inviteSaveState(state){
 			try { lsSet(INVITE_STATE_KEY, JSON.stringify(state || {})); } catch {}
+			try { invitePopulateCampaignList(); } catch {}
 		}
 		function inviteNormalizeCampaign(name){
 			let n = safeStr(name || '').replace(/\s+/g,' ').trim();
@@ -675,6 +701,104 @@
 			if (el && el.value !== campaign) el.value = campaign;
 			lsSet(INVITE_CAMPAIGN_KEY, campaign);
 			return campaign;
+		}
+		function invitePopulateCampaignList(){
+			const dl = document.getElementById('inviteCampaignList');
+			if (!dl) return;
+			try {
+				const state = inviteLoadState();
+				const names = Object.keys(state?.campaigns || {}).sort((a,b)=> a.localeCompare(b));
+				dl.innerHTML = '';
+				names.forEach(name => {
+					const opt = document.createElement('option');
+					opt.value = name;
+					const count = Object.keys(state.campaigns[name] || {}).length;
+					opt.label = `${name} (${count} marked)`;
+					dl.appendChild(opt);
+				});
+			} catch {}
+		}
+		function inviteHandleDeleteCampaign(){
+			const campaign = inviteGetCampaign();
+			openConfirm(`Permanently delete campaign "${campaign}" and all its marks on this device?`, ()=>{
+				inviteClearCampaign(campaign);
+				closeConfirm();
+				// Reset to Default
+				const el = document.getElementById('inviteCampaign');
+				if (el) el.value = 'Default';
+				lsSet(INVITE_CAMPAIGN_KEY, 'Default');
+				invitePopulateCampaignList();
+				inviteRender();
+				showToast(`Campaign "${campaign}" deleted`, 'success');
+			});
+		}
+		function inviteDownloadBlob(content, filename, type){
+			try {
+				const blob = new Blob([content], { type });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = filename;
+				a.style.display = 'none';
+				document.body.appendChild(a);
+				a.click();
+				setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1000);
+			} catch(e){
+				showToast('Download failed: ' + (e?.message || e), 'error');
+			}
+		}
+		function inviteHandleExportMarks(){
+			const state = inviteLoadState();
+			if (!state?.campaigns || Object.keys(state.campaigns).length === 0){
+				showToast('No marks to export', 'info'); return;
+			}
+			const json = JSON.stringify(state, null, 2);
+			const ts = new Date().toISOString().slice(0,10);
+			inviteDownloadBlob(json, `papsi-invite-marks-${ts}.json`, 'application/json');
+			showToast('Marks exported', 'success');
+		}
+		function inviteHandleImportMarks(file){
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = (ev)=>{
+				try {
+					const incoming = JSON.parse(ev.target.result);
+					if (!incoming?.campaigns || typeof incoming.campaigns !== 'object'){
+						showToast('Invalid file format', 'error'); return;
+					}
+					const existing = inviteLoadState();
+					if (!existing.campaigns) existing.campaigns = {};
+					// Merge: for each campaign, union the email keys (incoming wins on conflict)
+					Object.entries(incoming.campaigns).forEach(([camp, emails])=>{
+						if (!existing.campaigns[camp]) existing.campaigns[camp] = {};
+						Object.assign(existing.campaigns[camp], emails);
+					});
+					inviteSaveState(existing);
+					inviteRender();
+					const total = Object.values(incoming.campaigns).reduce((s,c)=> s + Object.keys(c).length, 0);
+					showToast(`Imported ${total} mark(s)`, 'success');
+				} catch(e){
+					showToast('Failed to parse file: ' + (e?.message || e), 'error');
+				}
+			};
+			reader.readAsText(file);
+		}
+		async function inviteHandleDownloadTSV(){
+			const campaign = inviteGetCampaign();
+			const groupList = inviteGetGroupMembers();
+			const list = inviteApplyMarkFilter(groupList, campaign);
+			if (!Array.isArray(list) || list.length === 0){ showToast('Nothing to download','info'); return; }
+			const header = ['Name','Email','Membership','Region','School','Sent'].join('\t');
+			const rows = list.map(m=>{
+				const email = safeStr(m.email);
+				const sent = isValidEmail(email) ? (inviteIsMarked(email, campaign) ? 'YES' : 'NO') : '';
+				return [tsvCell(m.name), tsvCell(email), tsvCell(m.membership), tsvCell(m.region || 'Unknown'), tsvCell(m.school), tsvCell(sent)].join('\t');
+			});
+			const tsv = [header, ...rows].join('\r\n');
+			const safeName = campaign.replace(/[^a-z0-9_-]/gi,'-').toLowerCase();
+			const ts = new Date().toISOString().slice(0,10);
+			inviteDownloadBlob(tsv, `papsi-invite-${safeName}-${ts}.tsv`, 'text/tab-separated-values');
+			showToast(`Downloaded ${rows.length} rows`, 'success');
 		}
 		function inviteEmailKey(email){
 			return safeStr(email).toLowerCase();
@@ -821,7 +945,7 @@
 			try { window.prompt('Copy emails:', t); } catch {}
 			return false;
 		}
-		function inviteUpdateStats(groupList, campaign){
+		function inviteUpdateStats(groupList, campaign, visibleCount){
 			let valid = 0;
 			let marked = 0;
 			let invalid = 0;
@@ -833,7 +957,10 @@
 			});
 			const unmarked = Math.max(0, valid - marked);
 			const el = document.getElementById('inviteStats');
-			if (el) el.textContent = `${marked} marked • ${unmarked} unmarked • ${invalid} no/invalid email`;
+			if (!el) return;
+			let text = `${marked} marked • ${unmarked} unmarked • ${invalid} no/invalid email`;
+			if (visibleCount !== undefined && visibleCount !== (valid + invalid)) text += ` • ${visibleCount} shown`;
+			el.textContent = text;
 		}
 		function inviteMakeSentCheckbox(member, campaign){
 			const email = safeStr(member.email);
@@ -842,6 +969,14 @@
 			cb.type = 'checkbox';
 			cb.disabled = !can;
 			cb.checked = can ? inviteIsMarked(email, campaign) : false;
+			if (cb.checked){
+				try {
+					const st = inviteLoadState();
+					const c = inviteNormalizeCampaign(campaign);
+					const ts = st?.campaigns?.[c]?.[inviteEmailKey(email)];
+					if (ts) cb.title = 'Marked: ' + new Date(ts).toLocaleString();
+				} catch {}
+			}
 			cb.addEventListener('click', (e)=> e.stopPropagation());
 			cb.addEventListener('change', ()=>{
 				inviteBulkSetMarked([email], cb.checked, campaign);
@@ -855,20 +990,26 @@
 			if (!tbody) return;
 			const campaign = inviteGetCampaign();
 			const groupList = inviteGetGroupMembers();
-			inviteUpdateStats(groupList, campaign);
 			const list = inviteApplyMarkFilter(groupList, campaign);
+			inviteUpdateStats(groupList, campaign, list.length);
 			tbody.innerHTML = '';
 			if (list.length === 0){
 				if (empty) empty.style.display = 'block';
+				inviteRenderPagination(0, 0);
 				return;
 			}
 			if (empty) empty.style.display = 'none';
+			// Clamp current page to valid range
+			const totalPages = Math.ceil(list.length / INVITE_PAGE_SIZE);
+			if (INVITE_PAGE >= totalPages) INVITE_PAGE = Math.max(0, totalPages - 1);
+			const start = INVITE_PAGE * INVITE_PAGE_SIZE;
+			const pageSlice = list.slice(start, start + INVITE_PAGE_SIZE);
 			const frag = document.createDocumentFragment();
-			list.forEach((m,i)=>{
+			pageSlice.forEach((m)=>{
 				const tr = document.createElement('tr');
 				tr.style.borderBottom = '1px solid var(--line)';
 				const cells = [
-					(i+1).toString(),
+					(m.idx + 1).toString(),
 					m.name || '—',
 					m.email || '—',
 					formatMembershipCell(m.membership),
@@ -889,6 +1030,35 @@
 				frag.appendChild(tr);
 			});
 			tbody.appendChild(frag);
+			inviteRenderPagination(list.length, totalPages);
+			// Sync select-all checkbox state (against the full filtered list, not just current page)
+			try {
+				const sa = document.getElementById('inviteSelectAll');
+				if (sa){
+					const validEmails = inviteUniqueValidEmails(list);
+					const checkedCount = validEmails.filter(em => inviteIsMarked(em, campaign)).length;
+					if (validEmails.length === 0){ sa.checked = false; sa.indeterminate = false; }
+					else if (checkedCount === validEmails.length){ sa.checked = true; sa.indeterminate = false; }
+					else if (checkedCount === 0){ sa.checked = false; sa.indeterminate = false; }
+					else { sa.checked = false; sa.indeterminate = true; }
+				}
+			} catch {}
+		}
+		function inviteRenderPagination(total, totalPages){
+			const pagination = document.getElementById('invitePagination');
+			const pageInfo = document.getElementById('invitePageInfo');
+			const prevBtn = document.getElementById('invitePrevBtn');
+			const nextBtn = document.getElementById('inviteNextBtn');
+			if (!pagination) return;
+			if (total <= INVITE_PAGE_SIZE){
+				pagination.style.display = 'none'; return;
+			}
+			pagination.style.display = 'flex';
+			const start = INVITE_PAGE * INVITE_PAGE_SIZE + 1;
+			const end = Math.min((INVITE_PAGE + 1) * INVITE_PAGE_SIZE, total);
+			if (pageInfo) pageInfo.textContent = `Page ${INVITE_PAGE + 1} of ${totalPages} (${start}–${end} of ${total})`;
+			if (prevBtn) prevBtn.disabled = INVITE_PAGE === 0;
+			if (nextBtn) nextBtn.disabled = INVITE_PAGE >= totalPages - 1;
 		}
 		function openInviteModal(){
 			const modal = document.getElementById('inviteModal');
@@ -902,6 +1072,7 @@
 				if (el && !safeStr(el.value)) el.value = stored;
 			} catch {}
 			inviteSyncSortButton();
+			invitePopulateCampaignList();
 			inviteRender();
 			setTimeout(()=>{ try{ document.getElementById('inviteSearch')?.focus(); } catch(e){} }, 0);
 			document.addEventListener('keydown', inviteKeyHandler);
@@ -957,20 +1128,34 @@
 		}
 		function inviteHandleMarkUnmarked(){
 			const campaign = inviteGetCampaign();
+			// Respect the current Show filter: only mark what is actually visible
 			const groupList = inviteGetGroupMembers();
-			const emails = inviteUniqueValidEmails(groupList).filter(em => !inviteIsMarked(em, campaign));
+			const visibleList = inviteApplyMarkFilter(groupList, campaign);
+			const emails = inviteUniqueValidEmails(visibleList).filter(em => !inviteIsMarked(em, campaign));
 			if (emails.length === 0){ showToast('Nothing to mark','info'); return; }
-			inviteBulkSetMarked(emails, true, campaign);
-			inviteRender();
-			showToast(`Marked ${emails.length} as sent`, 'success');
+			openConfirm(`Mark ${emails.length} unmarked member(s) as sent for campaign "${campaign}"?`, ()=>{
+				inviteBulkSetMarked(emails, true, campaign);
+				closeConfirm();
+				inviteRender();
+				showToast(`Marked ${emails.length} as sent`, 'success');
+			});
+		}
+		async function inviteHandleCopyMarked(){
+			const campaign = inviteGetCampaign();
+			const groupList = inviteGetGroupMembers();
+			const emails = inviteUniqueValidEmails(groupList).filter(em => inviteIsMarked(em, campaign));
+			if (emails.length === 0){ showToast('No marked emails in the current group','info'); return; }
+			const ok = await inviteCopyToClipboard(emails.join(', '));
+			showToast(ok ? `Copied ${emails.length} marked emails` : `Prepared ${emails.length} marked emails`, ok ? 'success' : 'info');
 		}
 		function inviteHandleClearMarks(){
 			const campaign = inviteGetCampaign();
-			const ok = window.confirm(`Clear ALL invite marks for campaign "${campaign}" on this device?`);
-			if (!ok) return;
-			inviteClearCampaign(campaign);
-			inviteRender();
-			showToast('Marks cleared','success');
+			openConfirm(`Clear ALL invite marks for campaign "${campaign}" on this device?`, ()=>{
+				inviteClearCampaign(campaign);
+				closeConfirm();
+				inviteRender();
+				showToast('Marks cleared','success');
+			});
 		}
 
 		function filterAndDrawMembers(){
@@ -1810,21 +1995,39 @@
 		document.getElementById('inviteManagerBtn')?.addEventListener('click', openInviteModal);
 		document.getElementById('inviteCloseBtn')?.addEventListener('click', closeInviteModal);
 		document.getElementById('inviteModal')?.addEventListener('click', (e)=>{ if (e.target === e.currentTarget) closeInviteModal(); });
-		document.getElementById('inviteCampaign')?.addEventListener('change', ()=> inviteRender());
-		document.getElementById('inviteMembership')?.addEventListener('change', ()=> inviteRender());
-		document.getElementById('inviteSearch')?.addEventListener('input', ()=> inviteRender());
-		document.getElementById('inviteRegion')?.addEventListener('change', ()=> inviteRender());
-		document.getElementById('inviteMarkFilter')?.addEventListener('change', ()=> inviteRender());
-		document.getElementById('inviteSortKey')?.addEventListener('change', ()=>{ inviteSyncSortButton(); inviteRender(); });
+		document.getElementById('inviteCampaign')?.addEventListener('change', ()=>{ INVITE_PAGE=0; inviteRender(); });
+		document.getElementById('inviteMembership')?.addEventListener('change', ()=>{ INVITE_PAGE=0; inviteRender(); });
+		document.getElementById('inviteSearch')?.addEventListener('input', ()=>{ INVITE_PAGE=0; inviteRender(); });
+		document.getElementById('inviteRegion')?.addEventListener('change', ()=>{ INVITE_PAGE=0; inviteRender(); });
+		document.getElementById('inviteMarkFilter')?.addEventListener('change', ()=>{ INVITE_PAGE=0; inviteRender(); });
+		document.getElementById('inviteSortKey')?.addEventListener('change', ()=>{ INVITE_PAGE=0; inviteSyncSortButton(); inviteRender(); });
 		document.getElementById('inviteSortBtn')?.addEventListener('click', ()=>{
 			INVITE_SORT_DIR = INVITE_SORT_DIR === 'asc' ? 'desc' : 'asc';
+			INVITE_PAGE = 0;
 			inviteSyncSortButton();
 			inviteRender();
 		});
+		document.getElementById('invitePrevBtn')?.addEventListener('click', ()=>{ if (INVITE_PAGE > 0){ INVITE_PAGE--; inviteRender(); } });
+		document.getElementById('inviteNextBtn')?.addEventListener('click', ()=>{ INVITE_PAGE++; inviteRender(); });
 		document.getElementById('inviteCopyBtn')?.addEventListener('click', inviteHandleCopyUnmarked);
+		document.getElementById('inviteCopyMarkedBtn')?.addEventListener('click', inviteHandleCopyMarked);
 		document.getElementById('inviteCopyTsvBtn')?.addEventListener('click', inviteHandleCopyTSV);
 		document.getElementById('inviteMarkUnmarkedBtn')?.addEventListener('click', inviteHandleMarkUnmarked);
 		document.getElementById('inviteClearMarksBtn')?.addEventListener('click', inviteHandleClearMarks);
+		document.getElementById('inviteDeleteCampaignBtn')?.addEventListener('click', inviteHandleDeleteCampaign);
+		document.getElementById('inviteExportBtn')?.addEventListener('click', inviteHandleExportMarks);
+		document.getElementById('inviteDownloadTsvBtn')?.addEventListener('click', inviteHandleDownloadTSV);
+		document.getElementById('inviteImportInput')?.addEventListener('change', function(){ inviteHandleImportMarks(this.files?.[0]); this.value = ''; });
+		document.getElementById('inviteSelectAll')?.addEventListener('change', function(){
+			const campaign = inviteGetCampaign();
+			const groupList = inviteGetGroupMembers();
+			const visibleList = inviteApplyMarkFilter(groupList, campaign);
+			const emails = inviteUniqueValidEmails(visibleList);
+			if (emails.length === 0) return;
+			inviteBulkSetMarked(emails, this.checked, campaign);
+			inviteRender();
+			showToast(this.checked ? `Marked ${emails.length} as sent` : `Unmarked ${emails.length}`, 'success');
+		});
 		// Action cards
 		function activateButtonCard(el, onClick){
 			if(!el) return;

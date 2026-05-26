@@ -349,6 +349,45 @@
 
     /* Read-only Google-verified email in modal */
     #memberInfoModal #mi_email[readonly] { background: #f0f9f4 !important; cursor: default; }
+
+    /* ── Manual Registration button ── */
+    .btn-mbr-manual {
+      background: #fff;
+      color: #166938;
+      border: 1.5px solid #166938;
+      border-radius: 8px;
+      font-weight: 600;
+      padding: .42rem 1.4rem;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      letter-spacing: .01em;
+    }
+    .btn-mbr-manual:hover { background: #f0faf3; color: #0f5132; }
+    /* Check Membership button (inside input-group) */
+    .btn-mbr-check {
+      background: #166938;
+      color: #fff;
+      border: 1.5px solid #166938;
+      font-size: .82rem;
+      white-space: nowrap;
+      padding: 0 .85rem;
+      border-radius: 0 7px 7px 0 !important;
+      cursor: pointer;
+      transition: filter .15s;
+      line-height: 1;
+    }
+    .btn-mbr-check:hover { filter: brightness(1.1); }
+    .btn-mbr-check:disabled { opacity: .65; cursor: not-allowed; filter: none; }
+    #memberManualEmailWrap .form-control {
+      border: 1.5px solid #c8d8ce;
+      border-radius: 7px 0 0 7px;
+      font-size: .92rem;
+    }
+    #memberManualEmailWrap .form-control:focus {
+      border-color: #22a06b;
+      box-shadow: 0 0 0 3px rgba(34,160,107,.15);
+    }
   </style>
 
   <!-- Google Identity Services -->
@@ -560,6 +599,28 @@
                 </div>
                 <div id="membershipCheckResult" class="mt-2" aria-live="polite"></div>
                 <small class="text-muted d-block">Sign in with the Google account you used for PAPSI registration or trainings.</small>
+
+                <!-- Manual Registration option -->
+                <div class="text-center my-2" id="memberManualDivider">
+                  <span style="color:#9ca3af;font-size:.82rem;">— or —</span>
+                </div>
+                <div id="memberManualBtnWrap" class="text-center">
+                  <button type="button" id="memberManualRegBtn" class="btn-mbr-manual">
+                    &#9998;&#65039; Manual Registration
+                  </button>
+                </div>
+
+                <!-- Manual email input (revealed after clicking Manual Registration) -->
+                <div id="memberManualEmailWrap" style="display:none;" class="mt-3">
+                  <div class="input-group">
+                    <input type="email" class="form-control" id="memberManualEmail"
+                      placeholder="Enter your email address" autocomplete="email">
+                    <div class="input-group-append">
+                      <button type="button" id="memberManualCheckBtn" class="btn-mbr-check">&#128269; Check Membership</button>
+                    </div>
+                  </div>
+                  <small class="form-text text-muted">Enter your email, then click &#8220;Check Membership&#8221;.</small>
+                </div>
               </div>
             </div>
             <!-- /Membership Check -->
@@ -947,6 +1008,8 @@
   var _googleName    = null;
   var _googlePicture = null;
   var _checking      = false;
+  var _manualEmail   = null;   // email entered via Manual Registration
+  var _isManualMode  = false;  // true when using manual flow (no Google Sign-In)
 
   var MODAL = $('#memberInfoModal');
   var FORM = document.getElementById('memberInfoForm');
@@ -982,6 +1045,9 @@
     if (widget) widget.style.opacity = pending ? '.5' : '1';
     var signedIn = document.getElementById('googleMemberSignedIn');
     if (signedIn) signedIn.style.opacity = pending ? '.5' : '1';
+    // Also disable/enable the manual check button while a request is in flight
+    var manualCheckBtn = document.getElementById('memberManualCheckBtn');
+    if (manualCheckBtn) manualCheckBtn.disabled = !!pending;
   }
   function showMsg(html, type){
     if (!OUT) return;
@@ -1032,11 +1098,16 @@
     if (errBox) { errBox.classList.add('d-none'); errBox.textContent = ''; }
     // Clear fields
     Object.keys(fields).forEach(function(k){ if (fields[k]) fields[k].value = ''; });
-    // Prefill email (verified via Google Sign-In – lock the field)
+    // Prefill email; lock field for Google Sign-In, leave editable for manual mode
     fillField(fields.email, email || '');
     if (fields.email) {
-      fields.email.setAttribute('readonly', 'readonly');
-      fields.email.title = 'Email verified via Google Sign-In';
+      if (!_isManualMode) {
+        fields.email.setAttribute('readonly', 'readonly');
+        fields.email.title = 'Email verified via Google Sign-In';
+      } else {
+        fields.email.removeAttribute('readonly');
+        fields.email.title = '';
+      }
     }
     // Ensure all "Other" inputs are hidden/reset before mapping
     ;(function(){
@@ -1045,7 +1116,8 @@
         if (el) { el.classList.add('d-none'); el.value = ''; }
       });
     })();
-    if (data && typeof data === 'object') {
+    // In manual mode, only email is pre-filled — skip all other data for security
+    if (!_isManualMode && data && typeof data === 'object') {
       // Map common keys (case-insensitive)
       var map = function(o, keys){
         for (var i=0;i<keys.length;i++){
@@ -1149,10 +1221,12 @@
   }
 
   async function doCheck(){
-    var email = _googleEmail || '';
+    var email = _googleEmail || _manualEmail || '';
     if (OUT) { OUT.className = ''; OUT.textContent = ''; }
     if (!email || !isValidEmail(email)){
-      showMsg('Please sign in with your Google account to continue.', 'error');
+      showMsg(_isManualMode
+        ? 'Please enter a valid email address.'
+        : 'Please sign in with your Google account to continue.', 'error');
       return;
     }
     if (_checking) return;
@@ -1235,6 +1309,16 @@
     if (emailEl)  emailEl.textContent    = _googleEmail || '';
     if (avatarEl && _googlePicture) avatarEl.src = _googlePicture;
 
+    // Google Sign-In takes over — clear manual mode and hide manual section
+    _isManualMode = false;
+    _manualEmail  = null;
+    var mManualWrap = document.getElementById('memberManualEmailWrap');
+    var mManualDiv  = document.getElementById('memberManualDivider');
+    var mManualBtn  = document.getElementById('memberManualBtnWrap');
+    if (mManualWrap) mManualWrap.style.display = 'none';
+    if (mManualDiv)  mManualDiv.style.display  = 'none';
+    if (mManualBtn)  mManualBtn.style.display  = 'none';
+
     // Auto-trigger the membership check
     doCheck();
   };
@@ -1243,14 +1327,64 @@
   var switchBtn = document.getElementById('googleMemberSwitchBtn');
   switchBtn && switchBtn.addEventListener('click', function() {
     _googleEmail = null; _googleName = null; _googlePicture = null;
+    _isManualMode = false; _manualEmail = null;
     var widget   = document.getElementById('membershipGoogleSignIn');
     var signedIn = document.getElementById('googleMemberSignedIn');
     if (widget)   widget.style.display   = '';
     if (signedIn) signedIn.style.display = 'none';
     if (OUT) { OUT.className = ''; OUT.textContent = ''; }
+    // Restore manual registration option
+    var mManualWrap = document.getElementById('memberManualEmailWrap');
+    var mManualDiv  = document.getElementById('memberManualDivider');
+    var mManualBtn  = document.getElementById('memberManualBtnWrap');
+    var mManualEmailEl = document.getElementById('memberManualEmail');
+    if (mManualWrap)   { mManualWrap.style.display = 'none'; }
+    if (mManualDiv)    mManualDiv.style.display  = '';
+    if (mManualBtn)    mManualBtn.style.display  = '';
+    if (mManualEmailEl) mManualEmailEl.value = '';
     // Disable auto-select so Google shows account chooser again
     if (window.google && window.google.accounts && window.google.accounts.id) {
       window.google.accounts.id.disableAutoSelect();
+    }
+  });
+
+  // ── Manual Registration button ──
+  var memberManualRegBtn = document.getElementById('memberManualRegBtn');
+  memberManualRegBtn && memberManualRegBtn.addEventListener('click', function() {
+    _isManualMode = true;
+    _manualEmail  = null;
+    var mManualWrap = document.getElementById('memberManualEmailWrap');
+    var mManualDiv  = document.getElementById('memberManualDivider');
+    var mManualBtn  = document.getElementById('memberManualBtnWrap');
+    if (mManualWrap) mManualWrap.style.display = '';
+    if (mManualDiv)  mManualDiv.style.display  = 'none';
+    if (mManualBtn)  mManualBtn.style.display  = 'none';
+    var emailEl = document.getElementById('memberManualEmail');
+    if (emailEl) emailEl.focus();
+  });
+
+  // ── Check Membership button (manual mode) ──
+  var memberManualCheckBtn = document.getElementById('memberManualCheckBtn');
+  memberManualCheckBtn && memberManualCheckBtn.addEventListener('click', function() {
+    var emailEl = document.getElementById('memberManualEmail');
+    if (!emailEl) return;
+    var emailVal = emailEl.value.trim();
+    if (!emailVal || !isValidEmail(emailVal)) {
+      showMsg('Please enter a valid email address.', 'error');
+      return;
+    }
+    _manualEmail  = emailVal;
+    _isManualMode = true;
+    doCheck();
+  });
+
+  // Allow pressing Enter inside the manual email field to trigger the check
+  var memberManualEmailEl = document.getElementById('memberManualEmail');
+  memberManualEmailEl && memberManualEmailEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      var btn = document.getElementById('memberManualCheckBtn');
+      if (btn) btn.click();
     }
   });
 

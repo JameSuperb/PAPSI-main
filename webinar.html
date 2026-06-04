@@ -667,79 +667,8 @@
                 <p class="text-muted mt-1 mb-0" style="font-size:0.9rem;">&#9989; You can pick multiple webinars</p>
               </div>
 
-              <!-- Webinar 1 -->
-              <div class="webinar-card" id="card-webinar1">
-                <input type="checkbox" id="webinar1" name="webinars[]" value="webinar1" class="webinar-checkbox" hidden>
-                <label class="webinar-card-label" for="webinar1">
-                  <div class="webinar-card-inner">
-                    <div class="webinar-img-wrap">
-                      <a href="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-2_orig.png" class="webinar-vbox" data-gall="webinars" title="Scatter Plots and Correlation" onclick="event.stopPropagation();">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-2_orig.png" alt="Webinar 1" class="webinar-thumb">
-                      </a>
-                      <span class="zoom-hint">&#128269; Zoom</span>
-                    </div>
-                    <div class="webinar-info">
-                      <div class="webinar-title">Scatter Plots and Correlation: Understanding Relationships Between Variables</div>
-                      <div class="webinar-meta">
-                        <span>&#128197; May 30, 2026</span>
-                        <span>&#9200; 10:00 AM &ndash; 12:00 PM</span>
-                        <span>&#127891; Dr. Russel Soltura</span>
-                      </div>
-                      <span class="webinar-fee">PHP 300</span>
-                    </div>
-                    <div class="check-circle">&#10003;</div>
-                  </div>
-                </label>
-              </div>
-
-              <!-- Webinar 2 -->
-              <div class="webinar-card" id="card-webinar2">
-                <input type="checkbox" id="webinar2" name="webinars[]" value="webinar2" class="webinar-checkbox" hidden>
-                <label class="webinar-card-label" for="webinar2">
-                  <div class="webinar-card-inner">
-                    <div class="webinar-img-wrap">
-                      <a href="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-3_orig.png" class="webinar-vbox" data-gall="webinars" title="Physics Through Correlation" onclick="event.stopPropagation();">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-3_orig.png" alt="Webinar 2" class="webinar-thumb">
-                      </a>
-                      <span class="zoom-hint">&#128269; Zoom</span>
-                    </div>
-                    <div class="webinar-info">
-                      <div class="webinar-title">Physics Through Correlation: Using Experimental Data to Discover Physical Relationships</div>
-                      <div class="webinar-meta">
-                        <span>&#128197; May 30, 2026</span>
-                        <span>&#9200; 1:00 PM &ndash; 3:00 PM</span>
-                        <span>&#127891; Dr. James Salveo Olarve</span>
-                      </div>
-                      <span class="webinar-fee">PHP 300</span>
-                    </div>
-                    <div class="check-circle">&#10003;</div>
-                  </div>
-                </label>
-              </div>
-
-              <!-- Webinar 3 -->
-              <div class="webinar-card" id="card-webinar3">
-                <input type="checkbox" id="webinar3" name="webinars[]" value="webinar3" class="webinar-checkbox" hidden>
-                <label class="webinar-card-label" for="webinar3">
-                  <div class="webinar-card-inner">
-                    <div class="webinar-img-wrap">
-                      <a href="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-4_orig.png" class="webinar-vbox" data-gall="webinars" title="Chemistry Through Correlation" onclick="event.stopPropagation();">
-                        <img src="https://papsitrainingcenter.weebly.com/uploads/2/5/9/7/25977880/sciencecorrelation-4_orig.png" alt="Webinar 3" class="webinar-thumb">
-                      </a>
-                      <span class="zoom-hint">&#128269; Zoom</span>
-                    </div>
-                    <div class="webinar-info">
-                      <div class="webinar-title">Chemistry Through Correlation: Using Experimental Data to Discover Chemical Relationships</div>
-                      <div class="webinar-meta">
-                        <span>&#128197; June 6, 2026</span>
-                        <span>&#9200; 1:00 PM &ndash; 3:00 PM</span>
-                        <span>&#127891; Dr. David Penaloza Jr.</span>
-                      </div>
-                      <span class="webinar-fee">PHP 300</span>
-                    </div>
-                    <div class="check-circle">&#10003;</div>
-                  </div>
-                </label>
+              <div id="webinarCards" aria-live="polite">
+                <div class="alert alert-light border mb-3" id="webinarLoadingState">Loading webinars...</div>
               </div>
 
               <!-- Fee Summary -->
@@ -1092,13 +1021,147 @@
 
 <script>
   // Webinar card toggle
-  var WEBINAR_FEE = 300;
   var BUNDLE_DISCOUNT = 100;
-  var webinarNames = {
-    webinar1: 'Scatter Plots and Correlation: Understanding Relationships Between Variables',
-    webinar2: 'Physics Through Correlation: Using Experimental Data to Discover Physical Relationships',
-    webinar3: 'Chemistry Through Correlation: Using Experimental Data to Discover Chemical Relationships'
-  };
+  var webinarCatalog = {};
+
+  function escapeHTML(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function csvParseLine(line) {
+    var out = [];
+    var cur = '';
+    var inQuotes = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === ',' && !inQuotes) {
+        out.push(cur);
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function getSelectedWebinarIds() {
+    return Array.from(document.querySelectorAll('.webinar-checkbox:checked')).map(function(cb) {
+      return cb.value;
+    });
+  }
+
+  function getWebinarFee(id) {
+    return webinarCatalog[id] ? webinarCatalog[id].fee : 0;
+  }
+
+  function getWebinarTitle(id) {
+    return webinarCatalog[id] ? webinarCatalog[id].title : id;
+  }
+
+  function renderWebinarCards(items) {
+    var container = document.getElementById('webinarCards');
+    if (!container) return;
+
+    if (!items.length) {
+      container.innerHTML = '<div class="alert alert-warning mb-3">No webinars are currently listed in webinar.csv.</div>';
+      return;
+    }
+
+    container.innerHTML = items.map(function(item, index) {
+      var id = 'webinar' + (index + 1);
+      webinarCatalog[id] = item;
+      return '' +
+        '<div class="webinar-card" id="card-' + id + '">' +
+          '<input type="checkbox" id="' + id + '" name="webinars[]" value="' + id + '" class="webinar-checkbox" hidden>' +
+          '<label class="webinar-card-label" for="' + id + '">' +
+            '<div class="webinar-card-inner">' +
+              '<div class="webinar-img-wrap">' +
+                '<a href="' + escapeHTML(item.imageUrl) + '" class="webinar-vbox" data-gall="webinars" title="' + escapeHTML(item.title) + '" onclick="event.stopPropagation();">' +
+                  '<img src="' + escapeHTML(item.imageUrl) + '" alt="' + escapeHTML(item.title) + '" class="webinar-thumb">' +
+                '</a>' +
+                '<span class="zoom-hint">&#128269; Zoom</span>' +
+              '</div>' +
+              '<div class="webinar-info">' +
+                '<div class="webinar-title">' + escapeHTML(item.title) + '</div>' +
+                '<div class="webinar-meta">' +
+                  '<span>&#128197; ' + escapeHTML(item.date) + '</span>' +
+                  '<span>&#9200; ' + escapeHTML(item.time) + '</span>' +
+                  '<span>&#127891; ' + escapeHTML(item.speaker) + '</span>' +
+                '</div>' +
+                '<span class="webinar-fee">PHP ' + escapeHTML(item.fee) + '</span>' +
+              '</div>' +
+              '<div class="check-circle">&#10003;</div>' +
+            '</div>' +
+          '</label>' +
+        '</div>';
+    }).join('');
+
+    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.venobox) {
+      $('.webinar-vbox').venobox({
+        numeratio: true,
+        infinigall: true,
+        spinner: 'cube-grid',
+        overlayColor: 'rgba(10, 23, 18, 0.88)',
+        closeBackground: '#166938',
+        closeColor: '#fff'
+      });
+    }
+  }
+
+  function loadWebinarCards() {
+    fetch('webinar.csv', { cache: 'no-store' })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Failed to load webinar.csv');
+        return response.text();
+      })
+      .then(function(csv) {
+        webinarCatalog = {};
+        var lines = csv.split(/\r?\n/).filter(function(line) { return line.trim(); });
+        if (lines.length < 2) {
+          renderWebinarCards([]);
+          updateFees();
+          return;
+        }
+
+        var rows = lines.slice(1).map(function(line) {
+          return csvParseLine(line);
+        }).filter(function(cells) {
+          return cells.length >= 6 && cells[0].trim();
+        }).map(function(cells) {
+          return {
+            title: cells[0].trim(),
+            date: cells[1].trim(),
+            time: cells[2].trim(),
+            speaker: cells[3].trim(),
+            imageUrl: cells[4].trim(),
+            fee: Number(cells[5]) || 0
+          };
+        });
+
+        renderWebinarCards(rows);
+        updateFees();
+      })
+      .catch(function() {
+        var container = document.getElementById('webinarCards');
+        if (container) {
+          container.innerHTML = '<div class="alert alert-danger mb-3">Unable to load webinar.csv. Please try again later.</div>';
+        }
+        updateFees();
+      });
+  }
 
   // Membership fee state (set when form is shown after DB check)
   var _wrfMembershipFee   = 500;  // default: assume new user until DB check
@@ -1110,12 +1173,10 @@
     var formSection = document.getElementById('wrfFormSection');
     if (!formSection || formSection.style.display === 'none') return; // form not visible yet
 
-    var checked = [];
-    document.querySelectorAll('.webinar-checkbox:checked').forEach(function(cb) {
-      checked.push(cb.value);
-    });
-
-    var subtotal = checked.length * WEBINAR_FEE;
+    var checked = getSelectedWebinarIds();
+    var subtotal = checked.reduce(function(sum, id) {
+      return sum + getWebinarFee(id);
+    }, 0);
     var discount = checked.length === 3 ? BUNDLE_DISCOUNT : 0;
     var trainingTotal = subtotal - discount;
     var grandTotal = trainingTotal + _wrfMembershipFee;
@@ -1124,7 +1185,7 @@
     var trainingRowsEl = document.getElementById('wrfPayTrainingRows');
     if (trainingRowsEl) {
       trainingRowsEl.innerHTML = checked.map(function(id) {
-        return '<div class="wrf-pay-row"><span>' + webinarNames[id] + '</span><span>PHP ' + WEBINAR_FEE + '</span></div>';
+        return '<div class="wrf-pay-row"><span>' + escapeHTML(getWebinarTitle(id)) + '</span><span>PHP ' + getWebinarFee(id) + '</span></div>';
       }).join('');
     }
 
@@ -1160,10 +1221,7 @@
   }
 
   function updateFees() {
-    var checked = [];
-    document.querySelectorAll('.webinar-checkbox:checked').forEach(function(cb) {
-      checked.push(cb.value);
-    });
+    var checked = getSelectedWebinarIds();
 
     var box = document.getElementById('feeSummaryBox');
     var lineItems = document.getElementById('feeLineItems');
@@ -1179,10 +1237,12 @@
 
     // Build line items
     lineItems.innerHTML = checked.map(function(id) {
-      return '<div class="fee-row"><span class="fee-label">' + webinarNames[id] + '</span><span class="fee-amount">PHP ' + WEBINAR_FEE + '</span></div>';
+      return '<div class="fee-row"><span class="fee-label">' + escapeHTML(getWebinarTitle(id)) + '</span><span class="fee-amount">PHP ' + getWebinarFee(id) + '</span></div>';
     }).join('');
 
-    var subtotal = checked.length * WEBINAR_FEE;
+    var subtotal = checked.reduce(function(sum, id) {
+      return sum + getWebinarFee(id);
+    }, 0);
     var discount = checked.length === 3 ? BUNDLE_DISCOUNT : 0;
     var total = subtotal - discount;
 
@@ -1197,13 +1257,14 @@
     wrfUpdatePaymentSummary();
   }
 
-  document.querySelectorAll('.webinar-checkbox').forEach(function(cb) {
-    cb.addEventListener('change', function() {
-      var card = document.getElementById('card-' + this.id);
-      if (card) card.classList.toggle('selected', this.checked);
-      updateFees();
-    });
+  document.addEventListener('change', function(event) {
+    if (!event.target.classList || !event.target.classList.contains('webinar-checkbox')) return;
+    var card = document.getElementById('card-' + event.target.id);
+    if (card) card.classList.toggle('selected', event.target.checked);
+    updateFees();
   });
+
+  loadWebinarCards();
 
   // ── Google Sign-In for Webinar Registration ──
   var _wEmail = null, _wName = null, _wPicture = null;
@@ -1652,7 +1713,7 @@
 
         // Compute fees for submission
         var _subCount    = selected.length;
-        var _subSubtotal = _subCount * WEBINAR_FEE;
+        var _subSubtotal = selected.reduce(function(sum, id) { return sum + getWebinarFee(id); }, 0);
         var _subDiscount = _subCount === 3 ? BUNDLE_DISCOUNT : 0;
         var _subTraining = _subSubtotal - _subDiscount;
         var _subMbrFee   = _wrfMembershipFee;
@@ -1675,7 +1736,7 @@
           address:          document.getElementById('wrf_address').value.trim(),
           source:           resolveField('wrf_source', 'wrf_source_other'),
           highlight:        document.getElementById('wrf_topics').value.trim(),
-          webinar:          selected.map(function(id) { return webinarNames[id]; }).join(','),
+          webinar:          selected.map(function(id) { return getWebinarTitle(id); }).join(','),
           trainingfee:      _subTraining,
           statusmembership: _subMbrStatus,
           membershipfee:    _subMbrFee,

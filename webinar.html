@@ -1720,6 +1720,8 @@
         var _subTotal    = _subTraining + _subMbrFee;
         var _subMbrStatus = _wrfMembershipType === 'active' ? 'Member' : 'Non-member';
 
+        var selectedTitles = selected.map(function(id) { return getWebinarTitle(id); });
+
         var payload = {
           func:             'webinarregistration',
           email:            document.getElementById('wrf_email').value.trim(),
@@ -1736,7 +1738,9 @@
           address:          document.getElementById('wrf_address').value.trim(),
           source:           resolveField('wrf_source', 'wrf_source_other'),
           highlight:        document.getElementById('wrf_topics').value.trim(),
-          webinar:          selected.map(function(id) { return getWebinarTitle(id); }).join(','),
+          // Use a comma-safe format so titles containing commas are preserved.
+          webinar:          selectedTitles.join(' | '),
+          webinar_json:     JSON.stringify(selectedTitles),
           trainingfee:      _subTraining,
           statusmembership: _subMbrStatus,
           membershipfee:    _subMbrFee,

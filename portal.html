@@ -5019,11 +5019,9 @@ function audioRegisterNow() {
             // Show loading state
             resultEl.innerHTML = '<div class="text-gray-600">Verifying… Please wait.</div>';
 
-            // Build the GET URL with query params
-            const base = 'https://script.google.com/macros/s/AKfycbzLzNY8yRzgyMVaJInCpiOUFc18hGiAXZftCEe7AUDv87EnJ4U9rivkq6o2wMHpemYAgA/exec';
+            // Certificate verification uses a dedicated Apps Script deployment.
+            const base = 'https://script.google.com/macros/s/AKfycbxSvBt7qG2fz4w_y9P2CoV7RfJq0kvThANuCWsVRjJz5NaiqqidhgmHQJZneydAt2Yk/exec';
             const params = new URLSearchParams({
-                ID: '1ECREzocUMLr9HY9AoLSzNAJDRhtuBi3peuu8IDx2Daw',
-                SH: 'Sheet1',
                 func: 'verify',
                 code: code
             });

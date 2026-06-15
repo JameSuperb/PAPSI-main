@@ -436,43 +436,53 @@
     }
   });
 
-  async function verifyCertificate(){
-    var inputEl = document.getElementById('verifyCodeInput');
-    var resultEl = document.getElementById('verifyResult');
-    var code = (inputEl && inputEl.value || '').trim();
-    if(!code){ resultEl.innerHTML = '<div class="text-danger">Please enter the certificate code.</div>'; return; }
+  async function verifyCertificate() {
+    const inputEl = document.getElementById('verifyCodeInput');
+    const resultEl = document.getElementById('verifyResult');
+    const code = (inputEl?.value || '').trim();
+    if (!code) {
+      resultEl.innerHTML = '<div class="text-danger">Please enter the certificate code.</div>';
+      return;
+    }
+
+    // Show loading state
     resultEl.innerHTML = '<div class="text-muted">Verifying… Please wait.</div>';
 
-    var base = 'https://script.google.com/macros/s/AKfycbzLzNY8yRzgyMVaJInCpiOUFc18hGiAXZftCEe7AUDv87EnJ4U9rivkq6o2wMHpemYAgA/exec';
-    var params = new URLSearchParams({
-      ID: '1ECREzocUMLr9HY9AoLSzNAJDRhtuBi3peuu8IDx2Daw',
-      SH: 'Sheet1',
+    // Certificate verification uses a dedicated Apps Script deployment.
+    const base = 'https://script.google.com/macros/s/AKfycbxSvBt7qG2fz4w_y9P2CoV7RfJq0kvThANuCWsVRjJz5NaiqqidhgmHQJZneydAt2Yk/exec';
+    const params = new URLSearchParams({
       func: 'verify',
       code: code
     });
-    var url = base + '?' + params.toString();
-    try{
-      var res = await fetch(url, { method: 'GET' });
-      var text = await res.text();
-      try{
-        var data = JSON.parse(text);
-        var vCode = data.code || code;
-        var vName = data.name || '';
-        var vTraining = data.training || '';
-        resultEl.innerHTML = '<div class="p-3 rounded" style="background:#edf7ed;border:1px solid #c6e6c6;color:#166938;font-size:1rem">\
-          <div class="font-weight-bold">Certificate is valid</div>\
-          <div class="mt-1">Code: <span class="font-weight-bold">'+ vCode +'</span></div>\
-          <div class="mt-1">Name: <span class="font-weight-bold">'+ vName +'</span></div>\
-          <div class="mt-1">Training: <span class="font-weight-bold">'+ vTraining +'</span></div>\
-        </div>';
+    const url = `${base}?${params.toString()}`;
+
+    try {
+      const res = await fetch(url, { method: 'GET' });
+      const text = await res.text();
+
+      // Success case: JSON with { code, name, training }
+      try {
+        const data = JSON.parse(text);
+        const vCode = data.code || code;
+        const vName = data.name || '';
+        const vTraining = data.training || '';
+        resultEl.innerHTML = `
+          <div class="p-3 rounded" style="background:#edf7ed;border:1px solid #c6e6c6;color:#166938;font-size:1rem">
+            <div class="font-weight-bold">Certificate is valid</div>
+            <div class="mt-1">Code: <span class="font-weight-bold">${vCode}</span></div>
+            <div class="mt-1">Name: <span class="font-weight-bold">${vName}</span></div>
+            <div class="mt-1">Training: <span class="font-weight-bold">${vTraining}</span></div>
+          </div>`;
         return;
-      } catch(_){
-        var errMsg = (text || '').trim() || 'Verification failed.';
-        resultEl.innerHTML = '<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">'+ errMsg +'</div>';
+      } catch (_) {
+        // Not JSON: expect a plain-text error like "Error: Invalid code" or "Error: Contact PAPSI Admin"
+        const errMsg = text?.trim() || 'Verification failed.';
+        resultEl.innerHTML = `<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">${errMsg}</div>`;
         return;
       }
-    } catch(err){
-      resultEl.innerHTML = '<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">'+ (err && err.message || 'Unable to verify at this time.') +'</div>';
+    } catch (error) {
+      console.error('Verification error:', error);
+      resultEl.innerHTML = `<div class="p-3 rounded" style="background:#fdeaea;border:1px solid #f5c2c7;color:#842029;font-size:1rem">${error.message || 'Unable to verify at this time.'}</div>`;
     }
   }
 </script>

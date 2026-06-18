@@ -1168,6 +1168,35 @@
   var _wrfMembershipType  = 'new'; // 'new' | 'renewal' | 'active'
   var _wrfIsManual        = false; // true when user chose Manual Registration
 
+  function wrfResolvePositionValue() {
+    var positionEl = document.getElementById('wrf_position');
+    if (!positionEl) return '';
+
+    if (positionEl.value === '__other') {
+      var otherEl = document.getElementById('wrf_position_other');
+      return otherEl ? otherEl.value.trim() : '';
+    }
+
+    return (positionEl.value || '').trim();
+  }
+
+  function wrfIsStudentPosition(positionValue) {
+    return /student/i.test(positionValue || '');
+  }
+
+  function wrfGetEffectiveMembershipFee() {
+    return wrfIsStudentPosition(wrfResolvePositionValue()) ? 0 : _wrfMembershipFee;
+  }
+
+  function wrfGetEffectiveMembershipLabel() {
+    return wrfIsStudentPosition(wrfResolvePositionValue()) ? 'student' : _wrfMembershipType;
+  }
+
+  function wrfGetEffectiveMembershipStatus() {
+    if (wrfIsStudentPosition(wrfResolvePositionValue())) return 'Student';
+    return _wrfMembershipType === 'active' ? 'Member' : 'Non-member';
+  }
+
   // Update the payment summary inside the registration form
   function wrfUpdatePaymentSummary() {
     var formSection = document.getElementById('wrfFormSection');
@@ -1179,7 +1208,9 @@
     }, 0);
     var discount = checked.length === 3 ? BUNDLE_DISCOUNT : 0;
     var trainingTotal = subtotal - discount;
-    var grandTotal = trainingTotal + _wrfMembershipFee;
+    var effectiveMembershipFee = wrfGetEffectiveMembershipFee();
+    var effectiveMembershipLabel = wrfGetEffectiveMembershipLabel();
+    var grandTotal = trainingTotal + effectiveMembershipFee;
 
     // Training rows
     var trainingRowsEl = document.getElementById('wrfPayTrainingRows');
@@ -1200,10 +1231,17 @@
     // Membership row
     var memberAmtEl  = document.getElementById('wrfPayMemberAmt');
     var memberBadge  = document.getElementById('wrfPayMemberBadge');
-    if (memberAmtEl) memberAmtEl.textContent = _wrfMembershipFee === 0 ? 'PHP 0 (included)' : 'PHP ' + _wrfMembershipFee;
+    if (memberAmtEl) {
+      memberAmtEl.textContent = effectiveMembershipFee === 0
+        ? (effectiveMembershipLabel === 'student' ? 'PHP 0 (student exempt)' : 'PHP 0 (included)')
+        : 'PHP ' + effectiveMembershipFee;
+    }
     if (memberBadge) {
       memberBadge.className = 'wrf-pay-member-badge';
-      if (_wrfMembershipType === 'active') {
+      if (effectiveMembershipLabel === 'student') {
+        memberBadge.textContent = 'Student';
+        memberBadge.classList.add('active');
+      } else if (_wrfMembershipType === 'active') {
         memberBadge.textContent = 'Active Member';
         memberBadge.classList.add('active');
       } else if (_wrfMembershipType === 'renewal') {
@@ -1661,8 +1699,19 @@
             other.value = '';
           }
         }
+
+        if (selId === 'wrf_position') {
+          wrfUpdatePaymentSummary();
+        }
       });
     });
+
+    var positionOtherEl = document.getElementById('wrf_position_other');
+    if (positionOtherEl) {
+      positionOtherEl.addEventListener('input', function() {
+        wrfUpdatePaymentSummary();
+      });
+    }
 
     // Submit button
     var submitBtn = document.getElementById('wrfSubmitBtn');
@@ -1716,9 +1765,9 @@
         var _subSubtotal = selected.reduce(function(sum, id) { return sum + getWebinarFee(id); }, 0);
         var _subDiscount = _subCount === 3 ? BUNDLE_DISCOUNT : 0;
         var _subTraining = _subSubtotal - _subDiscount;
-        var _subMbrFee   = _wrfMembershipFee;
+        var _subMbrFee   = wrfGetEffectiveMembershipFee();
         var _subTotal    = _subTraining + _subMbrFee;
-        var _subMbrStatus = _wrfMembershipType === 'active' ? 'Member' : 'Non-member';
+        var _subMbrStatus = wrfGetEffectiveMembershipStatus();
 
         var selectedTitles = selected.map(function(id) { return getWebinarTitle(id); });
 
